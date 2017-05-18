@@ -12,8 +12,8 @@ NODE_COORD_SECTION
 %s
 EOF
 '''
-CITY_TEMPLATE = '  %d %i %i %s'
-CITY_PATTERN = '\d+ (\d+) (\d+)'
+CITY_TEMPLATE = '%d %i %i %s'
+CITY_PATTERN = '\d+ (\d+.\d+) (\d+.\d+)'
 
 
 def generate_instance(size, start_position=0, end_position=1, minimum_distance=0.001):
@@ -54,8 +54,8 @@ def load_instance(filename):
         for line in lines:
             match = re.search(CITY_PATTERN, line)
             if match:
-                x = int(match.groups()[0])
-                y = int(match.groups()[1])
+                x = float(match.groups()[0])
+                y = float(match.groups()[1])
                 cities.add((x, y))
 
     return cities

@@ -90,6 +90,7 @@ def show_plot(filename, optimal_distance):
     print('Saving file:', filename)
 
     cities = tsp.load_instance(filename)
+    print cities
     start_city = list(cities)[0]
 
     statistics = {'time': [], 'distances': []}
@@ -101,10 +102,12 @@ def show_plot(filename, optimal_distance):
     plt.xlabel('Time')
     plt.ylabel('Solution Quality')
     plt.scatter(statistics['time'], solution_qualities, color='r')
-    plt.savefig('test.png')
+    plt.show()
 
 
 def save_all_plots(filename, directory='plots'):
+    time, averages = experiments.get_average_performance_profile('instances/instances.csv')
+
     with open(filename) as f:
         lines = f.readlines()
 
@@ -122,16 +125,20 @@ def save_all_plots(filename, directory='plots'):
             # solution_qualities = [1 - ((distance - optimal_distance) / optimal_distance) for distance in statistics['distances']]
             solution_qualities = [optimal_distance / distance for distance in statistics['distances']]
 
-            plt.figure()
+            # plt.figure()
             plt.title('Performance Profile')
             plt.xlabel('Time')
             plt.ylabel('Solution Quality')
-            plt.scatter(statistics['time'], solution_qualities, color='r')
-            plt.savefig(directory + '/plot-%i.png' % i)
+            plt.plot(statistics['time'], solution_qualities, color='r')
+            plt.plot(time, averages, color='b')
+            # plt.savefig(directory + '/plot-%i.png' % i)
+
+        plt.show()
 
 
 def main():
-    save_all_plots('instances/instances.csv')
+    # save_all_plots('instances/instances.csv')
+    show_plot('instances/dj38.tsp', 6656)
 
 
 if __name__ == '__main__':

@@ -48,7 +48,7 @@ def get_averages(solution_quality_groups):
     return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
 
 
-def get_average_performance_profile(filename, iterations=500, limit=5):
+def get_average_performance_profile(filename, iterations=70, limit=50):
     solution_quality_groups = []
 
     with open(filename) as f:
@@ -66,12 +66,19 @@ def get_average_performance_profile(filename, iterations=500, limit=5):
             start_city = list(cities)[0]
 
             statistics = {'time': [], 'distances': []}
-            randomized_tour_improver.two_opt_solve(cities, start_city, statistics)
+            randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
 
             solution_qualities = get_solution_qualities(statistics['distances'], optimal_distance)
             solution_quality_groups.append(solution_qualities)
 
-    return range(iterations), get_averages(solution_quality_groups)
+        max_length = max(len(solution_qualities) for solution_qualities in solution_quality_groups)
+
+        for solution_qualities in solution_quality_groups:
+            while len(solution_qualities) < max_length:
+                solution_qualities.append(solution_qualities[-1])
+
+    averages = get_averages(solution_quality_groups)
+    return range(len(averages)), averages
 
 
 def main():
