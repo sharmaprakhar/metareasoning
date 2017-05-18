@@ -1,15 +1,14 @@
 from __future__ import division
-
 import json
-
 import matplotlib.pyplot as plt
 import numpy as np
-
 import anytime_astar_solver
 import astar_solver
 import n_puzzle
 import n_puzzle_problem
 from utils import Problem
+import randomized_tour_improver
+import tsp
 
 
 def f(x, a, c, d):
@@ -31,7 +30,8 @@ def parse_line(line):
 
 
 def get_solution_qualities(distances, optimal_distance):
-    return [1 - ((distance - optimal_distance) / optimal_distance) for distance in distances]
+    # return [1 - ((distance - optimal_distance) / optimal_distance) for distance in distances]
+    return [optimal_distance / distance for distance in distances]
 
 
 def get_components(line):
@@ -44,34 +44,34 @@ def get_components(line):
     return states, start_state, optimal_distance
 
 
-# def get_averages(solution_quality_groups):
-#     return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
-#
-#
-# def get_average_performance_profile(filename, iterations=10000, limit=10):
-#     solution_quality_groups = []
-#
-#     with open(filename) as f:
-#         lines = f.readlines()
-#
-#         for i, line in enumerate(lines):
-#             if i == limit:
-#                 break
-#
-#             filename, optimal_distance = parse_line(line)
-#
-#             print 'File:', filename
-#
-#             cities = old.tsp.load_instance(filename)
-#             start_city = random.choice(list(cities))
-#
-#             statistics = {'time': [], 'distances': []}
-#             old.randomized_tour_improver.naive_solve(cities, start_city, statistics, iterations=iterations, is_detailed=True)
-#
-#             solution_qualities = get_solution_qualities(statistics['distances'], optimal_distance)
-#             solution_quality_groups.append(solution_qualities)
-#
-#     return range(iterations), get_averages(solution_quality_groups)
+def get_averages(solution_quality_groups):
+    return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
+
+
+def get_average_performance_profile(filename, iterations=500, limit=5):
+    solution_quality_groups = []
+
+    with open(filename) as f:
+        lines = f.readlines()
+
+        for i, line in enumerate(lines):
+            if i == limit:
+                break
+
+            filename, optimal_distance = parse_line(line)
+
+            print 'File:', filename
+
+            cities = tsp.load_instance(filename)
+            start_city = list(cities)[0]
+
+            statistics = {'time': [], 'distances': []}
+            randomized_tour_improver.two_opt_solve(cities, start_city, statistics)
+
+            solution_qualities = get_solution_qualities(statistics['distances'], optimal_distance)
+            solution_quality_groups.append(solution_qualities)
+
+    return range(iterations), get_averages(solution_quality_groups)
 
 
 def main():

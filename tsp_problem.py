@@ -1,11 +1,9 @@
 import random
-
 import numpy as np
-
-import anytime_astar_solver
-import astar_solver
 import tsp
-from utils import Problem
+import matplotlib.pyplot as plt
+import randomized_tour_improver
+import experiments
 
 
 def pop(queue):
@@ -88,29 +86,52 @@ def get_tour_distance(start_city, actions):
     return distance
 
 
+def show_plot(filename, optimal_distance):
+    print('Saving file:', filename)
+
+    cities = tsp.load_instance(filename)
+    start_city = list(cities)[0]
+
+    statistics = {'time': [], 'distances': []}
+    randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
+
+    solution_qualities = [1 - ((distance - optimal_distance) / optimal_distance) for distance in statistics['distances']]
+
+    plt.title('Performance Profile')
+    plt.xlabel('Time')
+    plt.ylabel('Solution Quality')
+    plt.scatter(statistics['time'], solution_qualities, color='r')
+    plt.savefig('test.png')
+
+
+def save_all_plots(filename, directory='plots'):
+    with open(filename) as f:
+        lines = f.readlines()
+
+        for i, line in enumerate(lines):
+            filename, optimal_distance = experiments.parse_line(line)
+
+            print 'Saving file:', filename
+
+            cities = tsp.load_instance(filename)
+            start_city = list(cities)[0]
+
+            statistics = {'time': [], 'distances': []}
+            randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
+
+            # solution_qualities = [1 - ((distance - optimal_distance) / optimal_distance) for distance in statistics['distances']]
+            solution_qualities = [optimal_distance / distance for distance in statistics['distances']]
+
+            plt.figure()
+            plt.title('Performance Profile')
+            plt.xlabel('Time')
+            plt.ylabel('Solution Quality')
+            plt.scatter(statistics['time'], solution_qualities, color='r')
+            plt.savefig(directory + '/plot-%i.png' % i)
+
+
 def main():
-    cities = tsp.generate_instance(8)
-    start_city = random.choice(list(cities))
-
-    print 'Cities:', cities
-    print 'Start City:', start_city
-
-    print 'Optimal Solution:', astar_solver.solve(Problem(
-        [start_city],
-        lambda state: is_goal(state, cities),
-        lambda state: get_successors(state, cities),
-        get_cost,
-        lambda state: get_heuristic(state, start_city, cities)
-    ))
-
-    print 'Generating solutions...'
-    anytime_astar_solver.solve(Problem(
-        [start_city],
-        lambda state: is_goal(state, cities),
-        lambda state: get_successors(state, cities),
-        get_cost,
-        lambda state: get_heuristic(state, start_city, cities)
-    ))
+    save_all_plots('instances/instances.csv')
 
 
 if __name__ == '__main__':
