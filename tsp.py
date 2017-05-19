@@ -41,7 +41,7 @@ def save_instance(name, comment, cities):
 
     instance = FILE_TEMPLATE % (name, comment, len(cities), node_coord_section)
 
-    f = open('instance-%s.instances' % name, 'w')
+    f = open(name, 'w')
     f.write(instance)
     f.close()
 
@@ -74,8 +74,8 @@ def get_distance(tour):
 
 
 def main():
-    cities = generate_instance(30, start_position=0, end_position=2000, minimum_distance=1)
-    save_instance('justin', 'justin', cities)
+    cities = generate_instance(50, start_position=0, end_position=2000, minimum_distance=1)
+    save_instance('tsp-50.tsp', 'Comment', cities)
 
 
 if __name__ == '__main__':
