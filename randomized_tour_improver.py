@@ -1,8 +1,9 @@
+import itertools
 import random
 
 import numpy as np
+
 import tsp
-import itertools
 
 
 def get_initial_random_tour(states, start_state):
@@ -138,15 +139,15 @@ def two_opt_solve(states, start_state, statistics, iterations=500):
 
 
 def k_opt_solve(states, start_state, statistics, iterations=50):
-    # tour = get_nearest_neighbor_tour(states, start_state)
-    tour = get_initial_random_tour(states, start_state)
+    tour = get_nearest_neighbor_tour(states, start_state)
+    # tour = get_initial_random_tour(states, start_state)
     distance = tsp.get_distance(tour)
-    print distance
 
     cities = range(1, len(tour) - 1)
 
     for time in range(iterations):
-        print time
+        print('Iteration %d: %d' % (time, distance))
+
         has_changed = False
 
         best_tour = tour

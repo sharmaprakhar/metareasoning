@@ -1,14 +1,17 @@
 from __future__ import division
+
 import json
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 import anytime_astar_solver
 import astar_solver
 import n_puzzle
 import n_puzzle_problem
-from utils import Problem
 import randomized_tour_improver
 import tsp
+from utils import Problem
 
 
 def f(x, a, c, d):
@@ -60,7 +63,7 @@ def get_average_performance_profile(filename, iterations=70, limit=50):
 
             filename, optimal_distance = parse_line(line)
 
-            print 'File:', filename
+            print('File:', filename)
 
             cities = tsp.load_instance(filename)
             start_city = list(cities)[0]

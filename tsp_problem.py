@@ -1,9 +1,9 @@
-import random
-import numpy as np
-import tsp
 import matplotlib.pyplot as plt
-import randomized_tour_improver
+import numpy as np
+
 import experiments
+import randomized_tour_improver
+import tsp
 
 
 def pop(queue):
@@ -74,23 +74,10 @@ def get_cost(state, action, next_state):
     return np.linalg.norm(np.subtract(state[-1], next_state))
 
 
-def get_tour_distance(start_city, actions):
-    distance = get_cost(start_city, actions[0], actions[0])
-
-    for i in range(len(actions)):
-        if i + 1 == len(actions):
-            break
-
-        distance += get_cost(actions[i], actions[i + 1], actions[i + 1])
-
-    return distance
-
-
 def show_plot(filename, optimal_distance):
     print('Saving file:', filename)
 
     cities = tsp.load_instance(filename)
-    print cities
     start_city = list(cities)[0]
 
     statistics = {'time': [], 'distances': []}
@@ -114,7 +101,7 @@ def save_all_plots(filename, directory='plots'):
         for i, line in enumerate(lines):
             filename, optimal_distance = experiments.parse_line(line)
 
-            print 'Saving file:', filename
+            print('Saving file:', filename)
 
             cities = tsp.load_instance(filename)
             start_city = list(cities)[0]
@@ -138,7 +125,7 @@ def save_all_plots(filename, directory='plots'):
 
 def main():
     # save_all_plots('instances/instances.csv')
-    show_plot('instances/dj38.tsp', 6656)
+    show_plot('instances/tsp-100-2.tsp', 15375)
 
 
 if __name__ == '__main__':
