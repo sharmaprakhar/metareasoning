@@ -74,8 +74,9 @@ def get_distance(tour):
 
 
 def main():
-    cities = generate_instance(100, start_position=0, end_position=2000, minimum_distance=1)
-    save_instance('instance-4.tsp', 'Comment', cities)
+    for i in range(50):
+        cities = generate_instance(100, start_position=0, end_position=2000, minimum_distance=1)
+        save_instance('instances/100-tsp/instance-%d.tsp' % i, 'Comment', cities)
 
 
 if __name__ == '__main__':
