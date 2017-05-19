@@ -2,16 +2,10 @@ from __future__ import division
 
 import json
 
-import matplotlib.pyplot as plt
 import numpy as np
 
-import anytime_astar_solver
-import astar_solver
-import n_puzzle
-import n_puzzle_problem
 import randomized_tour_improver
 import tsp
-from utils import Problem
 
 
 def f(x, a, c, d):
@@ -100,44 +94,41 @@ def experiment():
     #                     [14, 10, 15, 12]])
 
     # 30
-    # puzzle = np.matrix([[7, 11, 9, 8],
-    #                     [6, 1, 2, 3],
-    #                     [0, 10, 5, 12],
-    #                     [4, 13, 14, 15]])
+    puzzle = np.matrix([[7, 11, 9, 8],
+                        [6, 1, 2, 3],
+                        [0, 10, 5, 12],
+                        [4, 13, 14, 15]])
 
-    puzzle = n_puzzle.get_random_puzzle(34)
-    print(puzzle)
-
-    problem = Problem(
-        puzzle,
-        n_puzzle_problem.is_goal,
-        n_puzzle_problem.get_successors,
-        n_puzzle_problem.get_cost,
-        n_puzzle_problem.get_heuristic
-    )
-
-    astar_statistics = {'expanded_nodes': 0}
-    optimal_cost = len(astar_solver.solve(problem, astar_statistics))
-    print('A*')
-    print('Optimal Cost:', optimal_cost)
-    print('Expanded Nodes:', astar_statistics['expanded_nodes'])
-    print()
-
-    anytime_astar_statistics = {'time': [], 'costs': [], 'expanded_nodes': 0, 'max_open_list_size': -1, 'max_closed_set_size': -1}
-    anytime_astar_solver.solve(problem, anytime_astar_statistics, weight=5)
-    print('Anytime A*')
-    print('Costs:', anytime_astar_statistics['costs'])
-    print('Expanded Nodes:', anytime_astar_statistics['expanded_nodes'])
-    print('Max Open List Size:', anytime_astar_statistics['max_open_list_size'])
-    print('Max Closed Set Size:', anytime_astar_statistics['max_closed_set_size'])
-
-    solution_qualities = [optimal_cost / cost for cost in anytime_astar_statistics['costs']]
-
-    plt.title('Performance Profile')
-    plt.xlabel('Time')
-    plt.ylabel('Solution Quality')
-    plt.scatter(anytime_astar_statistics['time'], solution_qualities, color='b')
-    plt.show()
+    # problem = Problem(
+    #     puzzle,
+    #     n_puzzle_problem.is_goal,
+    #     n_puzzle_problem.get_successors,
+    #     n_puzzle_problem.get_cost,
+    #     n_puzzle_problem.get_heuristic
+    # )
+    #
+    # astar_statistics = {'expanded_nodes': 0}
+    # optimal_cost = len(astar_solver.solve(problem, astar_statistics))
+    # print('A*')
+    # print('Optimal Cost:', optimal_cost)
+    # print('Expanded Nodes:', astar_statistics['expanded_nodes'])
+    # print()
+    #
+    # anytime_astar_statistics = {'time': [], 'costs': [], 'expanded_nodes': 0, 'max_open_list_size': -1, 'max_closed_set_size': -1}
+    # anytime_astar_solver.solve(problem, anytime_astar_statistics, weight=5)
+    # print('Anytime A*')
+    # print('Costs:', anytime_astar_statistics['costs'])
+    # print('Expanded Nodes:', anytime_astar_statistics['expanded_nodes'])
+    # print('Max Open List Size:', anytime_astar_statistics['max_open_list_size'])
+    # print('Max Closed Set Size:', anytime_astar_statistics['max_closed_set_size'])
+    #
+    # solution_qualities = [optimal_cost / cost for cost in anytime_astar_statistics['costs']]
+    #
+    # plt.title('Performance Profile')
+    # plt.xlabel('Time')
+    # plt.ylabel('Solution Quality')
+    # plt.scatter(anytime_astar_statistics['time'], solution_qualities, color='b')
+    # plt.show()
 
 
 if __name__ == '__main__':

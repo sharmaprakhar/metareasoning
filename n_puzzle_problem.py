@@ -4,7 +4,9 @@ import n_puzzle
 
 
 def is_goal(state):
-    return np.array_equal(state, n_puzzle.get_initial_puzzle())
+    size = n_puzzle.get_size(state)
+    goal = n_puzzle.get_initial_puzzle(size)
+    return np.array_equal(state, goal)
 
 
 def get_successors(state):
@@ -14,9 +16,9 @@ def get_successors(state):
         location = n_puzzle.get_blank_location(state)
         next_location = n_puzzle.get_next_blank_location(location, action)
 
-        if n_puzzle.is_valid_blank_location(next_location):
-            neighbor = n_puzzle.get_next_puzzle(state, action)
-            successors.append({'action': action, 'state': neighbor})
+        if n_puzzle.is_valid_blank_location(state, next_location):
+            next_puzzle = n_puzzle.get_next_puzzle(state, action)
+            successors.append({'state': next_puzzle, 'action': action})
 
     return successors
 

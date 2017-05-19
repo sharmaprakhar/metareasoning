@@ -1,6 +1,6 @@
 import random
 import re
-
+import n_puzzle
 import numpy as np
 
 FILE_TEMPLATE = '''NAME : %s
@@ -75,7 +75,7 @@ def get_distance(tour):
 
 def main():
     cities = generate_instance(100, start_position=0, end_position=2000, minimum_distance=1)
-    save_instance('tsp-100-5.tsp', 'Comment', cities)
+    save_instance('instance-4.tsp', 'Comment', cities)
 
 
 if __name__ == '__main__':

@@ -4,20 +4,19 @@ import numpy as np
 import experiments
 import randomized_tour_improver
 import tsp
+from utils import pop
 
 
-def pop(queue):
-    minimum_value = float('inf')
-    minimum_key = None
+def is_goal(state, cities):
+    return len(cities) == len(state)
 
-    for key in queue:
-        if queue[key] < minimum_value:
-            minimum_value = queue[key]
-            minimum_key = key
 
-    del queue[minimum_key]
+def get_successors(state, cities):
+    return [{'action': city, 'state': list(state) + [city]} for city in cities - set(state)]
 
-    return minimum_key
+
+def get_cost(state, action, next_state):
+    return np.linalg.norm(np.subtract(state[-1], next_state))
 
 
 def get_heuristic(current_node, start_city, cities):
@@ -62,18 +61,6 @@ def get_heuristic(current_node, start_city, cities):
     return cost
 
 
-def is_goal(state, cities):
-    return len(cities) == len(state)
-
-
-def get_successors(state, cities):
-    return [{'action': city, 'state': list(state) + [city]} for city in cities - set(state)]
-
-
-def get_cost(state, action, next_state):
-    return np.linalg.norm(np.subtract(state[-1], next_state))
-
-
 def show_plot(filename, optimal_distance):
     print('Saving file:', filename)
 
@@ -101,7 +88,7 @@ def save_all_plots(filename, directory='plots'):
         for i, line in enumerate(lines):
             filename, optimal_distance = experiments.parse_line(line)
 
-            print('Saving file:', filename)
+            print 'Saving file:', filename
 
             cities = tsp.load_instance(filename)
             start_city = list(cities)[0]
@@ -125,7 +112,7 @@ def save_all_plots(filename, directory='plots'):
 
 def main():
     # save_all_plots('instances/instances.csv')
-    show_plot('instances/tsp-100-2.tsp', 15375)
+    show_plot('instances/dj38.tsp', 6656)
 
 
 if __name__ == '__main__':

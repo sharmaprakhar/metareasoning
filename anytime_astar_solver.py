@@ -1,9 +1,9 @@
-from utils import Node, get_children, get_solution, key, OpenList
+from utils import Node, get_children_nodes, get_solution, get_key, OpenList
 
 
 def solve(problem, statistics, weight=1.2):
     start_node = Node(problem.start_state)
-    start_node_key = key(start_node.state)
+    start_node_key = get_key(start_node.state)
     start_node_value = start_node.path_cost + weight * problem.get_heuristic(start_node.state)
 
     open_list = OpenList()
@@ -24,23 +24,22 @@ def solve(problem, statistics, weight=1.2):
         current_node_value = current_node.path_cost + problem.get_heuristic(current_node.state)
 
         if current_node_value < best_value:
-            current_node_key = key(current_node.state)
+            current_node_key = get_key(current_node.state)
+            closed_set.add(current_node_key)
 
             statistics['expanded_nodes'] += 1
-
             statistics['max_open_list_size'] = max(statistics['max_open_list_size'], len(open_list))
             statistics['max_closed_set_size'] = max(statistics['max_closed_set_size'], len(closed_set))
 
-            closed_set.add(current_node_key)
-
-            for child_node in get_children(problem, current_node):
+            for child_node in get_children_nodes(problem, current_node):
                 child_node_value = child_node.path_cost + problem.get_heuristic(child_node.state)
-                child_node_key = key(child_node.state)
+                child_node_key = get_key(child_node.state)
 
                 if child_node_value < best_value:
                     if problem.is_goal(child_node.state):
                         path_costs[child_node_key] = child_node.path_cost
                         best_value = child_node_value
+
                         cost = len(get_solution(child_node))
 
                         statistics['time'].append(statistics['expanded_nodes'])

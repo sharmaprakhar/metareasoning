@@ -3,10 +3,8 @@ import random
 import numpy as np
 from scipy.spatial import distance
 
-from utils import key
+from utils import get_key
 
-# TODO Remove the dependency on size
-SIZE = 4
 BLANK_SYMBOL = 0
 ACTIONS = {
     'North': (-1, 0),
@@ -15,15 +13,17 @@ ACTIONS = {
     'West': (0, 1)
 }
 
+heuristic_cache = {}
 
-def get_initial_puzzle():
-    puzzle = np.zeros((SIZE, SIZE))
 
-    for i in range(SIZE):
-        for j in range(SIZE):
-            puzzle[i, j] = (i * SIZE) + j + 1
+def get_initial_puzzle(size):
+    puzzle = np.zeros((size, size))
 
-    puzzle[SIZE - 1, SIZE - 1] = BLANK_SYMBOL
+    for row in range(size):
+        for column in range(size):
+            puzzle[row, column] = (row * size) + column + 1
+
+    puzzle[size - 1, size - 1] = BLANK_SYMBOL
 
     return puzzle
 
@@ -40,10 +40,13 @@ def get_next_puzzle(puzzle, action):
     return next_state
 
 
+def get_size(puzzle):
+    return puzzle.shape[0]
+
+
 def get_blank_location(puzzle):
     locations = np.where(puzzle == BLANK_SYMBOL)
-    x = locations[0][0]
-    y = locations[1][0]
+    x, y = locations[0][0], locations[1][0]
     return x, y
 
 
@@ -54,22 +57,23 @@ def get_next_blank_location(location, action):
     return new_x, new_y
 
 
-def is_valid_blank_location(location):
+def is_valid_blank_location(puzzle, location):
+    size = get_size(puzzle)
     x, y = location
-    return SIZE > x >= 0 and SIZE > y >= 0
+    return size > x >= 0 and size > y >= 0
 
 
-def generate_random_puzzle(iterations=1000):
-    puzzle = get_initial_puzzle()
+def get_random_puzzle(size, iterations=100):
+    puzzle = get_initial_puzzle(size)
+    actions = list(ACTIONS.keys())
 
     for _ in range(iterations):
         location = get_blank_location(puzzle)
-
-        action = random.choice(list(ACTIONS.keys()))
+        action = random.choice(actions)
         next_location = get_next_blank_location(location, action)
 
-        while not is_valid_blank_location(next_location):
-            action = random.choice(list(ACTIONS.keys()))
+        while not is_valid_blank_location(puzzle, next_location):
+            action = random.choice(actions)
             next_location = get_next_blank_location(location, action)
 
         puzzle = get_next_puzzle(puzzle, action)
@@ -77,18 +81,17 @@ def generate_random_puzzle(iterations=1000):
     return puzzle
 
 
-def get_random_puzzle(minimum_difficulty, epsilon=0.1):
-    puzzle = get_initial_puzzle()
+def get_difficult_puzzle(size, target_difficulty, epsilon=0.1):
+    puzzle = get_initial_puzzle(size)
+    actions = list(ACTIONS.keys())
 
     difficulty = get_manhattan_distance(puzzle)
-
-    while difficulty < minimum_difficulty:
-        action = random.choice(list(ACTIONS.keys()))
-
+    while difficulty < target_difficulty:
+        action = random.choice(actions)
         location = get_blank_location(puzzle)
         next_location = get_next_blank_location(location, action)
 
-        if is_valid_blank_location(next_location):
+        if is_valid_blank_location(puzzle, next_location):
             next_puzzle = get_next_puzzle(puzzle, action)
             next_difficulty = get_manhattan_distance(next_puzzle)
 
@@ -99,28 +102,25 @@ def get_random_puzzle(minimum_difficulty, epsilon=0.1):
     return puzzle
 
 
-GOAL_PUZZLE = get_initial_puzzle()
-heuristic_cache = {}
-
-
 def get_manhattan_distance(puzzle):
-    puzzle_key = key(puzzle)
-
+    puzzle_key = get_key(puzzle)
     if puzzle_key in heuristic_cache:
         return heuristic_cache[puzzle_key]
 
+    size = get_size(puzzle)
+    goal_puzzle = get_initial_puzzle(size)
     manhattan_distance = 0
 
-    for i in range(SIZE):
-        for j in range(SIZE):
-            value = GOAL_PUZZLE[i, j]
+    for row in range(size):
+        for column in range(size):
+            value = goal_puzzle[row, column]
 
             if value == BLANK_SYMBOL:
                 continue
 
             locations = np.where(puzzle == value)
             x, y = locations[0][0], locations[1][0]
-            manhattan_distance += distance.cityblock((x, y), (i, j))
+            manhattan_distance += distance.cityblock((x, y), (row, column))
 
     heuristic_cache[puzzle_key] = manhattan_distance
 
