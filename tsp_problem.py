@@ -104,7 +104,7 @@ def save_all_plots(filename, directory='plots'):
             plt.title('Performance Profile')
             plt.xlabel('Time')
             plt.ylabel('Solution Quality')
-            plt.plot(statistics['time'], solution_qualities, color='r')
+            plt.scatter(statistics['time'], solution_qualities, color='r')
             # plt.plot(time, averages, color='b')
             plt.savefig(directory + '/plot-%s.png' % id)
 
@@ -112,7 +112,7 @@ def save_all_plots(filename, directory='plots'):
 
 
 def main():
-    save_all_plots('instances/30-tsp/instances.csv')
+    save_all_plots('instances/50-tsp/instances.csv')
     # show_plot('instances/100-tsp/instance-11.tsp', 15446)
 
 

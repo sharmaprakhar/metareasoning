@@ -1,50 +1,50 @@
-instances/instance-0.tsp, 11086.00
-instances/instance-1.tsp, 10492.00
-instances/instance-10.tsp, 11733.00
-instances/instance-11.tsp, 11228.00
-instances/instance-12.tsp, 11520.00
-instances/instance-13.tsp, 11016.00
-instances/instance-14.tsp, 11581.00
-instances/instance-15.tsp, 11974.00
-instances/instance-16.tsp, 10888.00
-instances/instance-17.tsp, 11651.00
-instances/instance-18.tsp, 10971.00
-instances/instance-19.tsp, 10876.00
-instances/instance-2.tsp, 11167.00
-instances/instance-20.tsp, 11863.00
-instances/instance-21.tsp, 11483.00
-instances/instance-22.tsp, 12571.00
-instances/instance-23.tsp, 10994.00
-instances/instance-24.tsp, 11894.00
-instances/instance-25.tsp, 11700.00
-instances/instance-26.tsp, 10894.00
-instances/instance-27.tsp, 11480.00
-instances/instance-28.tsp, 11298.00
-instances/instance-29.tsp, 10585.00
-instances/instance-3.tsp, 11356.00
-instances/instance-30.tsp, 11502.00
-instances/instance-31.tsp, 11895.00
-instances/instance-32.tsp, 11810.00
-instances/instance-33.tsp, 10247.00
-instances/instance-34.tsp, 11359.00
-instances/instance-35.tsp, 10922.00
-instances/instance-36.tsp, 12016.00
-instances/instance-37.tsp, 11427.00
-instances/instance-38.tsp, 11853.00
-instances/instance-39.tsp, 11634.00
-instances/instance-4.tsp, 11074.00
-instances/instance-40.tsp, 10914.00
-instances/instance-41.tsp, 11504.00
-instances/instance-42.tsp, 11011.00
-instances/instance-43.tsp, 10775.00
-instances/instance-44.tsp, 11085.00
-instances/instance-45.tsp, 11149.00
-instances/instance-46.tsp, 10326.00
-instances/instance-47.tsp, 11020.00
-instances/instance-48.tsp, 10474.00
-instances/instance-49.tsp, 11732.00
-instances/instance-5.tsp, 11625.00
-instances/instance-6.tsp, 11304.00
-instances/instance-7.tsp, 11220.00
-instances/instance-8.tsp, 11937.00
-instances/instance-9.tsp, 11257.00
+instances/50-tsp/instance-0.tsp,11086.00
+instances/50-tsp/instance-1.tsp,10492.00
+instances/50-tsp/instance-10.tsp,11733.00
+instances/50-tsp/instance-11.tsp,11228.00
+instances/50-tsp/instance-12.tsp,11520.00
+instances/50-tsp/instance-13.tsp,11016.00
+instances/50-tsp/instance-14.tsp,11581.00
+instances/50-tsp/instance-15.tsp,11974.00
+instances/50-tsp/instance-16.tsp,10888.00
+instances/50-tsp/instance-17.tsp,11651.00
+instances/50-tsp/instance-18.tsp,10971.00
+instances/50-tsp/instance-19.tsp,10876.00
+instances/50-tsp/instance-2.tsp,11167.00
+instances/50-tsp/instance-20.tsp,11863.00
+instances/50-tsp/instance-21.tsp,11483.00
+instances/50-tsp/instance-22.tsp,12571.00
+instances/50-tsp/instance-23.tsp,10994.00
+instances/50-tsp/instance-24.tsp,11894.00
+instances/50-tsp/instance-25.tsp,11700.00
+instances/50-tsp/instance-26.tsp,10894.00
+instances/50-tsp/instance-27.tsp,11480.00
+instances/50-tsp/instance-28.tsp,11298.00
+instances/50-tsp/instance-29.tsp,10585.00
+instances/50-tsp/instance-3.tsp,11356.00
+instances/50-tsp/instance-30.tsp,11502.00
+instances/50-tsp/instance-31.tsp,11895.00
+instances/50-tsp/instance-32.tsp,11810.00
+instances/50-tsp/instance-33.tsp,10247.00
+instances/50-tsp/instance-34.tsp,11359.00
+instances/50-tsp/instance-35.tsp,10922.00
+instances/50-tsp/instance-36.tsp,12016.00
+instances/50-tsp/instance-37.tsp,11427.00
+instances/50-tsp/instance-38.tsp,11853.00
+instances/50-tsp/instance-39.tsp,11634.00
+instances/50-tsp/instance-4.tsp,11074.00
+instances/50-tsp/instance-40.tsp,10914.00
+instances/50-tsp/instance-41.tsp,11504.00
+instances/50-tsp/instance-42.tsp,11011.00
+instances/50-tsp/instance-43.tsp,10775.00
+instances/50-tsp/instance-44.tsp,11085.00
+instances/50-tsp/instance-45.tsp,11149.00
+instances/50-tsp/instance-46.tsp,10326.00
+instances/50-tsp/instance-47.tsp,11020.00
+instances/50-tsp/instance-48.tsp,10474.00
+instances/50-tsp/instance-49.tsp,11732.00
+instances/50-tsp/instance-5.tsp,11625.00
+instances/50-tsp/instance-6.tsp,11304.00
+instances/50-tsp/instance-7.tsp,11220.00
+instances/50-tsp/instance-8.tsp,11937.00
+instances/50-tsp/instance-9.tsp,11257.00
