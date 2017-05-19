@@ -75,12 +75,12 @@ def show_plot(filename, optimal_distance):
     plt.title('Performance Profile')
     plt.xlabel('Time')
     plt.ylabel('Solution Quality')
-    plt.scatter(statistics['time'], solution_qualities, color='r')
+    plt.plot(statistics['time'], solution_qualities, color='r')
     plt.show()
 
 
 def save_all_plots(filename, directory='plots'):
-    time, averages = experiments.get_average_performance_profile('instances/instances.csv')
+    # time, averages = experiments.get_average_performance_profile('instances/100-tsp/instances.csv')
 
     with open(filename) as f:
         lines = f.readlines()
@@ -88,7 +88,8 @@ def save_all_plots(filename, directory='plots'):
         for i, line in enumerate(lines):
             filename, optimal_distance = experiments.parse_line(line)
 
-            print 'Saving file:', filename
+            print 'File:', filename
+            id = filename.split('/')[2].split('-')[1]
 
             cities = tsp.load_instance(filename)
             start_city = list(cities)[0]
@@ -96,23 +97,23 @@ def save_all_plots(filename, directory='plots'):
             statistics = {'time': [], 'distances': []}
             randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
 
-            # solution_qualities = [1 - ((distance - optimal_distance) / optimal_distance) for distance in statistics['distances']]
-            solution_qualities = [optimal_distance / distance for distance in statistics['distances']]
+            solution_qualities = [1 - ((distance - optimal_distance) / optimal_distance) for distance in statistics['distances']]
+            # solution_qualities = [optimal_distance / distance for distance in statistics['distances']]
 
-            # plt.figure()
+            plt.figure()
             plt.title('Performance Profile')
             plt.xlabel('Time')
             plt.ylabel('Solution Quality')
             plt.plot(statistics['time'], solution_qualities, color='r')
-            plt.plot(time, averages, color='b')
-            # plt.savefig(directory + '/plot-%i.png' % i)
+            # plt.plot(time, averages, color='b')
+            plt.savefig(directory + '/plot-%s.png' % id)
 
         plt.show()
 
 
 def main():
-    # save_all_plots('instances/instances.csv')
-    show_plot('instances/dj38.tsp', 6656)
+    save_all_plots('instances/30-tsp/instances.csv')
+    # show_plot('instances/100-tsp/instance-11.tsp', 15446)
 
 
 if __name__ == '__main__':

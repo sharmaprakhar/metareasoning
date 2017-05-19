@@ -13,7 +13,7 @@ NODE_COORD_SECTION
 EOF
 '''
 CITY_TEMPLATE = '%d %i %i %s'
-CITY_PATTERN = '\d+ (\d+.\d+) (\d+.\d+)'
+CITY_PATTERN = '\d+ (\d+) (\d+)'
 
 
 def generate_instance(size, start_position=0, end_position=1, minimum_distance=0.001):

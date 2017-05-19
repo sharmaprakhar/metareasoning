@@ -37,6 +37,32 @@ def get_nearest_neighbor_tour(cities, start_city):
     return tour
 
 
+def get_randomized_nearest_neighbor_tour(cities, start_city):
+    remaining_cities = set(cities) - set([start_city])
+
+    tour = [start_city]
+    current_city = start_city
+
+    while remaining_cities:
+        best_neighbor = None
+        best_distance = float('inf')
+
+        for neighbor in remaining_cities:
+            distance = np.linalg.norm(np.subtract(current_city, neighbor))
+
+            if distance < best_distance:
+                best_neighbor = neighbor
+                best_distance = distance
+
+        tour += [best_neighbor]
+        remaining_cities -= set([best_neighbor])
+        current_city = best_neighbor
+
+    tour += [start_city]
+
+    return tour
+
+
 def get_cities(tour):
     tour_length = len(tour)
     return range(tour_length)
