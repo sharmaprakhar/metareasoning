@@ -8,7 +8,7 @@ def is_goal(state, cities):
 
 
 def get_successors(state, cities):
-    return [{'action': city, 'state': list(state) + [city]} for city in cities - set(state)]
+    return [{'state': list(state) + [city], 'action': city} for city in cities - set(state)]
 
 
 def get_cost(state, action, next_state):
