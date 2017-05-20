@@ -2,9 +2,9 @@ from __future__ import division
 
 import matplotlib.pyplot as plt
 
-import randomized_tour_improver
 import tsp
-from utils import get_naive_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
+import tsp_solver
+from utils import get_naive_solution_qualities, get_standard_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
 
 
 def display_performance_profile(filename, optimal_distance):
@@ -13,10 +13,10 @@ def display_performance_profile(filename, optimal_distance):
     cities = tsp.load_instance(filename)
     start_city = list(cities)[0]
     statistics = {'time': [], 'distances': []}
-    randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
+    tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
-    # solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
-    solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
+    solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
+    # solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
 
     plt.title('Performance Profile')
     plt.xlabel('Time')
@@ -35,9 +35,9 @@ def display_solution_qualities(filename):
             cities = tsp.load_instance(filename)
             start_city = list(cities)[0]
             statistics = {'time': [], 'distances': []}
-            randomized_tour_improver.k_opt_solve(cities, start_city, statistics)
+            tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
-            # solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
+            solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
             solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
 
             print(solution_qualities)
@@ -66,9 +66,9 @@ def display_performance_profiles(filename):
 
 
 def main():
-    # display_performance_profile('instances/50-tsp/instance-11.tsp', 11228)
+    display_performance_profile('instances/50-tsp/instance-11.tsp', 11228)
     # display_solution_qualities('instances/50-tsp/instances.csv')
-    display_performance_profiles('results/50-tsp-standard-results.txt')
+    # display_performance_profiles('results/50-tsp-standard-results.txt')
 
 if __name__ == '__main__':
     main()

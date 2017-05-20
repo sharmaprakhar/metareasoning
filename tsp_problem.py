@@ -1,10 +1,11 @@
 import numpy as np
 
+import tsp
 from utils import pop
 
 
 def is_goal(state, cities):
-    return len(cities) == len(state)
+    return len(state) == len(cities)
 
 
 def get_successors(state, cities):
@@ -12,7 +13,7 @@ def get_successors(state, cities):
 
 
 def get_cost(state, action, next_state):
-    return np.linalg.norm(np.subtract(state[-1], next_state))
+    return tsp.get_distance(state[-1], next_state)
 
 
 def get_heuristic(current_node, start_city, cities):
