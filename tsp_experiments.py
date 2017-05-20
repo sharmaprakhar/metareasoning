@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 import tsp
 import tsp_solver
-from utils import get_naive_solution_qualities, get_standard_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
+from utils import get_standard_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
 
 
 def display_performance_profile(filename, optimal_distance):
@@ -38,7 +38,7 @@ def display_solution_qualities(filename):
             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
             solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
-            solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
+            # solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
 
             print(solution_qualities)
 
