@@ -1,9 +1,10 @@
 from __future__ import division
 
+import matplotlib.pyplot as plt
+
 import randomized_tour_improver
 import tsp
-import matplotlib.pyplot as plt
-from utils import get_naive_solution_qualities, get_standard_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
+from utils import get_naive_solution_qualities, get_line_components, get_solution_qualities, get_max_length, get_solution_quality_averages, get_trimmed_solution_qualities
 
 
 def display_performance_profile(filename, optimal_distance):
@@ -39,7 +40,7 @@ def display_solution_qualities(filename):
             # solution_qualities = get_standard_solution_qualities(statistics['distances'], optimal_distance)
             solution_qualities = get_naive_solution_qualities(statistics['distances'], optimal_distance)
 
-            print solution_qualities
+            print(solution_qualities)
 
 
 def display_performance_profiles(filename):
@@ -67,7 +68,7 @@ def display_performance_profiles(filename):
 def main():
     # display_performance_profile('instances/50-tsp/instance-11.tsp', 11228)
     # display_solution_qualities('instances/50-tsp/instances.csv')
-    display_performance_profiles('results/50-tsp-naive-results.txt')
+    display_performance_profiles('results/50-tsp-standard-results.txt')
 
 if __name__ == '__main__':
     main()

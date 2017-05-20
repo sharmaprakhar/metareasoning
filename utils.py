@@ -1,5 +1,6 @@
 import ast
 
+
 class Problem(object):
     def __init__(self, start_state, is_goal, get_successors, get_cost, get_heuristic):
         self.start_state = start_state
