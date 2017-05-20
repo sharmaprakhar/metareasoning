@@ -1,6 +1,6 @@
 import random
 import re
-import n_puzzle
+
 import numpy as np
 
 FILE_TEMPLATE = '''NAME : %s

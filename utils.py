@@ -1,3 +1,5 @@
+import ast
+
 class Problem(object):
     def __init__(self, start_state, is_goal, get_successors, get_cost, get_heuristic):
         self.start_state = start_state
@@ -87,3 +89,51 @@ def pop(queue):
     del queue[minimum_key]
 
     return minimum_key
+
+
+def get_standard_solution_qualities(costs, optimal_cost):
+    return [1 - ((cost - optimal_cost) / optimal_cost) for cost in costs]
+
+
+def get_naive_solution_qualities(costs, optimal_cost):
+    return [optimal_cost / cost for cost in costs]
+
+
+def get_max_length(solution_quality_groups):
+    return max(len(solution_qualities) for solution_qualities in solution_quality_groups)
+
+
+def get_trimmed_solution_qualities(solution_quality_groups, max_length):
+    trimmed_solution_quality_groups = []
+
+    for solution_qualities in solution_quality_groups:
+        trimmed_solution_qualities = list(solution_qualities)
+
+        while len(trimmed_solution_qualities) < max_length:
+            trimmed_solution_qualities.append(trimmed_solution_qualities[-1])
+
+        trimmed_solution_quality_groups.append(trimmed_solution_qualities)
+
+    return trimmed_solution_quality_groups
+
+
+def get_solution_quality_averages(solution_quality_groups):
+    return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
+
+
+def get_solution_qualities(line):
+    return ast.literal_eval(line)
+
+
+def get_line_components(line):
+    filename, raw_optimal_distance = line.split(',')
+
+    stripped_optimal_distance = raw_optimal_distance.strip()
+    truncated_optimal_distance = stripped_optimal_distance.split('.')[0]
+    casted_optimal_distance = int(truncated_optimal_distance)
+
+    return filename, casted_optimal_distance
+
+
+def get_instance_id(filename):
+    return filename.split('/')[2].split('-')[1]

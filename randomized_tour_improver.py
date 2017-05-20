@@ -37,32 +37,6 @@ def get_nearest_neighbor_tour(cities, start_city):
     return tour
 
 
-def get_randomized_nearest_neighbor_tour(cities, start_city):
-    remaining_cities = set(cities) - set([start_city])
-
-    tour = [start_city]
-    current_city = start_city
-
-    while remaining_cities:
-        best_neighbor = None
-        best_distance = float('inf')
-
-        for neighbor in remaining_cities:
-            distance = np.linalg.norm(np.subtract(current_city, neighbor))
-
-            if distance < best_distance:
-                best_neighbor = neighbor
-                best_distance = distance
-
-        tour += [best_neighbor]
-        remaining_cities -= set([best_neighbor])
-        current_city = best_neighbor
-
-    tour += [start_city]
-
-    return tour
-
-
 def get_cities(tour):
     tour_length = len(tour)
     return range(tour_length)
@@ -75,7 +49,6 @@ def get_mutated_tour(tour, first_key, second_key):
 
 
 def random_solve(states, start_state, statistics, iterations=1000, is_detailed=False):
-    # tour = get_initial_random_tour(states, start_state)
     tour = get_nearest_neighbor_tour(states, start_state)
     distance = tsp.get_distance(tour)
 
@@ -108,7 +81,6 @@ def random_solve(states, start_state, statistics, iterations=1000, is_detailed=F
 
 def robust_random_solve(states, start_state, statistics, iterations=1000):
     tour = get_initial_random_tour(states, start_state)
-    # tour = get_nearest_neighbor_tour(states, start_state)
     distance = tsp.get_distance(tour)
 
     cities = range(1, len(tour) - 1)
@@ -134,7 +106,6 @@ def robust_random_solve(states, start_state, statistics, iterations=1000):
 
 
 def two_opt_solve(states, start_state, statistics, iterations=500):
-    # tour = get_nearest_neighbor_tour(states, start_state)
     tour = get_initial_random_tour(states, start_state)
     distance = tsp.get_distance(tour)
 
@@ -165,7 +136,6 @@ def two_opt_solve(states, start_state, statistics, iterations=500):
 
 
 def k_opt_solve(states, start_state, statistics, iterations=100):
-    # tour = get_nearest_neighbor_tour(states, start_state)
     tour = get_initial_random_tour(states, start_state)
     distance = tsp.get_distance(tour)
 
