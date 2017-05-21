@@ -1,4 +1,5 @@
 import ast
+import json
 
 
 class Problem(object):
@@ -122,6 +123,11 @@ def get_solution_quality_averages(solution_quality_groups):
     return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
 
 
+def get_solution_quality_map(filename):
+    with open(filename) as f:
+        return json.load(f)
+
+
 def get_solution_qualities(line):
     return ast.literal_eval(line)
 
@@ -136,5 +142,5 @@ def get_line_components(line):
     return filename, casted_optimal_distance
 
 
-def get_instance_id(filename):
-    return filename.split('/')[2].split('-')[1]
+def get_instance_name(filename):
+    return filename.split('/')[2]
