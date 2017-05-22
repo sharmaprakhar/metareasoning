@@ -1,5 +1,9 @@
+from __future__ import division
+
 import ast
 import json
+
+import numpy as np
 
 
 class Problem(object):
@@ -101,26 +105,51 @@ def get_naive_solution_qualities(costs, optimal_cost):
     return [optimal_cost / cost for cost in costs]
 
 
-def get_max_length(solution_quality_groups):
-    return max(len(solution_qualities) for solution_qualities in solution_quality_groups)
+def get_solution_quality_groups(solution_quality_map):
+    return [solution_qualities for solution_qualities in solution_quality_map.values()]
 
 
-def get_trimmed_solution_qualities(solution_quality_groups, max_length):
-    trimmed_solution_quality_groups = []
-
-    for solution_qualities in solution_quality_groups:
-        trimmed_solution_qualities = list(solution_qualities)
-
-        while len(trimmed_solution_qualities) < max_length:
-            trimmed_solution_qualities.append(trimmed_solution_qualities[-1])
-
-        trimmed_solution_quality_groups.append(trimmed_solution_qualities)
-
-    return trimmed_solution_quality_groups
+def get_intrinsic_value_groups(solution_quality_map, multiplier):
+    return [get_intrinsic_values(solution_qualities, multiplier) for solution_qualities in solution_quality_map.values()]
 
 
-def get_solution_quality_averages(solution_quality_groups):
-    return [sum(solution_qualities) / len(solution_qualities) for solution_qualities in zip(*solution_quality_groups)]
+def get_max_length(groups):
+    return max(len(group) for group in groups)
+
+
+def get_trimmed_groups(groups, max_length):
+    trimmed_groups = []
+
+    for solution_qualities in groups:
+        trimmed_group = list(solution_qualities)
+
+        while len(trimmed_group) < max_length:
+            trimmed_group.append(trimmed_group[-1])
+
+        trimmed_groups.append(trimmed_group)
+
+    return trimmed_groups
+
+
+def get_intrinsic_value_averages(solution_quality_map, multiplier):
+    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier)
+    max_length = get_max_length(intrinsic_value_groups)
+    trimmed_intrinsic_value_groups = get_trimmed_groups(intrinsic_value_groups, max_length)
+    return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
+
+
+def get_performance_profile(solution_quality_map, buckets):
+    performance_profile = {}
+
+    solution_quality_groups = get_solution_quality_groups(solution_quality_map)
+    max_length = get_max_length(solution_quality_groups)
+    trimmed_solution_quality_groups = get_trimmed_groups(solution_quality_groups, max_length)
+
+    solution_quality_matrix = np.array(trimmed_solution_quality_groups)
+    for i in range(max_length):
+        performance_profile[i] = np.histogram(solution_quality_matrix[:, i], buckets)[0] / len(solution_quality_groups)
+
+    return performance_profile
 
 
 def get_solution_quality_map(filename):
@@ -144,3 +173,23 @@ def get_line_components(line):
 
 def get_instance_name(filename):
     return filename.split('/')[2]
+
+
+def get_estimated_intrinsic_value(x, a, b, c):
+    return a * np.arctan(x + b) + c
+
+
+def get_intrinsic_values(solution_qualities, multiplier):
+    return np.multiply(multiplier, solution_qualities)
+
+
+def get_time_costs(time, multiplier):
+    return np.multiply(multiplier, time)
+
+
+def get_comprehensive_values(instrinsic_value, time_cost):
+    return instrinsic_value - time_cost
+
+
+def get_optimal_stopping_point(comprehensive_values):
+    return list(comprehensive_values).index(max(comprehensive_values))

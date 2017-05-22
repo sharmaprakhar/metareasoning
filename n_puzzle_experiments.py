@@ -1,9 +1,10 @@
-import numpy as np
-from utils import Problem, get_standard_solution_qualities
-import n_puzzle_problem
-import astar_solver
-import anytime_astar_solver
 import matplotlib.pyplot as plt
+import numpy as np
+
+import anytime_astar_solver
+import astar_solver
+import n_puzzle_problem
+from utils import Problem, get_standard_solution_qualities
 
 
 def display_performance_profile(problem):
