@@ -1,7 +1,7 @@
 from utils import Node, get_children_nodes, get_solution, get_key, OpenList
 
 
-def solve(problem, statistics, weight=1.2):
+def solve(problem, statistics, weight):
     start_node = Node(problem.start_state)
     start_node_key = get_key(start_node.state)
     start_node_value = start_node.path_cost + weight * problem.get_heuristic(start_node.state)

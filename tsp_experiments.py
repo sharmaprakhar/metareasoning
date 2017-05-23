@@ -17,13 +17,7 @@ INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
-# BUCKETS = np.linspace(0, 1, 500)
-# BUCKETS = [0, 0.65, 0.75, 0.85, 0.90, 0.95, 1]
-# BUCKETS = [0, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1]
-# BUCKETS = [0, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1]
 BUCKETS = np.linspace(0, 1, 7)
-# BUCKETS = np.insert(BUCKETS, 0, 0)
-# BUCKETS = [0, .20, .25, .30, .35, .40, .45, .50, .55, .60, .65, .75, .85, .90, .95, 1]
 
 
 def get_mevc(solution_quality, time, performance_profile):
@@ -58,7 +52,7 @@ def save_performance_profiles(results_filename, instances_filename, directory):
     print performance_profile
 
     with open(instances_filename) as f:
-        lines = f.readlines()#[1:]
+        lines = f.readlines()
 
         for line in lines:
             instance_filename, _ = utils.get_line_components(line)
@@ -120,10 +114,10 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
     plt.scatter([average_best_time], comprehensive_values[average_best_time], color='y', zorder=4)
     plt.text(0, 10, "%0.2f - Best Value w/ Average Performance Profile" % comprehensive_values[average_best_time], color='y')
 
-    # average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
-    # average_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
-    # plt.scatter([average_best_time], comprehensive_values[average_best_time], color='y', zorder=3)
-    # plt.text(0, 10, "%0.2f - Best Reward w/ Average Performance Profile" % comprehensive_values[average_best_time], color='y')
+    average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
+    average_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
+    plt.scatter([average_best_time], comprehensive_values[average_best_time], color='y', zorder=3)
+    plt.text(0, 10, "%0.2f - Best Reward w/ Average Performance Profile" % comprehensive_values[average_best_time], color='y')
 
     for sample_limit in range(sample_start, sample_end):
         try:
@@ -230,8 +224,8 @@ def display_projections(instance_filename, optimal_distance, results_filename):
 
 
 def main():
-    save_performance_profiles('results/naive.json', 'instances/50-tsp/instances.csv', 'plots')
-    # display_solution_qualities('instances/50-tsp/instances.csv')
+    save_performance_profiles('results/50-tsp-approximation-ratio-map.json', 'instances/50-tsp/instances.csv', 'plots')
+
 
 if __name__ == '__main__':
     main()

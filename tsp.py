@@ -13,8 +13,11 @@ NODE_COORD_SECTION
 EOF
 '''
 CITY_TEMPLATE = '%d %i %i %s'
+COMMENT = 'No Comment'
 CITY_PATTERN = '\d+ (\d+) (\d+)'
 DELIMITER = '\n'
+
+SIZE = 50
 
 
 def get_initial_random_tour(states, start_state):
@@ -93,12 +96,12 @@ def load_instance(filename):
 
 def generate_instance_file(size, name):
     cities = get_instance(size, start_position=0, end_position=2000, minimum_distance=1)
-    save_instance('instances/%d-tsp/instance-%d.tsp' % (size, name), 'No comment', cities)
+    save_instance(name, COMMENT, cities)
 
 
 def main():
-    for i in range(50):
-        generate_instance_file(50, i)
+    for i in range(SIZE):
+        generate_instance_file(SIZE, 'instances/%d-tsp/instance-%d.tsp' % (SIZE, i))
 
 
 if __name__ == '__main__':

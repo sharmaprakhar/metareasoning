@@ -4,7 +4,6 @@ import ast
 import json
 
 import numpy as np
-import copy
 
 
 class Problem(object):

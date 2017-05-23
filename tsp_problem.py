@@ -1,5 +1,3 @@
-import numpy as np
-
 import tsp
 from utils import pop
 
@@ -20,7 +18,7 @@ def get_heuristic(current_node, start_city, cities):
     if is_goal(current_node.state, cities):
         return 0
 
-    # TODO Add the start city
+    # TODO Should we add the start city to this?
     subset = cities - set(current_node.state)
 
     predecessors = {}
@@ -41,8 +39,7 @@ def get_heuristic(current_node, start_city, cities):
         for successor in get_successors(current_node.state, subset):
             next_city = successor['state'][-1]
 
-            # TODO Fix this
-            cost = np.linalg.norm(np.subtract(current_city, next_city))
+            cost = tsp.get_distance(current_city, next_city)
 
             if next_city in queue and cost < key[next_city]:
                 predecessors[next_city] = current_city
@@ -52,7 +49,6 @@ def get_heuristic(current_node, start_city, cities):
     cost = 0
     for parent_city, child_city in predecessors.iteritems():
         if child_city != -1:
-            # TODO Fix this
-            cost += np.linalg.norm(np.subtract(parent_city, child_city))
+            cost += tsp.get_distance(parent_city, child_city)
 
     return cost
