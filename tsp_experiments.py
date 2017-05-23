@@ -10,8 +10,8 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 2
-INTRINSIC_VALUE_MULTIPLIER = 1000
+TIME_COST_MULTIPLIER = 0.1
+INTRINSIC_VALUE_MULTIPLIER = 100
 
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0
@@ -86,7 +86,7 @@ def save_performance_profiles(results_filename, directory):
 
         solution_qualities = solution_quality_map[instance_filename]
 
-        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, 10)
+        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, 4)
 
         instance_id = utils.get_instance_name(instance_filename)
         plot_filename = directory + '/' + instance_id + '.png'
@@ -143,8 +143,9 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
 
     average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
     fixed_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
-    plt.scatter([fixed_best_time], comprehensive_values[fixed_best_time], color='y', zorder=4)
-    plt.text(0, 10, "%0.2f - Best Reward w/ Fixed Time Allocation" % comprehensive_values[fixed_best_time], color='y')
+    offset_fixed_best_time = fixed_best_time if fixed_best_time < len(comprehensive_values) else len(comprehensive_values) - 1
+    plt.scatter([offset_fixed_best_time], comprehensive_values[offset_fixed_best_time], color='y', zorder=4)
+    plt.text(0, 10, "%0.2f - Best Reward w/ Fixed Time Allocation" % comprehensive_values[offset_fixed_best_time], color='y')
 
     decrement = DIFFERENCE / (time_limit - monitor_threshold)
     current_color = INITIAL_GRAY
@@ -182,7 +183,7 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
     myopic_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[average_best_time]
     plt.text(0, -20, "%0.2f - Myopic Monitoring Loss" % myopic_loss, color='y')
 
-    fixed_time_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[fixed_best_time]
+    fixed_time_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[offset_fixed_best_time]
     plt.text(0, -30, "%0.2f - Fixed Time Allocation Loss" % fixed_time_loss, color='y')
 
     return plt, online_loss, myopic_loss, fixed_time_loss
