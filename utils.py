@@ -131,6 +131,7 @@ def get_trimmed_groups(groups, max_length):
     return trimmed_groups
 
 
+# TODO Check if this logic is correct
 def get_intrinsic_value_averages(solution_quality_map, multiplier):
     intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier)
     max_length = get_max_length(intrinsic_value_groups)
@@ -147,7 +148,6 @@ def get_naive_performance_profile(solution_quality_map, buckets):
     solution_quality_matrix = np.array(trimmed_solution_quality_groups)
 
     for i in range(max_length):
-        # TODO Replace with norm when you get everything else working
         performance_profile[i] = np.histogram(solution_quality_matrix[:, i], buckets)[0] / len(solution_quality_groups)
 
     return performance_profile
@@ -173,7 +173,7 @@ def get_dynamic_performance_profile(solution_quality_map, buckets):
 
     solution_quality_groups = get_solution_quality_groups(solution_quality_map)
 
-    # TODO should this refer to trimmed_solution_quality_groups?
+    # TODO Should this refer to trimmed_solution_quality_groups? I don't think so
     for solution_qualities in solution_quality_groups:
         time_length = len(solution_qualities)
         for t in range(time_length):
@@ -208,10 +208,10 @@ def get_line_components(line):
 
 
 def get_instance_name(filename):
-    return filename.split('/')[2]
+    return filename.split('/')[2].split('.')[0]
 
 
-def get_estimated_intrinsic_value(x, a, b, c):
+def get_estimated_solution_qualities(x, a, b, c):
     return a * np.arctan(x + b) + c
 
 
@@ -246,3 +246,9 @@ def digitize(solution_quality, buckets):
             break
 
     return bucket_id
+
+
+def get_solution_quality(solution_quality_class, bucket_size):
+    length = 1 / bucket_size
+    offset = length / 2
+    return (solution_quality_class / bucket_size) + offset

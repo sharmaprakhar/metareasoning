@@ -91,7 +91,9 @@ def load_instance(filename):
                 y = float(match.groups()[1])
                 cities.add((x, y))
 
-    return cities
+    start_city = list(cities)[0]
+
+    return cities, start_city
 
 
 def generate_instance_file(size, name):
