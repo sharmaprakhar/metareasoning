@@ -4,6 +4,7 @@ import ast
 import json
 
 import numpy as np
+import copy
 
 
 class Problem(object):
@@ -138,16 +139,52 @@ def get_intrinsic_value_averages(solution_quality_map, multiplier):
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
 
 
-def get_performance_profile(solution_quality_map, buckets):
+def get_naive_performance_profile(solution_quality_map, buckets):
     performance_profile = {}
 
     solution_quality_groups = get_solution_quality_groups(solution_quality_map)
     max_length = get_max_length(solution_quality_groups)
     trimmed_solution_quality_groups = get_trimmed_groups(solution_quality_groups, max_length)
-
     solution_quality_matrix = np.array(trimmed_solution_quality_groups)
+
     for i in range(max_length):
+        # TODO Replace with norm when you get everything else working
         performance_profile[i] = np.histogram(solution_quality_matrix[:, i], buckets)[0] / len(solution_quality_groups)
+
+    return performance_profile
+
+
+def get_adjusted_performance_profile(performance_profile, current_solution_quality):
+    adjusted_performance_profile = {}
+
+    for key in performance_profile:
+        distribution = list(performance_profile[key])
+
+        for i in range(current_solution_quality):
+            distribution[i] = 0
+
+        adjusted_performance_profile[key] = [float(i) / (sum(distribution) + 0.0000000001) for i in distribution]
+
+    return adjusted_performance_profile
+
+
+def get_dynamic_performance_profile(solution_quality_map, buckets):
+    class_count = len(buckets) - 1
+    performance_profile = {key: class_count * [0] for key in range(class_count)}
+
+    solution_quality_groups = get_solution_quality_groups(solution_quality_map)
+
+    # TODO should this refer to trimmed_solution_quality_groups?
+    for solution_qualities in solution_quality_groups:
+        time_length = len(solution_qualities)
+        for t in range(time_length):
+            if t + 1 < time_length:
+                solution_quality_start = digitize(solution_qualities[t], buckets)
+                solution_quality_target = digitize(solution_qualities[t + 1], buckets)
+                performance_profile[solution_quality_start][solution_quality_target] += 1
+
+    for i in range(class_count):
+        performance_profile[i] = [float(j) / (sum(performance_profile[i]) + 0.0000000001) for j in performance_profile[i]]
 
     return performance_profile
 
@@ -193,3 +230,20 @@ def get_comprehensive_values(instrinsic_value, time_cost):
 
 def get_optimal_stopping_point(comprehensive_values):
     return list(comprehensive_values).index(max(comprehensive_values))
+
+
+def digitize(solution_quality, buckets):
+    bucket_id = len(buckets) - 1
+
+    for i in range(len(buckets)):
+        if i + 1 == len(buckets):
+            break
+
+        range_start = buckets[i]
+        range_end = buckets[i + 1]
+
+        if range_start <= solution_quality < range_end:
+            bucket_id = i
+            break
+
+    return bucket_id

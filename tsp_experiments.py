@@ -10,49 +10,30 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 1
-INTRINSIC_VALUE_MULTIPLIER = 100
+TIME_COST_MULTIPLIER = 2
+INTRINSIC_VALUE_MULTIPLIER = 200
 
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
-BUCKETS = np.linspace(0, 1, 51)
+# BUCKETS = np.linspace(0, 1, 500)
 # BUCKETS = [0, 0.65, 0.75, 0.85, 0.90, 0.95, 1]
 # BUCKETS = [0, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1]
 # BUCKETS = [0, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1]
-# BUCKETS = np.linspace(0.65, 1, 7)
+BUCKETS = np.linspace(0, 1, 7)
 # BUCKETS = np.insert(BUCKETS, 0, 0)
-
-def digitize(solution_quality, buckets):
-    bucket_id = 0
-
-    for i in range(len(buckets)):
-        if i + 1 == len(buckets):
-            break
-
-        range_start = buckets[i]
-        range_end = buckets[i + 1]
-
-        if range_start <= solution_quality < range_end:
-            bucket_id = i
-            break
-
-    return bucket_id
+# BUCKETS = [0, .20, .25, .30, .35, .40, .45, .50, .55, .60, .65, .75, .85, .90, .95, 1]
 
 
 def get_mevc(solution_quality, time, performance_profile):
-    solution_quality_class = digitize(solution_quality, BUCKETS) #np.digitize(solution_quality, BUCKETS, right=True)
-    print solution_quality
-    print solution_quality_class
+    solution_quality_class = utils.digitize(solution_quality, BUCKETS)
 
     current_intrinsic_value = utils.get_intrinsic_values(solution_quality_class, INTRINSIC_VALUE_MULTIPLIER)
     current_time_cost = utils.get_time_costs(time, TIME_COST_MULTIPLIER)
     current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
 
-    print current_intrinsic_value, current_time_cost
-
-    distribution = performance_profile[time + 1]
+    # adjusted_performance_profile = utils.get_adjusted_performance_profile(performance_profile, solution_quality_class)
 
     estimated_next_intrinsic_value = 0
     for i in range(len(BUCKETS) - 1):
@@ -60,12 +41,8 @@ def get_mevc(solution_quality, time, performance_profile):
         next_time_cost = utils.get_time_costs(time + 1, TIME_COST_MULTIPLIER)
         next_comprehensive_value = utils.get_comprehensive_values(next_intrinsic_value, next_time_cost)
 
-        print next_comprehensive_value, distribution[i]
-
-        estimated_next_intrinsic_value += distribution[i] * next_comprehensive_value
-
-    print 'Estimated Next Intrinsic Value', estimated_next_intrinsic_value
-    print 'Current Comprehensive Value:', current_comprehensive_value
+        # estimated_next_intrinsic_value += adjusted_performance_profile[time + 1][i] * next_comprehensive_value
+        estimated_next_intrinsic_value += (performance_profile[solution_quality_class][i] * next_comprehensive_value)
 
     return estimated_next_intrinsic_value - current_comprehensive_value
 
@@ -76,10 +53,12 @@ def save_performance_profiles(results_filename, instances_filename, directory):
 
     solution_quality_map = utils.get_solution_quality_map(results_filename)
     intrinsic_value_averages = utils.get_intrinsic_value_averages(solution_quality_map, INTRINSIC_VALUE_MULTIPLIER)
-    performance_profile = utils.get_performance_profile(solution_quality_map, BUCKETS)
+    # performance_profile = utils.get_naive_performance_profile(solution_quality_map, BUCKETS)
+    performance_profile = utils.get_dynamic_performance_profile(solution_quality_map, BUCKETS)
+    print performance_profile
 
     with open(instances_filename) as f:
-        lines = f.readlines()
+        lines = f.readlines()#[1:]
 
         for line in lines:
             instance_filename, _ = utils.get_line_components(line)
@@ -93,8 +72,6 @@ def save_performance_profiles(results_filename, instances_filename, directory):
 
             online_pp_losses.append(online_pp_loss)
             average_pp_losses.append(average_pp_loss)
-
-            break
 
     print("Online Performance Profile Mean Loss: %f" % np.average(online_pp_losses))
     print("Average Performance Profile Mean Loss: %f" % np.average(average_pp_losses))
@@ -121,8 +98,8 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
     plt.plot(time_steps, comprehensive_values, color='g')
 
     true_best_time = utils.get_optimal_stopping_point(comprehensive_values)
-    plt.scatter([true_best_time], comprehensive_values[true_best_time], color='m', zorder=3)
-    plt.text(0, 30, "%0.2f - Best Reward" % comprehensive_values[true_best_time], color='m')
+    plt.scatter([true_best_time], comprehensive_values[true_best_time], color='m', zorder=4)
+    plt.text(0, 30, "%0.2f - Best Value" % comprehensive_values[true_best_time], color='m')
 
     decrement = DIFFERENCE / (sample_end - sample_start)
     current_color = INITIAL_GRAY
@@ -133,18 +110,15 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
             average_best_time = i
             break
 
-        solution_quality = solution_qualities[i]
-        mevc = get_mevc(solution_quality, i, performance_profile)
+        mevc = get_mevc(solution_qualities[i], i, performance_profile)
 
-        print mevc
-
-        average_best_time = i
-
-        if mevc <= 0:
+        if mevc > 0:
+            average_best_time = i
+        else:
             break
 
     plt.scatter([average_best_time], comprehensive_values[average_best_time], color='y', zorder=4)
-    plt.text(0, 10, "%0.2f - Best Reward w/ Average Performance Profile" % comprehensive_values[average_best_time], color='y')
+    plt.text(0, 10, "%0.2f - Best Value w/ Average Performance Profile" % comprehensive_values[average_best_time], color='y')
 
     # average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
     # average_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
@@ -162,15 +136,15 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
             estimated_best_time = utils.get_optimal_stopping_point(estimated_comprehensive_values)
 
             if estimated_best_time <= sample_limit:
-                plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color='c', zorder=3)
-                plt.text(0, 20, "%0.2f - Best Reward w/ Online Performance Profile" % comprehensive_values[estimated_best_time], color='c')
+                plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color='c', zorder=4)
+                plt.text(0, 20, "%0.2f - Best Value w/ Online Performance Profile" % comprehensive_values[estimated_best_time], color='c')
                 break
             else:
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color=str(current_color), zorder=3)
 
             current_color -= decrement
         except Exception as e:
-            print("Encountered error while estimating the performance profile")
+            pass
 
     online_pp_loss = comprehensive_values[true_best_time] - comprehensive_values[estimated_best_time]
     plt.text(0, -10, "%0.2f - Online Performance Profile Loss" % online_pp_loss)
