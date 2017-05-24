@@ -10,14 +10,14 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 0.1
-INTRINSIC_VALUE_MULTIPLIER = 100
+TIME_COST_MULTIPLIER = 2
+INTRINSIC_VALUE_MULTIPLIER = 200
 
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
-BUCKETS = np.linspace(0, 1, 100)
+BUCKETS = np.linspace(0, 1, 20)
 BUCKET_SIZE = len(BUCKETS) - 1
 
 
@@ -86,7 +86,7 @@ def save_performance_profiles(results_filename, directory):
 
         solution_qualities = solution_quality_map[instance_filename]
 
-        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, 4)
+        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, 10, 10)
 
         instance_id = utils.get_instance_name(instance_filename)
         plot_filename = directory + '/' + instance_id + '.png'
@@ -101,7 +101,7 @@ def save_performance_profiles(results_filename, directory):
     print("Fixed Time Allocation Mean Loss: %f" % np.average(fixed_time_losses))
 
 
-def get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, monitor_threshold):
+def get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, monitor_threshold, window):
     plt.figure()
     plt.title('Performance Profile')
     plt.xlabel('Time')
@@ -133,9 +133,8 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
 
         mevc = get_mevc(solution_qualities[step], step, performance_profile)
 
-        if mevc > 0:
+        if mevc <= 0:
             average_best_time = step
-        else:
             break
 
     plt.scatter([average_best_time], comprehensive_values[average_best_time], color='y', zorder=4)
@@ -152,25 +151,24 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
 
     for sample_limit in range(monitor_threshold, time_limit):
         try:
-            parameters, _ = curve_fit(utils.get_estimated_solution_qualities, steps[:sample_limit], solution_qualities[:sample_limit])
+            start = sample_limit - window
+            parameters, _ = curve_fit(utils.get_estimated_solution_qualities, steps[start:sample_limit], solution_qualities[start:sample_limit])
 
             estimated_solution_qualities = utils.get_estimated_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
             estimated_intrinsic_values = utils.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
             plt.plot(steps, estimated_intrinsic_values, color=str(current_color))
 
             estimated_comprehensive_values = utils.get_comprehensive_values(estimated_intrinsic_values, time_costs)
-            # TODO Is my optimal stopping point calculation correct?
             estimated_best_time = utils.get_optimal_stopping_point(estimated_comprehensive_values)
 
-            # TODO Is my stopping criterion correct?
             if estimated_best_time > sample_limit:
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color=str(current_color), zorder=3)
 
-            # TODO Should I adjust this by 1?
-            if estimated_best_time <= sample_limit:
-                estimated_best_time = sample_limit
+            # TODO Is my stopping criterion correct?
+            if estimated_best_time < sample_limit:
+                estimated_best_time = sample_limit - 1
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color='c', zorder=4)
-                plt.text(0, 30, "%0.2f - Best Value w/ Online Montoring" % comprehensive_values[estimated_best_time], color='c')
+                plt.text(0, 30, "%0.2f - Best Value w/ Online Monitoring" % comprehensive_values[estimated_best_time], color='c')
                 break
 
             current_color -= decrement
