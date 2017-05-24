@@ -165,7 +165,7 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color=str(current_color), zorder=3)
 
             # TODO Is my stopping criterion correct?
-            if estimated_best_time < sample_limit:
+            if estimated_best_time <= sample_limit - 1:
                 estimated_best_time = sample_limit - 1
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color='c', zorder=4)
                 plt.text(0, 30, "%0.2f - Best Value w/ Online Monitoring" % comprehensive_values[estimated_best_time], color='c')
