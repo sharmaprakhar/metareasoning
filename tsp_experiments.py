@@ -143,7 +143,7 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
 
     average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
     fixed_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
-    offset_fixed_best_time = fixed_best_time if fixed_best_time < len(comprehensive_values) else len(comprehensive_values) - 1
+    offset_fixed_best_time = fixed_best_time if fixed_best_time < time_limit else time_limit - 1
     plt.scatter([offset_fixed_best_time], comprehensive_values[offset_fixed_best_time], color='y', zorder=4)
     plt.text(0, 10, "%0.2f - Best Reward w/ Fixed Time Allocation" % comprehensive_values[offset_fixed_best_time], color='y')
 
