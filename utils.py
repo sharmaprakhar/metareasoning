@@ -105,12 +105,14 @@ def get_naive_solution_qualities(costs, optimal_cost):
     return [optimal_cost / cost for cost in costs]
 
 
-def get_solution_quality_groups(solution_quality_map):
-    return [solution_qualities for solution_qualities in solution_quality_map.values()]
+def get_solution_quality_groups(solution_quality_map, key):
+    return [solution_qualities[key] for solution_qualities in solution_quality_map.values()]
+    # return [solution_qualities for solution_qualities in solution_quality_map.values()]
 
 
-def get_intrinsic_value_groups(solution_quality_map, multiplier):
-    return [get_intrinsic_values(solution_qualities, multiplier) for solution_qualities in solution_quality_map.values()]
+def get_intrinsic_value_groups(solution_quality_map, multiplier, key):
+    return [get_intrinsic_values(solution_qualities[key], multiplier) for solution_qualities in solution_quality_map.values()]
+    # return [get_intrinsic_values(solution_qualities, multiplier) for solution_qualities in solution_quality_map.values()]
 
 
 def get_max_length(groups):
@@ -133,7 +135,7 @@ def get_trimmed_groups(groups, max_length):
 
 # TODO Check if this logic is correct
 def get_intrinsic_value_averages(solution_quality_map, multiplier):
-    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier)
+    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
     max_length = get_max_length(intrinsic_value_groups)
     trimmed_intrinsic_value_groups = get_trimmed_groups(intrinsic_value_groups, max_length)
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
@@ -168,12 +170,11 @@ def get_adjusted_performance_profile(performance_profile, current_solution_quali
 
 
 def get_dynamic_performance_profile(solution_quality_map, buckets):
+    solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
     class_count = len(buckets) - 1
+
     performance_profile = {key: class_count * [0] for key in range(class_count)}
 
-    solution_quality_groups = get_solution_quality_groups(solution_quality_map)
-
-    # TODO Should this refer to trimmed_solution_quality_groups? I don't think so
     for solution_qualities in solution_quality_groups:
         time_length = len(solution_qualities)
         for t in range(time_length):
@@ -182,8 +183,10 @@ def get_dynamic_performance_profile(solution_quality_map, buckets):
                 solution_quality_target = digitize(solution_qualities[t + 1], buckets)
                 performance_profile[solution_quality_start][solution_quality_target] += 1
 
+    fudge = np.nextafter(0, 1)
     for i in range(class_count):
-        performance_profile[i] = [float(j) / (sum(performance_profile[i]) + 0.0000000001) for j in performance_profile[i]]
+        length = sum(performance_profile[i]) + fudge
+        performance_profile[i] = [float(j) / length for j in performance_profile[i]]
 
     return performance_profile
 

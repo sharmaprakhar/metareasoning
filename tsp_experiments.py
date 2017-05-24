@@ -9,15 +9,16 @@ from scipy.optimize import curve_fit
 import tsp
 import tsp_solver
 import utils
+import tsp_problem
 
-TIME_COST_MULTIPLIER = 2
-INTRINSIC_VALUE_MULTIPLIER = 200
+TIME_COST_MULTIPLIER = 0.75
+INTRINSIC_VALUE_MULTIPLIER = 100
 
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
-BUCKETS = np.linspace(0, 1, 20)
+BUCKETS = np.linspace(0, 1, 100)
 BUCKET_SIZE = len(BUCKETS) - 1
 
 
@@ -29,7 +30,7 @@ def get_mevc(solution_quality, step, performance_profile):
     current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
 
     solution_quality_classes = range(BUCKET_SIZE)
-    estimated_next_intrinsic_value = 0
+    expected_next_comprehensive_value = 0
 
     for next_solution_quality_class in solution_quality_classes:
         next_solution_quality = utils.get_solution_quality(next_solution_quality_class, BUCKET_SIZE)
@@ -37,9 +38,9 @@ def get_mevc(solution_quality, step, performance_profile):
         next_time_cost = utils.get_time_costs(step + 1, TIME_COST_MULTIPLIER)
         next_comprehensive_value = utils.get_comprehensive_values(next_intrinsic_value, next_time_cost)
 
-        estimated_next_intrinsic_value += performance_profile[current_solution_quality_class][next_solution_quality_class] * next_comprehensive_value
+        expected_next_comprehensive_value += performance_profile[current_solution_quality_class][next_solution_quality_class] * next_comprehensive_value
 
-    return estimated_next_intrinsic_value - current_comprehensive_value
+    return expected_next_comprehensive_value - current_comprehensive_value
 
 
 def get_optimal_fixed_allocation_time(performance_profile):
@@ -84,9 +85,12 @@ def save_performance_profiles(results_filename, directory):
     for instance_filename in solution_quality_map:
         print('Instance: %s' % instance_filename)
 
-        solution_qualities = solution_quality_map[instance_filename]
+        solution_qualities = solution_quality_map[instance_filename]['solution_qualities']
+        approximated_solution_qualities = solution_quality_map[instance_filename]['estimated_solution_qualities']
+        # solution_qualities = solution_quality_map[instance_filename]
+        # estimated_solution_qualities = []
 
-        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, 10, 10)
+        plt, online_loss, myopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, approximated_solution_qualities, intrinsic_value_averages, performance_profile, 10, 20)
 
         instance_id = utils.get_instance_name(instance_filename)
         plot_filename = directory + '/' + instance_id + '.png'
@@ -96,23 +100,25 @@ def save_performance_profiles(results_filename, directory):
         online_losses.append(online_loss)
         fixed_time_losses.append(fixed_time_loss)
 
-    print("Online Monitoring Mean Loss: %f" % np.average(online_losses))
-    print("Myopic Monitoring Mean Loss: %f" % np.average(myopic_losses))
-    print("Fixed Time Allocation Mean Loss: %f" % np.average(fixed_time_losses))
+    print("Online Monitoring Mean Error: %f%%" % np.average(online_losses))
+    print("Myopic Monitoring Mean Error: %f%%" % np.average(myopic_losses))
+    print("Fixed Time Allocation Mean Error: %f%%" % np.average(fixed_time_losses))
 
 
-def get_performance_profile(solution_qualities, intrinsic_value_averages, performance_profile, monitor_threshold, window):
+def get_performance_profile(solution_qualities, approximated_solution_qualities, intrinsic_value_averages, performance_profile, monitor_threshold, window):
     plt.figure()
     plt.title('Performance Profile')
     plt.xlabel('Time')
     plt.ylabel('Value')
 
     intrinsic_values = utils.get_intrinsic_values(solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+    approximated_intrinsic_values = utils.get_intrinsic_values(approximated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
 
     time_limit = len(solution_qualities)
     steps = range(time_limit)
 
     plt.scatter(steps, intrinsic_values, color='r', zorder=3)
+    plt.scatter(steps, approximated_intrinsic_values, color='g', zorder=3)
     plt.plot(steps, intrinsic_value_averages[:time_limit], color='b')
 
     time_costs = utils.get_time_costs(steps, TIME_COST_MULTIPLIER)
@@ -131,7 +137,9 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
             average_best_time = step
             break
 
-        mevc = get_mevc(solution_qualities[step], step, performance_profile)
+        # TODO Make this approximate
+        # mevc = get_mevc(solution_qualities[step], step, performance_profile)
+        mevc = get_mevc(approximated_solution_qualities[step], step, performance_profile)
 
         if mevc <= 0:
             average_best_time = step
@@ -152,7 +160,11 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
     for sample_limit in range(monitor_threshold, time_limit):
         try:
             start = sample_limit - window
-            parameters, _ = curve_fit(utils.get_estimated_solution_qualities, steps[start:sample_limit], solution_qualities[start:sample_limit])
+            # start = 0
+            # TODO Make this approximate
+            # parameters, _ = curve_fit(utils.get_estimated_solution_qualities, steps[start:sample_limit], solution_qualities[start:sample_limit])
+
+            parameters, _ = curve_fit(utils.get_estimated_solution_qualities, steps[start:sample_limit], approximated_solution_qualities[start:sample_limit])
 
             estimated_solution_qualities = utils.get_estimated_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
             estimated_intrinsic_values = utils.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
@@ -164,7 +176,6 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
             if estimated_best_time > sample_limit:
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color=str(current_color), zorder=3)
 
-            # TODO Is my stopping criterion correct?
             if estimated_best_time <= sample_limit - 1:
                 estimated_best_time = sample_limit - 1
                 plt.scatter([estimated_best_time], comprehensive_values[estimated_best_time], color='c', zorder=4)
@@ -175,14 +186,17 @@ def get_performance_profile(solution_qualities, intrinsic_value_averages, perfor
         except:
             pass
 
-    online_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[estimated_best_time]
-    plt.text(0, -10, "%0.2f - Online Monitoring Loss" % online_loss, color='c')
+    online_loss = ((comprehensive_values[optimal_stopping_point] - comprehensive_values[estimated_best_time]) / comprehensive_values[optimal_stopping_point]) * 100
+    # online_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[estimated_best_time]
+    plt.text(0, -10, "%0.2f%% - Online Monitoring Error" % online_loss, color='c')
 
-    myopic_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[average_best_time]
-    plt.text(0, -20, "%0.2f - Myopic Monitoring Loss" % myopic_loss, color='y')
+    myopic_loss = ((comprehensive_values[optimal_stopping_point] - comprehensive_values[average_best_time]) / comprehensive_values[optimal_stopping_point]) * 100
+    # myopic_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[average_best_time]
+    plt.text(0, -20, "%0.2f%% - Myopic Monitoring Error" % myopic_loss, color='y')
 
-    fixed_time_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[offset_fixed_best_time]
-    plt.text(0, -30, "%0.2f - Fixed Time Allocation Loss" % fixed_time_loss, color='y')
+    fixed_time_loss = ((comprehensive_values[optimal_stopping_point] - comprehensive_values[offset_fixed_best_time]) / comprehensive_values[optimal_stopping_point]) * 100
+    # fixed_time_loss = comprehensive_values[optimal_stopping_point] - comprehensive_values[offset_fixed_best_time]
+    plt.text(0, -30, "%0.2f%% - Fixed Time Allocation Error" % fixed_time_loss, color='y')
 
     return plt, online_loss, myopic_loss, fixed_time_loss
 
@@ -198,13 +212,20 @@ def print_solution_quality_map(instances_filename, get_solution_qualities):
             statistics = {'time': [], 'distances': []}
             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
-            solution_quality_map[instance_filename] = get_solution_qualities(statistics['distances'], optimal_distance)
+            estimated_optimal_distance = tsp_problem.prim(start_city, list(cities)[1:])
+
+            solution_quality_map[instance_filename] = {
+                'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
+                'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
+            }
 
     print(json.dumps(solution_quality_map))
 
 
 def main():
-    save_performance_profiles('results/50-tsp-approximation-ratio-map.json', 'plots')
+    # save_performance_profiles('results/50-tsp-approximation-ratio-map.json', 'plots')
+    save_performance_profiles('results/results.json', 'plots')
+    # print_solution_quality_map('instances/50-tsp/instances.csv', utils.get_naive_solution_qualities)
 
 
 if __name__ == '__main__':
