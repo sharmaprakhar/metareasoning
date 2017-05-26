@@ -133,7 +133,6 @@ def get_trimmed_groups(groups, max_length):
     return trimmed_groups
 
 
-# TODO Check if this logic is correct
 def get_intrinsic_value_averages(solution_quality_map, multiplier):
     intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
     max_length = get_max_length(intrinsic_value_groups)
@@ -169,26 +168,118 @@ def get_adjusted_performance_profile(performance_profile, current_solution_quali
     return adjusted_performance_profile
 
 
-def get_dynamic_performance_profile(solution_quality_map, buckets):
-    solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+def get_dynamic_performance_profile_1(solution_quality_map, buckets):
+    solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'solution_qualities')
+    estimated_solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+
+    max_length = get_max_length(solution_quality_groups)
+
+    trimmed_solution_quality_groups = get_trimmed_groups(solution_quality_groups, max_length)
+    trimmed_estimated_solution_quality_groups = get_trimmed_groups(estimated_solution_quality_groups, max_length)
+
     class_count = len(buckets) - 1
 
-    performance_profile = {key: class_count * [0] for key in range(class_count)}
+    performance_profile = {key: {inner_key: class_count * [0] for inner_key in range(max_length)} for key in range(class_count)}
 
-    for solution_qualities in solution_quality_groups:
-        time_length = len(solution_qualities)
-        for t in range(time_length):
-            if t + 1 < time_length:
-                solution_quality_start = digitize(solution_qualities[t], buckets)
+    for i in range(len(trimmed_solution_quality_groups)):
+        solution_qualities = trimmed_solution_quality_groups[i]
+        estimated_solution_qualities = trimmed_estimated_solution_quality_groups[i]
+
+        for t in range(max_length):
+            if t + 1 < max_length:
+                estimated_solution_quality_start = digitize(estimated_solution_qualities[t], buckets)
                 solution_quality_target = digitize(solution_qualities[t + 1], buckets)
-                performance_profile[solution_quality_start][solution_quality_target] += 1
+
+                performance_profile[estimated_solution_quality_start][t][solution_quality_target] += 1
 
     fudge = np.nextafter(0, 1)
     for i in range(class_count):
-        length = sum(performance_profile[i]) + fudge
-        performance_profile[i] = [float(j) / length for j in performance_profile[i]]
+        for j in range(max_length):
+            length = sum(performance_profile[i][j]) + fudge
+            performance_profile[i][j] = [float(k) / length for k in performance_profile[i][j]]
 
     return performance_profile
+
+
+def get_dynamic_performance_profile_2(solution_quality_map, buckets):
+    solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'solution_qualities')
+    estimated_solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+
+    max_length = get_max_length(solution_quality_groups)
+
+    trimmed_solution_quality_groups = get_trimmed_groups(solution_quality_groups, max_length)
+    trimmed_estimated_solution_quality_groups = get_trimmed_groups(estimated_solution_quality_groups, max_length)
+
+    class_count = len(buckets) - 1
+
+    performance_profile = {key: {inner_key: class_count * [0] for inner_key in range(max_length)} for key in range(class_count)}
+
+    for i in range(len(trimmed_solution_quality_groups)):
+        solution_qualities = trimmed_solution_quality_groups[i]
+        estimated_solution_qualities = trimmed_estimated_solution_quality_groups[i]
+
+        for t in range(max_length):
+            estimated_solution_quality_start = digitize(estimated_solution_qualities[t], buckets)
+            solution_quality_target = digitize(solution_qualities[t], buckets)
+
+            performance_profile[estimated_solution_quality_start][t][solution_quality_target] += 1
+
+    fudge = np.nextafter(0, 1)
+    for i in range(class_count):
+        for j in range(max_length):
+            length = sum(performance_profile[i][j]) + fudge
+            performance_profile[i][j] = [float(k) / length for k in performance_profile[i][j]]
+
+    return performance_profile
+
+
+
+# def get_dynamic_performance_profile(solution_quality_map, buckets):
+#     solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+#     max_length = get_max_length(solution_quality_groups)
+#     trimmed_solution_quality_groups = get_trimmed_groups(solution_quality_groups, max_length)
+#
+#     class_count = len(buckets) - 1
+#
+#     performance_profile = {key: {inner_key: class_count * [0] for inner_key in range(max_length)} for key in range(class_count)}
+#
+#     for solution_qualities in trimmed_solution_quality_groups:
+#         for t in range(max_length):
+#             if t + 1 < max_length:
+#                 solution_quality_start = digitize(solution_qualities[t], buckets)
+#                 solution_quality_target = digitize(solution_qualities[t + 1], buckets)
+#
+#                 performance_profile[solution_quality_start][t][solution_quality_target] += 1
+#
+#     fudge = np.nextafter(0, 1)
+#     for i in range(class_count):
+#         for j in range(max_length):
+#             length = sum(performance_profile[i][j]) + fudge
+#             performance_profile[i][j] = [float(k) / length for k in performance_profile[i][j]]
+#
+#     return performance_profile
+
+
+# def get_dynamic_performance_profile(solution_quality_map, buckets):
+#     solution_quality_groups = get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+#     class_count = len(buckets) - 1
+#
+#     performance_profile = {key: class_count * [0] for key in range(class_count)}
+#
+#     for solution_qualities in solution_quality_groups:
+#         time_length = len(solution_qualities)
+#         for t in range(time_length):
+#             if t + 1 < time_length:
+#                 solution_quality_start = digitize(solution_qualities[t], buckets)
+#                 solution_quality_target = digitize(solution_qualities[t + 1], buckets)
+#                 performance_profile[solution_quality_start][solution_quality_target] += 1
+#
+#     fudge = np.nextafter(0, 1)
+#     for i in range(class_count):
+#         length = sum(performance_profile[i]) + fudge
+#         performance_profile[i] = [float(j) / length for j in performance_profile[i]]
+#
+#     return performance_profile
 
 
 def get_solution_quality_map(filename):
@@ -214,7 +305,7 @@ def get_instance_name(filename):
     return filename.split('/')[2].split('.')[0]
 
 
-def get_estimated_solution_qualities(x, a, b, c):
+def get_projected_solution_qualities(x, a, b, c):
     return a * np.arctan(x + b) + c
 
 
@@ -255,3 +346,33 @@ def get_solution_quality(solution_quality_class, bucket_size):
     length = 1 / bucket_size
     offset = length / 2
     return (solution_quality_class / bucket_size) + offset
+
+
+def get_optimal_fixed_allocation_time(performance_profile, bucket_size, intrinsic_value_multiplier, time_cost_multiplier):
+    best_step = None
+    best_value = float('-inf')
+
+    time_limit = len(performance_profile.keys())
+    steps = range(time_limit)
+    solution_quality_classes = range(bucket_size)
+
+    for step in steps:
+        estimated_value = 0
+
+        for solution_quality_class in solution_quality_classes:
+            adjusted_performance_profile = get_adjusted_performance_profile(performance_profile, solution_quality_class)
+
+            probability = adjusted_performance_profile[step][solution_quality_class]
+
+            solution_quality = get_solution_quality(solution_quality_class, bucket_size)
+            intrinsic_value = get_intrinsic_values(solution_quality, intrinsic_value_multiplier)
+            time_cost = get_time_costs(step, time_cost_multiplier)
+            comprehensive_value = get_comprehensive_values(intrinsic_value, time_cost)
+
+            estimated_value += probability * comprehensive_value
+
+        if estimated_value > best_value:
+            best_step = step
+            best_value = estimated_value
+
+    return best_step
