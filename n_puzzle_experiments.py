@@ -1,22 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import anytime_astar_solver
-import astar_solver
+import anytime_astar
+import astar
 import n_puzzle_problem
 from utils import Problem, get_standard_solution_qualities
 
 
 def display_performance_profile(problem):
     astar_statistics = {'expanded_nodes': 0}
-    optimal_cost = len(astar_solver.solve(problem, astar_statistics))
+    optimal_cost = len(astar.solve(problem, astar_statistics))
     print('A*')
     print('Optimal Cost:', optimal_cost)
     print('Expanded Nodes:', astar_statistics['expanded_nodes'])
     print()
 
     anytime_astar_statistics = {'time': [], 'costs': [], 'expanded_nodes': 0, 'max_open_list_size': -1, 'max_closed_set_size': -1}
-    anytime_astar_solver.solve(problem, anytime_astar_statistics, weight=5)
+    anytime_astar.solve(problem, anytime_astar_statistics, weight=5)
     print('Anytime A*')
     print('Costs:', anytime_astar_statistics['costs'])
     print('Expanded Nodes:', anytime_astar_statistics['expanded_nodes'])

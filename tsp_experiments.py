@@ -10,6 +10,8 @@ import tsp
 import tsp_solver
 import utils
 import tsp_problem
+import computation
+import performance_profile
 
 TIME_COST_MULTIPLIER = 0.5
 INTRINSIC_VALUE_MULTIPLIER = 100
@@ -24,101 +26,10 @@ BUCKET_SIZE = len(BUCKETS) - 1
 TOUR_SIZE = 50
 
 
-def get_optimal_values(state, step, performance_profile_1, performance_profile_2):
-    solution_quality_classes = range(BUCKET_SIZE)
-    value = 0
-
-    estimated_solution_quality_class = utils.digitize(state, BUCKETS)
-
-    best_action = ''
-
-    while True:
-        delta = 0
-
-        stop_value = 0
-        for solution_quality_class in solution_quality_classes:
-            current_solution_quality = utils.get_solution_quality(solution_quality_class, BUCKET_SIZE)
-            current_intrinsic_value = utils.get_intrinsic_values(current_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-            current_time_cost = utils.get_time_costs(step, TIME_COST_MULTIPLIER)
-            current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
-
-            stop_value += performance_profile_2[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
-
-        continue_value = 0
-        for solution_quality_class in solution_quality_classes:
-            current_solution_quality = utils.get_solution_quality(solution_quality_class, BUCKET_SIZE)
-            current_intrinsic_value = utils.get_intrinsic_values(current_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-            current_time_cost = utils.get_time_costs(step, TIME_COST_MULTIPLIER)
-            current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
-
-            continue_value += performance_profile_1[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
-
-        new_value = max(stop_value, continue_value)
-
-        delta = max(delta, abs(new_value - value))
-        value = new_value
-
-        if stop_value >= continue_value:
-            best_action = 'stop'
-
-        if stop_value < continue_value:
-            best_action = 'continue'
-
-        if delta < 0.001:
-            return best_action
-
-
-def get_mevc(estimated_solution_quality, step, performance_profile_1, performance_profile_2):
-    solution_quality_classes = range(BUCKET_SIZE)
-
-    current_estimated_solution_quality_class = utils.digitize(estimated_solution_quality, BUCKETS)
-
-    expected_current_comprehensive_value = 0
-    for solution_quality_class in solution_quality_classes:
-        current_solution_quality = utils.get_solution_quality(solution_quality_class, BUCKET_SIZE)
-        current_intrinsic_value = utils.get_intrinsic_values(current_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-        current_time_cost = utils.get_time_costs(step, TIME_COST_MULTIPLIER)
-        current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
-
-        expected_current_comprehensive_value += performance_profile_2[current_estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
-
-    expected_next_comprehensive_value = 0
-    for solution_quality_class in solution_quality_classes:
-        next_solution_quality = utils.get_solution_quality(solution_quality_class, BUCKET_SIZE)
-        next_intrinsic_value = utils.get_intrinsic_values(next_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-        next_time_cost = utils.get_time_costs(step + 1, TIME_COST_MULTIPLIER)
-        next_comprehensive_value = utils.get_comprehensive_values(next_intrinsic_value, next_time_cost)
-
-        expected_next_comprehensive_value += performance_profile_1[current_estimated_solution_quality_class][step][solution_quality_class] * next_comprehensive_value
-
-    return expected_next_comprehensive_value - expected_current_comprehensive_value
-
-
-# def get_mevc(solution_quality, step, performance_profile):
-#     current_solution_quality_class = utils.digitize(solution_quality, BUCKETS)
-#     current_solution_quality = utils.get_solution_quality(current_solution_quality_class, BUCKET_SIZE)
-#     current_intrinsic_value = utils.get_intrinsic_values(current_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-#     current_time_cost = utils.get_time_costs(step, TIME_COST_MULTIPLIER)
-#     current_comprehensive_value = utils.get_comprehensive_values(current_intrinsic_value, current_time_cost)
-#
-#     solution_quality_classes = range(BUCKET_SIZE)
-#     expected_next_comprehensive_value = 0
-#
-#     for next_solution_quality_class in solution_quality_classes:
-#         next_solution_quality = utils.get_solution_quality(next_solution_quality_class, BUCKET_SIZE)
-#         next_intrinsic_value = utils.get_intrinsic_values(next_solution_quality, INTRINSIC_VALUE_MULTIPLIER)
-#         next_time_cost = utils.get_time_costs(step + 1, TIME_COST_MULTIPLIER)
-#         next_comprehensive_value = utils.get_comprehensive_values(next_intrinsic_value, next_time_cost)
-#
-#         expected_next_comprehensive_value += performance_profile[current_solution_quality_class][step][next_solution_quality_class] * next_comprehensive_value
-#
-#     return expected_next_comprehensive_value - current_comprehensive_value
-
-
 def save_performance_profiles(results_filename, directory):
     solution_quality_map = utils.get_solution_quality_map(results_filename)
-    performance_profile_1 = utils.get_dynamic_performance_profile_1(solution_quality_map, BUCKETS)
-    performance_profile_2 = utils.get_dynamic_performance_profile_2(solution_quality_map, BUCKETS)
+    performance_profile_1 = performance_profile.get_dynamic_performance_profile_1(solution_quality_map, BUCKETS)
+    performance_profile_2 = performance_profile.get_dynamic_performance_profile_2(solution_quality_map, BUCKETS)
     intrinsic_value_averages = utils.get_intrinsic_value_averages(solution_quality_map, INTRINSIC_VALUE_MULTIPLIER)
 
     nonmyopic_losses = []
@@ -162,8 +73,8 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
     plt.annotate("$U_I(q) = %dq$" % INTRINSIC_VALUE_MULTIPLIER, xy=(0, 0), xytext=(10, 105), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate("$U(q, t) = U_C(t) - U_I(q)$", xy=(0, 0), xytext=(10, 95), va='bottom', xycoords='axes fraction', textcoords='offset points')
 
-    intrinsic_values = utils.get_intrinsic_values(solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
-    estimated_intrinsic_values = utils.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+    intrinsic_values = computation.get_intrinsic_values(solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+    estimated_intrinsic_values = computation.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
 
     time_limit = len(solution_qualities)
     steps = range(time_limit)
@@ -172,10 +83,10 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
     plt.scatter(steps, estimated_intrinsic_values, color='darkorange', zorder=3, label='Estimated Intrinsic Values')
     plt.plot(steps, intrinsic_value_averages[:time_limit], color='b', label='Expected Performance Profile')
 
-    time_costs = utils.get_time_costs(steps, TIME_COST_MULTIPLIER)
+    time_costs = computation.get_time_costs(steps, TIME_COST_MULTIPLIER)
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
 
-    comprehensive_values = utils.get_comprehensive_values(intrinsic_values, time_costs)
+    comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
 
     optimal_stopping_point = utils.get_optimal_stopping_point(comprehensive_values)
@@ -188,16 +99,15 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
             myopic_best_time = step
             break
 
-        mevc = get_mevc(estimated_solution_qualities[step], step, performance_profile_1, performance_profile_2)
+        mevc = computation.get_mevc(estimated_solution_qualities[step], step, performance_profile_1, performance_profile_2, BUCKETS, BUCKET_SIZE, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER)
 
         if mevc <= 0:
             myopic_best_time = step
             break
 
-
     nonmyopic_best_time = 0
     for step in steps:
-        action = get_optimal_values(estimated_solution_qualities[step], step, performance_profile_1, performance_profile_2)
+        action = computation.get_optimal_values(estimated_solution_qualities[step], step, performance_profile_1, performance_profile_2, BUCKETS, BUCKET_SIZE, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER)
 
         if action is 'stop':
             nonmyopic_best_time = step
@@ -206,7 +116,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
     plt.scatter([myopic_best_time], comprehensive_values[myopic_best_time], color='y', zorder=4, label='Myopic Stopping Point')
     plt.annotate("%0.2f - Best Value - Myopic Monitoring" % comprehensive_values[myopic_best_time], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
 
-    average_comprehensive_values = intrinsic_value_averages - utils.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
+    average_comprehensive_values = intrinsic_value_averages - computation.get_time_costs(range(len(intrinsic_value_averages)), TIME_COST_MULTIPLIER)
     fixed_best_time = utils.get_optimal_stopping_point(average_comprehensive_values)
     offset_fixed_best_time = fixed_best_time if fixed_best_time < time_limit else time_limit - 1
     plt.scatter([offset_fixed_best_time], comprehensive_values[offset_fixed_best_time], color='c', zorder=4, label='Fixed Stopping Point')
@@ -221,8 +131,8 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
             parameters, _ = curve_fit(utils.get_projected_solution_qualities, steps[start:sample_limit], estimated_solution_qualities[start:sample_limit])
 
             projected_solution_qualities = utils.get_projected_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
-            projected_intrinsic_values = utils.get_intrinsic_values(projected_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
-            projected_comprehensive_values = utils.get_comprehensive_values(projected_intrinsic_values, time_costs)
+            projected_intrinsic_values = computation.get_intrinsic_values(projected_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+            projected_comprehensive_values = computation.get_comprehensive_values(projected_intrinsic_values, time_costs)
             projected_best_time = utils.get_optimal_stopping_point(projected_comprehensive_values)
 
             projected_intrinsic_value_groups.append(projected_intrinsic_values)
