@@ -221,3 +221,7 @@ def get_optimal_fixed_allocation_time(performance_profile, bucket_size, intrinsi
 def get_column(lists, index):
     array = np.array(lists)
     return array[:, index]
+
+
+def get_percent_error(true_value, approximate_value):
+    return np.absolute(true_value - approximate_value) / true_value * 100

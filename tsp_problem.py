@@ -14,11 +14,11 @@ def get_cost(state, action, next_state):
     return tsp.get_distance(state[-1], next_state)
 
 
-def get_heuristic(start_city, cities):
-    # if is_goal(current_node.state, cities):
-    #     return 0
-    # TODO Should we add the start city to this?
-    subset = cities  # - set(current_node.state)
+def get_heuristic(current_node, cities):
+    if is_goal(current_node.state, cities):
+        return 0
+
+    subset = cities
 
     predecessors = {}
     key = {}
@@ -29,7 +29,7 @@ def get_heuristic(start_city, cities):
         key[state] = float('inf')
         queue[state] = float('inf')
 
-    current_city = start_city #current_node.state[-1]
+    current_city = current_node.state[-1]
     queue[current_city] = 0
 
     while queue:
@@ -101,7 +101,7 @@ def prim(start_city, cities):
         pred[v] = -1
         key[v] = 1000
 
-    key[cities[0]] = 0
+    key[start_city] = 0
 
     for v in graph:
         pqueue[v] = key[v]
@@ -121,5 +121,7 @@ def prim(start_city, cities):
         if second_city != -1:
             cost += tsp.get_distance(first_city, second_city)
 
+    print start_city
+    print cities
     return cost + 2 * get_nearest_city_distance(start_city, cities)
 
