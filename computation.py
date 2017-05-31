@@ -2,13 +2,16 @@ import numpy as np
 
 import utils
 
+STOP_SYMBOL = 'STOP'
+CONTINUE_SYMBOL = 'CONTINUE'
+
 
 def get_intrinsic_values(solution_qualities, configuration):
     return np.multiply(configuration, solution_qualities)
 
 
 def get_time_costs(time, multiplier):
-    return np.multiply(multiplier, time)
+    return np.exp(np.multiply(multiplier, time))
 
 
 def get_comprehensive_values(instrinsic_value, time_cost):
@@ -41,13 +44,11 @@ def get_mevc(estimated_solution_quality, step, performance_profile, performance_
     return expected_next_comprehensive_value - expected_current_comprehensive_value
 
 
-def get_optimal_values(current_solution_quality, step, performance_profile_1, performance_profile_2, configuration):
+def get_optimal_action(current_solution_quality, step, performance_profile, performance_map, configuration):
     solution_quality_classes = range(configuration['solution_quality_class_length'])
-    value = 0
-
     estimated_solution_quality_class = utils.digitize(current_solution_quality, configuration['solution_quality_classes'])
 
-    best_action = ''
+    value = 0
 
     while True:
         delta = 0
@@ -59,7 +60,7 @@ def get_optimal_values(current_solution_quality, step, performance_profile_1, pe
             current_time_cost = get_time_costs(step, configuration['time_cost_multiplier'])
             current_comprehensive_value = get_comprehensive_values(current_intrinsic_value, current_time_cost)
 
-            stop_value += performance_profile_2[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
+            stop_value += performance_map[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
 
         continue_value = 0
         for solution_quality_class in solution_quality_classes:
@@ -68,18 +69,11 @@ def get_optimal_values(current_solution_quality, step, performance_profile_1, pe
             current_time_cost = get_time_costs(step, configuration['time_cost_multiplier'])
             current_comprehensive_value = get_comprehensive_values(current_intrinsic_value, current_time_cost)
 
-            continue_value += performance_profile_1[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
+            continue_value += performance_profile[estimated_solution_quality_class][step][solution_quality_class] * current_comprehensive_value
 
         new_value = max(stop_value, continue_value)
-
         delta = max(delta, abs(new_value - value))
         value = new_value
 
-        if stop_value >= continue_value:
-            best_action = 'stop'
-
-        if stop_value < continue_value:
-            best_action = 'continue'
-
         if delta < 0.001:
-            return best_action
+            return STOP_SYMBOL if stop_value >= continue_value else CONTINUE_SYMBOL
