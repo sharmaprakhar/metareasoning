@@ -7,7 +7,7 @@ import numpy as np
 
 import computation
 import monitor
-import performance_profile
+import performance_profile as pp
 import tsp
 import tsp_problem
 import tsp_solver
@@ -18,7 +18,7 @@ INTRINSIC_VALUE_MULTIPLIER = 100
 SOLUTION_QUALITY_CLASSES = np.linspace(0, 1, 201)
 SOLUTION_QUALITY_CLASS_LENGTH = len(SOLUTION_QUALITY_CLASSES) - 1
 MONITOR_THRESHOLD = 10
-WINDOW = 10
+WINDOW = 20
 
 TOUR_SIZE = 50
 INITIAL_GRAY = 0.9
@@ -26,42 +26,40 @@ TERMINAL_GRAY = 0.3
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
-def save_performance_profiles(results_filename, directory):
-    solution_quality_map = utils.get_solution_quality_map(results_filename)
-    performance_profile_1 = performance_profile.get_dynamic_estimated_performance_profile(solution_quality_map, SOLUTION_QUALITY_CLASSES)
-    performance_profile_2 = performance_profile.get_dynamic_estimation_map(solution_quality_map, SOLUTION_QUALITY_CLASSES)
-    intrinsic_value_averages = utils.get_intrinsic_value_averages(solution_quality_map, INTRINSIC_VALUE_MULTIPLIER)
+def save_performance_profiles(instance_map, directory):
+    performance_profile = pp.get_estimated_dynamic_performance_profile(instance_map, SOLUTION_QUALITY_CLASSES)
+    performance_map = pp.get_estimated_dynamic_performance_map(instance_map, SOLUTION_QUALITY_CLASSES)
+    average_intrinsic_values = utils.get_average_intrinsic_values(instance_map, INTRINSIC_VALUE_MULTIPLIER)
 
-    online_losses = []
-    nonmyopic_losses = []
-    myopic_losses = []
-    fixed_time_losses = []
+    projected_monitoring_losses = []
+    nonmyopic_monitoring_losses = []
+    myopic_monitoring_losses = []
+    fixed_time_allocation_losses = []
 
-    for instance_filename in solution_quality_map:
-        print('Instance: %s' % instance_filename)
+    for instance in instance_map:
+        print('Experiment: %s' % instance)
 
-        solution_qualities = solution_quality_map[instance_filename]['solution_qualities']
-        estimated_solution_qualities = solution_quality_map[instance_filename]['estimated_solution_qualities']
+        solution_qualities = instance_map[instance]['solution_qualities']
+        estimated_solution_qualities = instance_map[instance]['estimated_solution_qualities']
 
-        plt, online_loss, myopic_loss, nonmyopic_loss, fixed_time_loss = get_performance_profile(solution_qualities, estimated_solution_qualities, intrinsic_value_averages, performance_profile_1, performance_profile_2)
+        plt, results = get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map)
 
-        instance_id = utils.get_instance_name(instance_filename)
-        plot_filename = directory + '/' + instance_id + '.png'
-        plt.savefig(plot_filename)
+        filename = directory + '/' + instance + '.png'
+        plt.savefig(filename)
         plt.close()
 
-        online_losses.append(online_loss)
-        nonmyopic_losses.append(nonmyopic_loss)
-        myopic_losses.append(myopic_loss)
-        fixed_time_losses.append(fixed_time_loss)
+        projected_monitoring_losses.append(results['projected_monitoring_loss'])
+        nonmyopic_monitoring_losses.append(results['nonmyopic_monitoring_loss'])
+        myopic_monitoring_losses.append(results['myopic_monitoring_loss'])
+        fixed_time_allocation_losses.append(results['fixed_time_allocation_loss'])
 
-    print('Online Monitoring Mean Error: %f%%' % np.average(online_losses))
-    print('Nonmyopic Monitoring Mean Error: %f%%' % np.average(nonmyopic_losses))
-    print('Myopic Monitoring Mean Error: %f%%' % np.average(myopic_losses))
-    print('Fixed Time Allocation Mean Error: %f%%' % np.average(fixed_time_losses))
+    print('Projected Monitoring Average Percent Error: %f%%' % np.average(projected_monitoring_losses))
+    print('Nonmyopic Monitoring Average Percent Error: %f%%' % np.average(nonmyopic_monitoring_losses))
+    print('Myopic Monitoring Average Percent Error: %f%%' % np.average(myopic_monitoring_losses))
+    print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
 
 
-def get_performance_profile(solution_qualities, estimated_solution_qualities, intrinsic_value_averages, performance_profile_1, performance_profile_2):
+def get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map):
     time_limit = len(solution_qualities)
     steps = range(time_limit)
 
@@ -73,14 +71,21 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
     projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_best_time(steps, estimated_solution_qualities, time_costs, MONITOR_THRESHOLD, time_limit, WINDOW, INTRINSIC_VALUE_MULTIPLIER)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_best_time(steps, estimated_solution_qualities, performance_profile_1, performance_profile_2, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER)
-    myopic_stopping_point = monitor.get_myopic_best_time(steps, estimated_solution_qualities, performance_profile_1, performance_profile_2, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER, time_limit)
-    fixed_stopping_point = monitor.get_fixed_stopping_point(intrinsic_value_averages, TIME_COST_MULTIPLIER, time_limit)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER)
+    myopic_stopping_point = monitor.get_myopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER, time_limit)
+    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, TIME_COST_MULTIPLIER, time_limit)
 
-    online_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[projected_stopping_point])
-    nonmyopic_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[nonmyopic_stopping_point])
-    myopic_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[myopic_stopping_point])
-    fixed_time_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[fixed_stopping_point])
+    projected_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[projected_stopping_point])
+    nonmyopic_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[nonmyopic_stopping_point])
+    myopic_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[myopic_stopping_point])
+    fixed_time_allocation_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[fixed_stopping_point])
+
+    results = {
+        'projected_monitoring_loss': projected_monitoring_loss,
+        'nonmyopic_monitoring_loss':  nonmyopic_monitoring_loss,
+        'myopic_monitoring_loss': myopic_monitoring_loss,
+        'fixed_time_allocation_loss': fixed_time_allocation_loss
+    }
 
     plt.figure(figsize=(12, 12))
     plt.title('Performance Profile')
@@ -97,7 +102,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
     plt.scatter(steps, intrinsic_values, color='g', zorder=3, label='Intrinsic Values')
     plt.scatter(steps, estimated_intrinsic_values, color='darkorange', zorder=3, label='Estimated Intrinsic Values')
 
-    plt.plot(steps, intrinsic_value_averages[:time_limit], color='b', label='Expected Performance Profile')
+    plt.plot(steps, average_intrinsic_values[:time_limit], color='b', label='Expected Performance Profile')
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
 
@@ -120,14 +125,14 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, in
         plt.plot(steps, projected_intrinsic_values, color=str(current_color))
         current_color -= decrement
 
-    plt.annotate('%0.2f%% - Error - Online Monitoring' % online_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
-    plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
-    plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_time_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
+    plt.annotate('%0.2f%% - Error - Online Monitoring' % projected_monitoring_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
+    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_monitoring_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
+    plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_monitoring_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
+    plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_time_allocation_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
     plt.legend(bbox_to_anchor=(0.0, 1.04, 1.0, 0.102), loc=3, ncol=3, mode='expand', borderaxespad=0.0)
 
-    return plt, online_loss, myopic_loss, nonmyopic_loss, fixed_time_loss
+    return plt, results
 
 
 def print_solution_quality_map(instances_filename, get_solution_qualities):
@@ -152,7 +157,8 @@ def print_solution_quality_map(instances_filename, get_solution_qualities):
 
 
 def main():
-    save_performance_profiles('results/results.json', 'plots')
+    instance_map = utils.get_instance_map('maps/50-tsp-naive-solution-quality-map.json')
+    save_performance_profiles(instance_map, 'plots')
 
 
 if __name__ == '__main__':

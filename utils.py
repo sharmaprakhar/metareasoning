@@ -132,14 +132,14 @@ def get_trimmed_lists(groups, max_length):
     return trimmed_groups
 
 
-def get_intrinsic_value_averages(solution_quality_map, multiplier):
+def get_average_intrinsic_values(solution_quality_map, multiplier):
     intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
     max_length = get_max_list_length(intrinsic_value_groups)
     trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
 
 
-def get_solution_quality_map(filename):
+def get_instance_map(filename):
     with open(filename) as f:
         return json.load(f)
 
@@ -152,10 +152,6 @@ def get_line_components(line):
     casted_optimal_distance = int(truncated_optimal_distance)
 
     return filename, casted_optimal_distance
-
-
-def get_instance_name(filename):
-    return filename.split('/')[2].split('.')[0]
 
 
 def get_projected_solution_qualities(x, a, b, c):
