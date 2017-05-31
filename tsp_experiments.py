@@ -96,7 +96,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
         'fixed_time_allocation_loss': fixed_time_allocation_loss
     }
 
-    plt.figure(figsize=(12, 12))
+    plt.figure(figsize=(16, 12), dpi=80)
     plt.title('Performance Profile')
     plt.xlabel('Time')
     plt.ylabel('Value')
@@ -117,13 +117,13 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
 
     plt.scatter([optimal_stopping_point], comprehensive_values[optimal_stopping_point], color='limegreen', zorder=4, label='Optimal Stopping Point')
     plt.scatter([projected_stopping_point], comprehensive_values[projected_stopping_point], color='m', zorder=4, label='Projected Stopping Point')
-    plt.scatter([nonmyopic_stopping_point], comprehensive_values[nonmyopic_stopping_point], color='pink', zorder=4, label='Nonmyopic Stopping Point')
+    plt.scatter([nonmyopic_stopping_point], comprehensive_values[nonmyopic_stopping_point], color='maroon', zorder=4, label='Nonmyopic Stopping Point')
     plt.scatter([myopic_stopping_point], comprehensive_values[myopic_stopping_point], color='y', zorder=4, label='Myopic Stopping Point')
     plt.scatter([fixed_stopping_point], comprehensive_values[fixed_stopping_point], color='c', zorder=4, label='Fixed Stopping Point')
 
     plt.annotate('%0.2f - Best Value' % comprehensive_values[optimal_stopping_point], xy=(0, 0), xytext=(10, 95), va='bottom', xycoords='axes fraction', textcoords='offset points', color='limegreen')
     plt.annotate('%0.2f - Best Value - Projected Monitoring' % comprehensive_values[projected_stopping_point], xy=(0, 0), xytext=(10, 85), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f - Best Value - Nonmyopic Monitoring' % comprehensive_values[nonmyopic_stopping_point], xy=(0, 0), xytext=(10, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
+    plt.annotate('%0.2f - Best Value - Nonmyopic Monitoring' % comprehensive_values[nonmyopic_stopping_point], xy=(0, 0), xytext=(10, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
     plt.annotate('%0.2f - Best Value - Myopic Monitoring' % comprehensive_values[myopic_stopping_point], xy=(0, 0), xytext=(10, 65), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
     plt.annotate('%0.2f - Best Value - Fixed Time Allocation' % comprehensive_values[fixed_stopping_point], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
@@ -135,7 +135,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
         current_color -= decrement
 
     plt.annotate('%0.2f%% - Error - Projected Monitoring' % projected_monitoring_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_monitoring_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
+    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_monitoring_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
     plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_monitoring_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
     plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_time_allocation_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
