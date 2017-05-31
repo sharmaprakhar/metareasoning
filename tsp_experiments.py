@@ -20,6 +20,15 @@ SOLUTION_QUALITY_CLASS_LENGTH = len(SOLUTION_QUALITY_CLASSES) - 1
 MONITOR_THRESHOLD = 10
 WINDOW = 20
 
+CONFIGURATION = {
+    'time_cost_multiplier': TIME_COST_MULTIPLIER,
+    'intrinsic_value_multiplier': INTRINSIC_VALUE_MULTIPLIER,
+    'solution_quality_classes': SOLUTION_QUALITY_CLASSES,
+    'solution_quality_class_length': SOLUTION_QUALITY_CLASS_LENGTH,
+    'monitor_threshold': MONITOR_THRESHOLD,
+    'window': WINDOW
+}
+
 TOUR_SIZE = 50
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0.3
@@ -70,10 +79,10 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
     estimated_intrinsic_values = computation.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
-    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_best_time(steps, estimated_solution_qualities, time_costs, MONITOR_THRESHOLD, time_limit, WINDOW, INTRINSIC_VALUE_MULTIPLIER)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER)
-    myopic_stopping_point = monitor.get_myopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, SOLUTION_QUALITY_CLASSES, SOLUTION_QUALITY_CLASS_LENGTH, INTRINSIC_VALUE_MULTIPLIER, TIME_COST_MULTIPLIER, time_limit)
-    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, TIME_COST_MULTIPLIER, time_limit)
+    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_best_time(steps, estimated_solution_qualities, time_costs, time_limit, CONFIGURATION)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, CONFIGURATION)
+    myopic_stopping_point = monitor.get_myopic_best_time(steps, estimated_solution_qualities, performance_profile, performance_map, time_limit, CONFIGURATION)
+    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIGURATION)
 
     projected_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[projected_stopping_point])
     nonmyopic_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[nonmyopic_stopping_point])
@@ -92,8 +101,8 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
     plt.xlabel('Time')
     plt.ylabel('Value')
 
-    plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 167), va='bottom', xycoords='axes fraction', textcoords='offset points')
-    plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_LENGTH, xy=(0, 0), xytext=(10, 157), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 165), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_LENGTH, xy=(0, 0), xytext=(10, 155), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$q(s) = Length_{MST} / Length(s)$', xy=(0, 0), xytext=(10, 145), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$U_C(t) = %.2ft$' % TIME_COST_MULTIPLIER, xy=(0, 0), xytext=(10, 135), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$U_I(q) = %dq$' % INTRINSIC_VALUE_MULTIPLIER, xy=(0, 0), xytext=(10, 125), va='bottom', xycoords='axes fraction', textcoords='offset points')
@@ -107,16 +116,16 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
 
     plt.scatter([optimal_stopping_point], comprehensive_values[optimal_stopping_point], color='limegreen', zorder=4, label='Optimal Stopping Point')
+    plt.scatter([projected_stopping_point], comprehensive_values[projected_stopping_point], color='m', zorder=4, label='Projected Stopping Point')
     plt.scatter([nonmyopic_stopping_point], comprehensive_values[nonmyopic_stopping_point], color='pink', zorder=4, label='Nonmyopic Stopping Point')
     plt.scatter([myopic_stopping_point], comprehensive_values[myopic_stopping_point], color='y', zorder=4, label='Myopic Stopping Point')
     plt.scatter([fixed_stopping_point], comprehensive_values[fixed_stopping_point], color='c', zorder=4, label='Fixed Stopping Point')
-    plt.scatter([projected_stopping_point], comprehensive_values[projected_stopping_point], color='m', zorder=4, label='Online Stopping Point')
 
     plt.annotate('%0.2f - Best Value' % comprehensive_values[optimal_stopping_point], xy=(0, 0), xytext=(10, 95), va='bottom', xycoords='axes fraction', textcoords='offset points', color='limegreen')
+    plt.annotate('%0.2f - Best Value - Projected Monitoring' % comprehensive_values[projected_stopping_point], xy=(0, 0), xytext=(10, 85), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
     plt.annotate('%0.2f - Best Value - Nonmyopic Monitoring' % comprehensive_values[nonmyopic_stopping_point], xy=(0, 0), xytext=(10, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
     plt.annotate('%0.2f - Best Value - Myopic Monitoring' % comprehensive_values[myopic_stopping_point], xy=(0, 0), xytext=(10, 65), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
     plt.annotate('%0.2f - Best Value - Fixed Time Allocation' % comprehensive_values[fixed_stopping_point], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
-    plt.annotate('%0.2f - Best Value - Online Monitoring' % comprehensive_values[projected_stopping_point], xy=(0, 0), xytext=(10, 85), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
 
     decrement = DIFFERENCE / len(projected_intrinsic_value_groups)
     current_color = INITIAL_GRAY
@@ -125,7 +134,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
         plt.plot(steps, projected_intrinsic_values, color=str(current_color))
         current_color -= decrement
 
-    plt.annotate('%0.2f%% - Error - Online Monitoring' % projected_monitoring_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
+    plt.annotate('%0.2f%% - Error - Projected Monitoring' % projected_monitoring_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
     plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_monitoring_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='pink')
     plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_monitoring_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
     plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_time_allocation_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')

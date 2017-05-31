@@ -5,9 +5,9 @@ import numpy as np
 import utils
 
 
-def get_estimated_dynamic_performance_profile(solution_quality_map, buckets):
-    solution_quality_groups = utils.get_solution_quality_groups(solution_quality_map, 'solution_qualities')
-    estimated_solution_quality_groups = utils.get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+def get_estimated_dynamic_performance_profile(instance_map, buckets):
+    solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'solution_qualities')
+    estimated_solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'estimated_solution_qualities')
 
     max_length = utils.get_max_list_length(solution_quality_groups)
 
@@ -38,9 +38,9 @@ def get_estimated_dynamic_performance_profile(solution_quality_map, buckets):
     return performance_profile
 
 
-def get_estimated_dynamic_performance_map(solution_quality_map, buckets):
-    solution_quality_groups = utils.get_solution_quality_groups(solution_quality_map, 'solution_qualities')
-    estimated_solution_quality_groups = utils.get_solution_quality_groups(solution_quality_map, 'estimated_solution_qualities')
+def get_estimated_dynamic_performance_map(instance_map, buckets):
+    solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'solution_qualities')
+    estimated_solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'estimated_solution_qualities')
 
     max_length = utils.get_max_list_length(solution_quality_groups)
 

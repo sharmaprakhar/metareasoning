@@ -65,17 +65,6 @@ def get_graph(cities):
     return graph
 
 
-def popmin(pqueue):
-    lowest = 1000
-    keylowest = None
-    for key in pqueue:
-        if pqueue[key] < lowest:
-            lowest = pqueue[key]
-            keylowest = key
-    del pqueue[keylowest]
-    return keylowest
-
-
 def get_nearest_city_distance(start_city, cities):
     nearest_distance = float('inf')
 
@@ -107,7 +96,7 @@ def prim(start_city, cities):
         pqueue[v] = key[v]
 
     while pqueue:
-        u = popmin(pqueue)
+        u = pop(pqueue)
 
         for v in graph[u]:
             if v in pqueue and graph[u][v] < key[v]:

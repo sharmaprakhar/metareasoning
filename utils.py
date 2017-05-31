@@ -181,36 +181,6 @@ def get_solution_quality(solution_quality_class, bucket_size):
     return (solution_quality_class / bucket_size) + offset
 
 
-def get_optimal_fixed_allocation_time(performance_profile, bucket_size, intrinsic_value_multiplier, time_cost_multiplier):
-    best_step = None
-    best_value = float('-inf')
-
-    time_limit = len(performance_profile.keys())
-    steps = range(time_limit)
-    solution_quality_classes = range(bucket_size)
-
-    for step in steps:
-        estimated_value = 0
-
-        for solution_quality_class in solution_quality_classes:
-            adjusted_performance_profile = performance_profile.get_adjusted_performance_profile(performance_profile, solution_quality_class)
-
-            probability = adjusted_performance_profile[step][solution_quality_class]
-
-            solution_quality = get_solution_quality(solution_quality_class, bucket_size)
-            intrinsic_value = computation.get_intrinsic_values(solution_quality, intrinsic_value_multiplier)
-            time_cost = computation.get_time_costs(step, time_cost_multiplier)
-            comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
-
-            estimated_value += probability * comprehensive_value
-
-        if estimated_value > best_value:
-            best_step = step
-            best_value = estimated_value
-
-    return best_step
-
-
 def get_column(lists, index):
     array = np.array(lists)
     return array[:, index]
