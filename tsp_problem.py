@@ -121,7 +121,5 @@ def prim(start_city, cities):
         if second_city != -1:
             cost += tsp.get_distance(first_city, second_city)
 
-    print start_city
-    print cities
     return cost + 2 * get_nearest_city_distance(start_city, cities)
 

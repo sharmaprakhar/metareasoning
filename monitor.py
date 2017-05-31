@@ -1,6 +1,17 @@
+from scipy.optimize import curve_fit
+
 import computation
 import utils
-from scipy.optimize import curve_fit
+
+
+def get_optimal_stopping_point(comprehensive_values):
+    return list(comprehensive_values).index(max(comprehensive_values))
+
+
+def get_fixed_stopping_point(intrinsic_value_averages, time_cost_multiplier, time_limit):
+    average_comprehensive_values = intrinsic_value_averages - computation.get_time_costs(range(len(intrinsic_value_averages)), time_cost_multiplier)
+    fixed_best_time = get_optimal_stopping_point(average_comprehensive_values)
+    return fixed_best_time if fixed_best_time < time_limit else time_limit - 1
 
 
 def get_nonmyopic_best_time(steps, solution_qualities, performance_profile_1, performance_profile_2, solution_quality_classes, solution_quality_class_length, intrinsic_value_multiplier, time_cost_multiplier):
@@ -35,7 +46,7 @@ def get_projected_best_time(steps, solution_qualities, time_costs, monitor_thres
             projected_solution_qualities = utils.get_projected_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
             projected_intrinsic_values = computation.get_intrinsic_values(projected_solution_qualities, intrinsic_value_multiplier)
             projected_comprehensive_values = computation.get_comprehensive_values(projected_intrinsic_values, time_costs)
-            projected_best_time = utils.get_optimal_stopping_point(projected_comprehensive_values)
+            projected_best_time = get_optimal_stopping_point(projected_comprehensive_values)
 
             projected_intrinsic_value_groups.append(projected_intrinsic_values)
 

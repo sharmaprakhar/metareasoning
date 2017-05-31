@@ -3,6 +3,7 @@ from __future__ import division
 import json
 
 import numpy as np
+
 import computation
 
 
@@ -159,10 +160,6 @@ def get_instance_name(filename):
 
 def get_projected_solution_qualities(x, a, b, c):
     return a * np.arctan(x + b) + c
-
-
-def get_optimal_stopping_point(comprehensive_values):
-    return list(comprehensive_values).index(max(comprehensive_values))
 
 
 def digitize(solution_quality, buckets):
