@@ -16,9 +16,25 @@ def get_fixed_stopping_point(average_intrinsic_values, time_limit, configuration
     return fixed_stopping_point if fixed_stopping_point < time_limit else time_limit - 1
 
 
-def get_nonmyopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, configuration):
+# def get_nonmyopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, configuration):
+#     for step in steps:
+#         action = computation.get_optimal_action(solution_qualities[step], step, performance_profile, performance_map, configuration)
+#
+#         if action is computation.STOP_SYMBOL:
+#             return step
+
+
+def get_nonmyopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, time_limit, configuration):
+    values = computation.get_optimal_values(steps, performance_profile, performance_map, configuration)
+
     for step in steps:
-        action = computation.get_optimal_action(solution_qualities[step], step, performance_profile, performance_map, configuration)
+        if step + 1 == time_limit:
+            return step
+
+        print values[solution_qualities[step]][step]
+
+        action = computation.get_optimal_action(solution_qualities[step], step, values, performance_profile, performance_map, configuration)
+
 
         if action is computation.STOP_SYMBOL:
             return step

@@ -15,7 +15,7 @@ import utils
 
 TIME_COST_MULTIPLIER = 0.1
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASSES = np.linspace(0, 1, 21)
+SOLUTION_QUALITY_CLASSES = np.linspace(0, 1, 6)
 SOLUTION_QUALITY_CLASS_LENGTH = len(SOLUTION_QUALITY_CLASSES) - 1
 MONITOR_THRESHOLD = 10
 WINDOW = None
@@ -45,7 +45,11 @@ def save_performance_profiles(instance_map, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    for instance in instance_map:
+    new_map = {
+        'instance-32': instance_map['instance-32']
+    }
+
+    for instance in new_map:
         print('Experiment: %s' % instance)
 
         solution_qualities = instance_map[instance]['solution_qualities']
@@ -80,7 +84,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
     projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_solution_qualities, steps, time_limit, CONFIGURATION)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_solution_qualities, steps, performance_profile, performance_map, CONFIGURATION)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_solution_qualities, steps, performance_profile, performance_map, time_limit, CONFIGURATION)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_solution_qualities, steps, performance_profile, performance_map, time_limit, CONFIGURATION)
     fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIGURATION)
 
