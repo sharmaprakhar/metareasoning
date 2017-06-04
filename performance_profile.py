@@ -5,7 +5,7 @@ import numpy as np
 import utils
 
 
-def get_estimated_dynamic_performance_profile(instance_map, buckets):
+def get_estimated_dynamic_performance_profile(instance_map, buckets, feature_target=False):
     solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'solution_qualities')
     estimated_solution_quality_groups = utils.get_solution_quality_groups(instance_map, 'estimated_solution_qualities')
 
@@ -25,7 +25,7 @@ def get_estimated_dynamic_performance_profile(instance_map, buckets):
         for t in range(max_length):
             if t + 1 < max_length:
                 estimated_solution_quality_start = utils.digitize(estimated_solution_qualities[t], buckets)
-                solution_quality_target = utils.digitize(solution_qualities[t + 1], buckets)
+                solution_quality_target = utils.digitize(estimated_solution_qualities[t + 1], buckets) if feature_target else utils.digitize(solution_qualities[t + 1], buckets)
 
                 performance_profile[estimated_solution_quality_start][t][solution_quality_target] += 1
 

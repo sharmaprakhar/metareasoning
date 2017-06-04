@@ -37,6 +37,7 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 def save_performance_profiles(instance_map, directory):
     performance_profile = pp.get_estimated_dynamic_performance_profile(instance_map, SOLUTION_QUALITY_CLASSES)
+    performance_profile_with_feature_target = pp.get_estimated_dynamic_performance_profile(instance_map, SOLUTION_QUALITY_CLASSES, feature_target=True)
     performance_map = pp.get_estimated_dynamic_performance_map(instance_map, SOLUTION_QUALITY_CLASSES)
     average_intrinsic_values = utils.get_average_intrinsic_values(instance_map, INTRINSIC_VALUE_MULTIPLIER)
 
@@ -45,17 +46,13 @@ def save_performance_profiles(instance_map, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    new_map = {
-        'instance-32': instance_map['instance-32']
-    }
-
-    for instance in new_map:
+    for instance in instance_map:
         print('Experiment: %s' % instance)
 
         solution_qualities = instance_map[instance]['solution_qualities']
         estimated_solution_qualities = instance_map[instance]['estimated_solution_qualities']
 
-        plt, results = get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map)
+        plt, results = get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map, performance_profile_with_feature_target)
 
         filename = directory + '/' + instance + '.png'
         plt.savefig(filename)
@@ -72,7 +69,7 @@ def save_performance_profiles(instance_map, directory):
     print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
 
 
-def get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map):
+def get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map, performance_profile_with_feature_target):
     time_limit = len(solution_qualities)
     steps = range(time_limit)
 
@@ -84,8 +81,7 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
     projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_solution_qualities, steps, time_limit, CONFIGURATION)
-    # TODO Put estimation back in
-    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, time_limit, CONFIGURATION)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_solution_qualities, steps, performance_profile_with_feature_target, performance_map, time_limit, CONFIGURATION)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_solution_qualities, steps, performance_profile, performance_map, time_limit, CONFIGURATION)
     fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIGURATION)
 
