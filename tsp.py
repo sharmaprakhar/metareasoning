@@ -1,9 +1,10 @@
 import random
 import re
 import sys
-import utils
 
 import numpy as np
+
+import utils
 
 FILE_TEMPLATE = '''NAME : %s
 COMMENT : %s

@@ -1,5 +1,7 @@
 import copy
+
 import numpy as np
+
 import utils
 
 STOP_SYMBOL = 'STOP'
@@ -10,8 +12,8 @@ def get_intrinsic_values(qualities, multiplier):
     return np.multiply(multiplier, qualities)
 
 
-def get_time_costs(time, multiplier):
-    return np.exp(np.multiply(multiplier, time))
+def get_time_costs(steps, multiplier):
+    return np.exp(np.multiply(multiplier, steps))
 
 
 def get_comprehensive_values(instrinsic_values, time_costs):
@@ -40,29 +42,29 @@ def get_mevc(estimated_quality, step, profile_1, profile_3, config):
 
 
 def get_optimal_values(steps, profile_2, profile_3, config, epsilon=0.01):
-    classes = range(config['solution_quality_class_count'])
     limit = len(steps)
 
-    values = {origin_class: limit * [0] for origin_class in classes}
+    values = {origin_class: limit * [0] for origin_class in config['solution_quality_classes']}
 
     while True:
         new_values = copy.deepcopy(values)
 
         delta = 0
 
-        for origin_class in classes:
+        for origin_class in config['solution_quality_classes']:
             for step in steps:
                 if step + 1 < limit:
                     stop_value = 0
                     continue_value = 0
 
-                    for target_class in classes:
-                        quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
-                        intrinsic_value = get_intrinsic_values(quality, config['intrinsic_value_multiplier'])
+                    for target_class in config['solution_quality_classes']:
+                        target_quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
+
+                        intrinsic_value = get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
                         time_cost = get_time_costs(step, config['time_cost_multiplier'])
                         comprehensive_value = get_comprehensive_values(intrinsic_value, time_cost)
-                        stop_value += profile_3[origin_class][step][target_class] * comprehensive_value
 
+                        stop_value += profile_3[origin_class][step][target_class] * comprehensive_value
                         continue_value += profile_2[origin_class][step][target_class] * values[target_class][step + 1]
 
                     new_values[origin_class][step] = max(stop_value, continue_value)
@@ -75,19 +77,19 @@ def get_optimal_values(steps, profile_2, profile_3, config, epsilon=0.01):
 
 
 def get_optimal_action(quality, step, values, profile_2, profile_3, config):
-    classes = config['solution_quality_classes']
     origin_class = utils.digitize(quality, config['solution_quality_class_bounds'])
 
     stop_value = 0
     continue_value = 0
 
-    for target_class in classes:
+    for target_class in config['solution_quality_classes']:
         target_quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
-        target_intrinsic_value = get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
-        target_time_cost = get_time_costs(step, config['time_cost_multiplier'])
-        target_comprehensive_value = get_comprehensive_values(target_intrinsic_value, target_time_cost)
 
-        stop_value += profile_3[origin_class][step][target_class] * target_comprehensive_value
+        intrinsic_value = get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
+        time_cost = get_time_costs(step, config['time_cost_multiplier'])
+        comprehensive_value = get_comprehensive_values(intrinsic_value, time_cost)
+
+        stop_value += profile_3[origin_class][step][target_class] * comprehensive_value
         continue_value += profile_2[origin_class][step][target_class] * values[target_class][step + 1]
 
     return STOP_SYMBOL if stop_value >= continue_value else CONTINUE_SYMBOL

@@ -1,4 +1,5 @@
 import numpy as np
+
 import utils
 
 TYPE_1 = lambda qualities, estimated_qualities, step: (estimated_qualities[step], qualities[step + 1])

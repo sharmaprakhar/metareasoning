@@ -1,7 +1,7 @@
-from scipy.optimize import curve_fit
-import computation
-import utils
 import numpy as np
+from scipy.optimize import curve_fit
+
+import computation
 
 
 def get_optimal_stopping_point(comprehensive_values):
@@ -16,11 +16,11 @@ def get_fixed_stopping_point(intrinsic_values, limit, config):
     return stopping_point if stopping_point < limit else limit - 1
 
 
-def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, time_limit, config):
+def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, limit, config):
     values = computation.get_optimal_values(steps, profile_2, profile_3, config)
 
     for step in steps:
-        if step + 1 == time_limit:
+        if step + 1 == limit:
             return step
 
         action = computation.get_optimal_action(qualities[step], step, values, profile_2, profile_3, config)
@@ -29,9 +29,9 @@ def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, time_li
             return step
 
 
-def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, time_limit, config):
+def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, limit, config):
     for step in steps:
-        if step + 1 == time_limit:
+        if step + 1 == limit:
             return step
 
         mevc = computation.get_mevc(qualities[step], step, profile_1, profile_3, config)
@@ -40,22 +40,21 @@ def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, time_limit
             return step
 
 
-def get_projected_stopping_point(qualities, steps, time_limit, config):
+def get_projected_stopping_point(qualities, steps, limit, config):
     intrinsic_value_groups = []
     stopping_point = 0
 
-    time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
-
     model = lambda x, a, b, c: a * np.arctan(x + b) + c
 
-    for end in range(config['monitor_threshold'], time_limit):
+    for end in range(config['monitor_threshold'], limit):
         try:
             start = 0 if config['window'] is None else end - config['window']
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
-            projected_qualities = model(steps, params[0], params[1], params[2])
+            projections = model(steps, params[0], params[1], params[2])
 
-            intrinsic_values = computation.get_intrinsic_values(projected_qualities, config['intrinsic_value_multiplier'])
+            intrinsic_values = computation.get_intrinsic_values(projections, config['intrinsic_value_multiplier'])
+            time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
             comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
             stopping_point = get_optimal_stopping_point(comprehensive_values)
 

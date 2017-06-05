@@ -156,12 +156,12 @@ def get_line_components(line):
     return filename, casted_optimal_distance
 
 
-def get_percent_error(true_value, approximate_value):
-    return np.absolute(true_value - approximate_value) / true_value * 100
+def get_percent_error(accepted_value, approximate_value):
+    return np.absolute(accepted_value - approximate_value) / accepted_value * 100
 
 
-def get_average_intrinsic_values(solution_quality_map, multiplier):
-    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
+def get_average_intrinsic_values(instances, multiplier):
+    intrinsic_value_groups = get_intrinsic_value_groups(instances, multiplier, 'solution_qualities')
     max_length = get_max_list_length(intrinsic_value_groups)
     trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]

@@ -1,4 +1,4 @@
-from utils import Node, get_children_nodes, get_solution, get_key, OpenList
+from utils import Node, OpenList, get_children_nodes, get_key, get_solution
 
 
 def solve(problem, statistics, weight):
