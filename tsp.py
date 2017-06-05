@@ -1,5 +1,7 @@
 import random
 import re
+import sys
+import utils
 
 import numpy as np
 
@@ -49,6 +51,67 @@ def get_tour_distance(tour):
         distance += get_distance(tour[i], tour[i + 1])
 
     return distance
+
+
+def get_graph(cities):
+    graph = {}
+
+    for start_city in cities:
+        graph[start_city] = {}
+
+        for end_city in cities:
+            graph[start_city][end_city] = get_distance(start_city, end_city)
+
+    return graph
+
+
+def get_nearest_city_distance(start_city, cities):
+    nearest_distance = float('inf')
+
+    for city in cities:
+        if start_city == city:
+            continue
+
+        current_city_distance = get_distance(start_city, city)
+        if current_city_distance < nearest_distance:
+            nearest_distance = current_city_distance
+
+    return nearest_distance
+
+
+def get_mst_distance(start_city, cities):
+    subset = cities - set([start_city])
+    graph = get_graph(subset)
+
+    predecessors = {}
+    key = {}
+    queue = {}
+
+    for vertex in graph:
+        predecessors[vertex] = -1
+        key[vertex] = sys.maxsize
+
+    key[start_city] = 0
+
+    for vertex in graph:
+        queue[vertex] = key[vertex]
+
+    while queue:
+        city = utils.pop(queue)
+
+        for vertex in graph[city]:
+            if vertex in queue and graph[city][vertex] < key[vertex]:
+                predecessors[vertex] = city
+                key[vertex] = graph[city][vertex]
+                queue[vertex] = graph[city][vertex]
+
+    cost = 0
+    for parent_city in predecessors:
+        child_city = predecessors[parent_city]
+        if child_city != -1:
+            cost += get_distance(parent_city, child_city)
+
+    return cost + 2 * get_nearest_city_distance(start_city, cities)
 
 
 def get_instance(size, start_position=0, end_position=1, minimum_distance=0.001):

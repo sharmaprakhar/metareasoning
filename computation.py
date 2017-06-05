@@ -19,12 +19,12 @@ def get_comprehensive_values(instrinsic_value, time_cost):
 
 
 def get_mevc(estimated_solution_quality, step, performance_profile, performance_map, configuration):
-    solution_quality_classes = range(configuration['solution_quality_class_length'])
-    current_estimated_solution_quality_class = utils.digitize(estimated_solution_quality, configuration['solution_quality_classes'])
+    solution_quality_classes = range(configuration['solution_quality_class_count'])
+    current_estimated_solution_quality_class = utils.digitize(estimated_solution_quality, configuration['solution_quality_class_bounds'])
 
     expected_current_comprehensive_value = 0
     for solution_quality_class in solution_quality_classes:
-        current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_length'])
+        current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_count'])
         current_intrinsic_value = get_intrinsic_values(current_solution_quality, configuration['intrinsic_value_multiplier'])
         current_time_cost = get_time_costs(step, configuration['time_cost_multiplier'])
         current_comprehensive_value = get_comprehensive_values(current_intrinsic_value, current_time_cost)
@@ -33,7 +33,7 @@ def get_mevc(estimated_solution_quality, step, performance_profile, performance_
 
     expected_next_comprehensive_value = 0
     for solution_quality_class in solution_quality_classes:
-        next_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_length'])
+        next_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_count'])
         next_intrinsic_value = get_intrinsic_values(next_solution_quality, configuration['intrinsic_value_multiplier'])
         next_time_cost = get_time_costs(step + 1, configuration['time_cost_multiplier'])
         next_comprehensive_value = get_comprehensive_values(next_intrinsic_value, next_time_cost)
@@ -44,7 +44,7 @@ def get_mevc(estimated_solution_quality, step, performance_profile, performance_
 
 
 def get_optimal_values(steps, performance_profile, performance_map, configuration, epsilon=0.01):
-    solution_quality_classes = range(configuration['solution_quality_class_length'])
+    solution_quality_classes = range(configuration['solution_quality_class_count'])
     time_limit = len(steps)
 
     values = {q: time_limit * [0] for q in solution_quality_classes}
@@ -61,7 +61,7 @@ def get_optimal_values(steps, performance_profile, performance_map, configuratio
                 continue_value = 0
 
                 for solution_quality_class in solution_quality_classes:
-                    current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_length'])
+                    current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_count'])
                     current_intrinsic_value = get_intrinsic_values(current_solution_quality, configuration['intrinsic_value_multiplier'])
                     current_time_cost = get_time_costs(t, configuration['time_cost_multiplier'])
                     current_comprehensive_value = get_comprehensive_values(current_intrinsic_value, current_time_cost)
@@ -81,13 +81,13 @@ def get_optimal_values(steps, performance_profile, performance_map, configuratio
 
 
 def get_optimal_action(solution_quality, step, values, performance_profile, performance_map, configuration):
-    current_solution_quality_class = utils.digitize(solution_quality, configuration['solution_quality_classes'])
-    solution_quality_classes = range(configuration['solution_quality_class_length'])
+    current_solution_quality_class = utils.digitize(solution_quality, configuration['solution_quality_class_bounds'])
+    solution_quality_classes = range(configuration['solution_quality_class_count'])
 
     stop_value = 0
     continue_value = 0
     for solution_quality_class in solution_quality_classes:
-        current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_length'])
+        current_solution_quality = utils.get_solution_quality(solution_quality_class, configuration['solution_quality_class_count'])
         current_intrinsic_value = get_intrinsic_values(current_solution_quality, configuration['intrinsic_value_multiplier'])
         current_time_cost = get_time_costs(step, configuration['time_cost_multiplier'])
         current_comprehensive_value = get_comprehensive_values(current_intrinsic_value, current_time_cost)

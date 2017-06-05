@@ -1,5 +1,3 @@
-from __future__ import division
-
 import json
 
 import matplotlib.pyplot as plt
@@ -7,7 +5,7 @@ import numpy as np
 
 import computation
 import monitor
-import performance_profile as pp
+import performance
 import tsp
 import tsp_problem
 import tsp_solver
@@ -15,16 +13,18 @@ import utils
 
 TIME_COST_MULTIPLIER = 0.1
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASSES = np.linspace(0, 1, 21)
-SOLUTION_QUALITY_CLASS_LENGTH = len(SOLUTION_QUALITY_CLASSES) - 1
+SOLUTION_QUALITY_CLASS_COUNT = 15
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
+SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
 WINDOW = None
 
-CONFIGURATION = {
+CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
     'intrinsic_value_multiplier': INTRINSIC_VALUE_MULTIPLIER,
     'solution_quality_classes': SOLUTION_QUALITY_CLASSES,
-    'solution_quality_class_length': SOLUTION_QUALITY_CLASS_LENGTH,
+    'solution_quality_class_bounds': SOLUTION_QUALITY_CLASS_BOUNDS,
+    'solution_quality_class_count': SOLUTION_QUALITY_CLASS_COUNT,
     'monitor_threshold': MONITOR_THRESHOLD,
     'window': WINDOW
 }
@@ -35,24 +35,24 @@ TERMINAL_GRAY = 0.3
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
-def save_performance_profiles(instance_map, directory):
-    performance_profile = pp.get_estimated_dynamic_performance_profile(instance_map, SOLUTION_QUALITY_CLASSES)
-    performance_profile_with_feature_target = pp.get_estimated_dynamic_performance_profile(instance_map, SOLUTION_QUALITY_CLASSES, feature_target=True)
-    performance_map = pp.get_estimated_dynamic_performance_map(instance_map, SOLUTION_QUALITY_CLASSES)
-    average_intrinsic_values = utils.get_average_intrinsic_values(instance_map, INTRINSIC_VALUE_MULTIPLIER)
+def run_experiments(instances, directory):
+    profile_1 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_1)
+    profile_2 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_2)
+    profile_3 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_3)
+    average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
     projected_monitoring_losses = []
     nonmyopic_monitoring_losses = []
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    for instance in instance_map:
+    for instance in instances:
         print('Experiment: %s' % instance)
 
-        solution_qualities = instance_map[instance]['solution_qualities']
-        estimated_solution_qualities = instance_map[instance]['estimated_solution_qualities']
+        qualities = instances[instance]['solution_qualities']
+        estimated_qualities = instances[instance]['estimated_solution_qualities']
 
-        plt, results = get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map, performance_profile_with_feature_target)
+        plt, results = run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3)
 
         filename = directory + '/' + instance + '.png'
         plt.savefig(filename)
@@ -69,32 +69,33 @@ def save_performance_profiles(instance_map, directory):
     print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
 
 
-def get_performance_profile(solution_qualities, estimated_solution_qualities, average_intrinsic_values, performance_profile, performance_map, performance_profile_with_feature_target):
-    time_limit = len(solution_qualities)
+def run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3):
+    time_limit = len(qualities)
     steps = range(time_limit)
 
-    intrinsic_values = computation.get_intrinsic_values(solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+    intrinsic_values = computation.get_intrinsic_values(qualities, INTRINSIC_VALUE_MULTIPLIER)
     time_costs = computation.get_time_costs(steps, TIME_COST_MULTIPLIER)
     comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
 
-    estimated_intrinsic_values = computation.get_intrinsic_values(estimated_solution_qualities, INTRINSIC_VALUE_MULTIPLIER)
+    estimated_intrinsic_values = computation.get_intrinsic_values(estimated_qualities, INTRINSIC_VALUE_MULTIPLIER)
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
-    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_solution_qualities, steps, time_limit, CONFIGURATION)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_solution_qualities, steps, performance_profile_with_feature_target, performance_map, time_limit, CONFIGURATION)
-    myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_solution_qualities, steps, performance_profile, performance_map, time_limit, CONFIGURATION)
-    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIGURATION)
+    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
+    myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
+    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIG)
 
-    projected_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[projected_stopping_point])
-    nonmyopic_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[nonmyopic_stopping_point])
-    myopic_monitoring_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[myopic_stopping_point])
-    fixed_time_allocation_loss = utils.get_percent_error(comprehensive_values[optimal_stopping_point], comprehensive_values[fixed_stopping_point])
+    optimal_value = comprehensive_values[optimal_stopping_point]
+    projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[projected_stopping_point])
+    nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+    myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
+    fixed_loss = utils.get_percent_error(optimal_value, comprehensive_values[fixed_stopping_point])
 
     results = {
-        'projected_monitoring_loss': projected_monitoring_loss,
-        'nonmyopic_monitoring_loss':  nonmyopic_monitoring_loss,
-        'myopic_monitoring_loss': myopic_monitoring_loss,
-        'fixed_time_allocation_loss': fixed_time_allocation_loss
+        'projected_monitoring_loss': projected_loss,
+        'nonmyopic_monitoring_loss':  nonmyopic_loss,
+        'myopic_monitoring_loss': myopic_loss,
+        'fixed_time_allocation_loss': fixed_loss
     }
 
     plt.figure(figsize=(16, 12), dpi=80)
@@ -102,10 +103,10 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
     plt.xlabel('Time')
     plt.ylabel('Value')
 
-    plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 165), va='bottom', xycoords='axes fraction', textcoords='offset points')
-    plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_LENGTH, xy=(0, 0), xytext=(10, 155), va='bottom', xycoords='axes fraction', textcoords='offset points')
-    plt.annotate('$q(s) = Length_{MST} / Length(s)$', xy=(0, 0), xytext=(10, 145), va='bottom', xycoords='axes fraction', textcoords='offset points')
-    plt.annotate('$U_C(t) = %.2ft$' % TIME_COST_MULTIPLIER, xy=(0, 0), xytext=(10, 135), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 172), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_COUNT, xy=(0, 0), xytext=(10, 162), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('$q(s) = Length_{MST} / Length(s)$', xy=(0, 0), xytext=(10, 152), va='bottom', xycoords='axes fraction', textcoords='offset points')
+    plt.annotate('$U_C(t) = -e^{%.2ft}$' % TIME_COST_MULTIPLIER, xy=(0, 0), xytext=(10, 135), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$U_I(q) = %dq$' % INTRINSIC_VALUE_MULTIPLIER, xy=(0, 0), xytext=(10, 125), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$U(q, t) = U_C(t) - U_I(q)$', xy=(0, 0), xytext=(10, 115), va='bottom', xycoords='axes fraction', textcoords='offset points')
 
@@ -135,10 +136,10 @@ def get_performance_profile(solution_qualities, estimated_solution_qualities, av
         plt.plot(steps, projected_intrinsic_values, color=str(current_color))
         current_color -= decrement
 
-    plt.annotate('%0.2f%% - Error - Projected Monitoring' % projected_monitoring_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_monitoring_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
-    plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_monitoring_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
-    plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_time_allocation_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
+    plt.annotate('%0.2f%% - Error - Projected Monitoring' % projected_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
+    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
+    plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
+    plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
     plt.legend(bbox_to_anchor=(0.0, 1.04, 1.0, 0.102), loc=3, ncol=3, mode='expand', borderaxespad=0.0)
 
@@ -156,7 +157,7 @@ def print_solution_quality_map(instances_filename, get_solution_qualities):
             statistics = {'time': [], 'distances': []}
             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
-            estimated_optimal_distance = tsp_problem.prim(start_city, list(cities)[1:])
+            estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
 
             solution_quality_map[instance_filename] = {
                 'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
@@ -168,7 +169,7 @@ def print_solution_quality_map(instances_filename, get_solution_qualities):
 
 def main():
     instance_map = utils.get_instance_map('maps/50-tsp-naive-solution-quality-map.json')
-    save_performance_profiles(instance_map, 'plots')
+    run_experiments(instance_map, 'plots')
 
 
 if __name__ == '__main__':

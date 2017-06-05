@@ -1,5 +1,4 @@
 from scipy.optimize import curve_fit
-
 import computation
 import utils
 
@@ -8,61 +7,60 @@ def get_optimal_stopping_point(comprehensive_values):
     return list(comprehensive_values).index(max(comprehensive_values))
 
 
-def get_fixed_stopping_point(average_intrinsic_values, time_limit, configuration):
-    steps = range(len(average_intrinsic_values))
-    time_costs = computation.get_time_costs(steps, configuration['time_cost_multiplier'])
-    average_comprehensive_values = average_intrinsic_values - time_costs
-    fixed_stopping_point = get_optimal_stopping_point(average_comprehensive_values)
-    return fixed_stopping_point if fixed_stopping_point < time_limit else time_limit - 1
+def get_fixed_stopping_point(intrinsic_values, limit, config):
+    steps = range(len(intrinsic_values))
+    time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
+    comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
+    stopping_point = get_optimal_stopping_point(comprehensive_values)
+    return stopping_point if stopping_point < limit else limit - 1
 
 
-def get_nonmyopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, time_limit, configuration):
-    values = computation.get_optimal_values(steps, performance_profile, performance_map, configuration)
-    
+def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, time_limit, config):
+    values = computation.get_optimal_values(steps, profile_2, profile_3, config)
+
     for step in steps:
         if step + 1 == time_limit:
             return step
-        
-        action = computation.get_optimal_action(solution_qualities[step], step, values, performance_profile, performance_map, configuration)
+
+        action = computation.get_optimal_action(qualities[step], step, values, profile_2, profile_3, config)
 
         if action is computation.STOP_SYMBOL:
             return step
 
 
-def get_myopic_stopping_point(solution_qualities, steps, performance_profile, performance_map, time_limit, configuration):
+def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, time_limit, config):
     for step in steps:
         if step + 1 == time_limit:
             return step
 
-        mevc = computation.get_mevc(solution_qualities[step], step, performance_profile, performance_map, configuration)
+        mevc = computation.get_mevc(qualities[step], step, profile_1, profile_3, config)
 
         if mevc <= 0:
             return step
 
 
-def get_projected_stopping_point(solution_qualities, steps, time_limit, configuration):
-    projected_intrinsic_value_groups = []
-    projected_best_time = 0
+def get_projected_stopping_point(qualities, steps, time_limit, config):
+    intrinsic_value_groups = []
+    stopping_point = 0
 
-    time_costs = computation.get_time_costs(steps, configuration['time_cost_multiplier'])
+    time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
 
-    for sample_limit in range(configuration['monitor_threshold'], time_limit):
+    for end in range(config['monitor_threshold'], time_limit):
         try:
-            start = 0 if configuration['window'] is None else sample_limit - configuration['window']
+            start = 0 if config['window'] is None else end - config['window']
 
-            parameters, _ = curve_fit(utils.get_projected_solution_qualities, steps[start:sample_limit], solution_qualities[start:sample_limit])
+            parameters, _ = curve_fit(utils.get_projected_solution_qualities, steps[start:end], qualities[start:end])
 
-            projected_solution_qualities = utils.get_projected_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
-            projected_intrinsic_values = computation.get_intrinsic_values(projected_solution_qualities, configuration['intrinsic_value_multiplier'])
-            projected_comprehensive_values = computation.get_comprehensive_values(projected_intrinsic_values, time_costs)
-            projected_best_time = get_optimal_stopping_point(projected_comprehensive_values)
+            projected_qualities = utils.get_projected_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
+            intrinsic_values = computation.get_intrinsic_values(projected_qualities, config['intrinsic_value_multiplier'])
+            comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
+            stopping_point = get_optimal_stopping_point(comprehensive_values)
 
-            projected_intrinsic_value_groups.append(projected_intrinsic_values)
+            intrinsic_value_groups.append(intrinsic_values)
 
-            if projected_best_time < sample_limit - 1:
-                projected_best_time = sample_limit - 1
-                break
-        except:
+            if stopping_point < end - 1:
+                return end - 1, intrinsic_value_groups
+        except RuntimeError:
             pass
 
-    return projected_best_time, projected_intrinsic_value_groups
+    return stopping_point, intrinsic_value_groups
