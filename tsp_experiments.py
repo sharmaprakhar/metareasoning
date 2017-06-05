@@ -201,7 +201,7 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instance_map('maps/50-tsp-naive-solution-quality-map.json')
+    instances = utils.get_instances('maps/50-tsp-naive-solution-quality-map.json')
     run_experiments(instances, 'plots')
 
 

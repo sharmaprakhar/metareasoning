@@ -4,7 +4,8 @@ import numpy as np
 import anytime_astar
 import astar
 import n_puzzle_problem
-from utils import Problem, get_standard_solution_qualities
+import performance
+import utils
 
 
 def display_performance_profile(problem):
@@ -23,7 +24,7 @@ def display_performance_profile(problem):
     print('Max Open List Size:', anytime_astar_statistics['max_open_list_size'])
     print('Max Closed Set Size:', anytime_astar_statistics['max_closed_set_size'])
 
-    solution_qualities = get_standard_solution_qualities(anytime_astar_statistics['costs'], optimal_cost)
+    solution_qualities = performance.get_standard_solution_qualities(anytime_astar_statistics['costs'], optimal_cost)
 
     plt.title('Performance Profile')
     plt.xlabel('Time')
@@ -47,7 +48,7 @@ def main():
                         [0, 10, 5, 12],
                         [4, 13, 14, 15]])
 
-    problem = Problem(
+    problem = utils.Problem(
         puzzle,
         n_puzzle_problem.is_goal,
         n_puzzle_problem.get_successors,

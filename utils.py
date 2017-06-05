@@ -1,5 +1,3 @@
-from __future__ import division
-
 import json
 
 import numpy as np
@@ -98,22 +96,6 @@ def pop(queue):
     return minimum_key
 
 
-def get_standard_solution_qualities(costs, optimal_cost):
-    return [1 - ((cost - optimal_cost) / optimal_cost) for cost in costs]
-
-
-def get_naive_solution_qualities(costs, optimal_cost):
-    return [optimal_cost / cost for cost in costs]
-
-
-def get_solution_quality_groups(solution_quality_map, key):
-    return [solution_qualities[key] for solution_qualities in solution_quality_map.values()]
-
-
-def get_intrinsic_value_groups(solution_quality_map, multiplier, key):
-    return [computation.get_intrinsic_values(solution_qualities[key], multiplier) for solution_qualities in solution_quality_map.values()]
-
-
 def get_max_list_length(lists):
     return max(len(inner_list) for inner_list in lists)
 
@@ -132,16 +114,36 @@ def get_trimmed_lists(groups, max_length):
     return trimmed_groups
 
 
-def get_average_intrinsic_values(solution_quality_map, multiplier):
-    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
-    max_length = get_max_list_length(intrinsic_value_groups)
-    trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
-    return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
+def get_groups(instances, key):
+    return [instance[key] for instance in instances.values()]
 
 
-def get_instance_map(filename):
-    with open(filename) as f:
-        return json.load(f)
+def get_intrinsic_value_groups(instances, multiplier, key):
+    return [computation.get_intrinsic_values(instance[key], multiplier) for instance in instances.values()]
+
+
+def get_instances(filename):
+    with open(filename) as file:
+        return json.load(file)
+
+
+def get_column(lists, index):
+    array = np.array(lists)
+    return array[:, index]
+
+
+def digitize(item, bins):
+    for i, _ in enumerate(bins):
+        if i + 1 < len(bins):
+            if bins[i] <= item < bins[i + 1]:
+                return i
+    return len(bins) - 1
+
+
+def get_bin_value(bin, bin_size):
+    length = 1 / bin_size
+    offset = length / 2
+    return (bin / bin_size) + offset
 
 
 def get_line_components(line):
@@ -154,37 +156,12 @@ def get_line_components(line):
     return filename, casted_optimal_distance
 
 
-def get_projected_solution_qualities(x, a, b, c):
-    return a * np.arctan(x + b) + c
-
-
-def digitize(solution_quality, buckets):
-    bucket_id = len(buckets) - 1
-
-    for i in range(len(buckets)):
-        if i + 1 == len(buckets):
-            break
-
-        range_start = buckets[i]
-        range_end = buckets[i + 1]
-
-        if range_start <= solution_quality < range_end:
-            bucket_id = i
-            break
-
-    return bucket_id
-
-
-def get_solution_quality(solution_quality_class, bucket_size):
-    length = 1 / bucket_size
-    offset = length / 2
-    return (solution_quality_class / bucket_size) + offset
-
-
-def get_column(lists, index):
-    array = np.array(lists)
-    return array[:, index]
-
-
 def get_percent_error(true_value, approximate_value):
     return np.absolute(true_value - approximate_value) / true_value * 100
+
+
+def get_average_intrinsic_values(solution_quality_map, multiplier):
+    intrinsic_value_groups = get_intrinsic_value_groups(solution_quality_map, multiplier, 'solution_qualities')
+    max_length = get_max_list_length(intrinsic_value_groups)
+    trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
+    return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]

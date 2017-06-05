@@ -6,6 +6,14 @@ TYPE_2 = lambda qualities, estimated_qualities, step: (estimated_qualities[step]
 TYPE_3 = lambda qualities, estimated_qualities, step: (estimated_qualities[step], qualities[step])
 
 
+def get_standard_solution_qualities(costs, optimal_cost):
+    return [1 - ((cost - optimal_cost) / optimal_cost) for cost in costs]
+
+
+def get_naive_solution_qualities(costs, optimal_cost):
+    return [optimal_cost / cost for cost in costs]
+
+
 def get_initial_performance_profile(classes, count, steps):
     return {key: {inner_key: count * [0] for inner_key in steps} for key in classes}
 
@@ -26,8 +34,8 @@ def get_performance_profile(instances, config, selector):
     bounds = config['solution_quality_class_bounds']
     count = config['solution_quality_class_count']
 
-    groups = utils.get_solution_quality_groups(instances, 'solution_qualities')
-    estimated_groups = utils.get_solution_quality_groups(instances, 'estimated_solution_qualities')
+    groups = utils.get_groups(instances, 'solution_qualities')
+    estimated_groups = utils.get_groups(instances, 'estimated_solution_qualities')
 
     length = utils.get_max_list_length(groups)
     steps = range(length)

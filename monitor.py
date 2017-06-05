@@ -1,6 +1,7 @@
 from scipy.optimize import curve_fit
 import computation
 import utils
+import numpy as np
 
 
 def get_optimal_stopping_point(comprehensive_values):
@@ -45,13 +46,15 @@ def get_projected_stopping_point(qualities, steps, time_limit, config):
 
     time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
 
+    model = lambda x, a, b, c: a * np.arctan(x + b) + c
+
     for end in range(config['monitor_threshold'], time_limit):
         try:
             start = 0 if config['window'] is None else end - config['window']
 
-            parameters, _ = curve_fit(utils.get_projected_solution_qualities, steps[start:end], qualities[start:end])
+            params, _ = curve_fit(model, steps[start:end], qualities[start:end])
+            projected_qualities = model(steps, params[0], params[1], params[2])
 
-            projected_qualities = utils.get_projected_solution_qualities(steps, parameters[0], parameters[1], parameters[2])
             intrinsic_values = computation.get_intrinsic_values(projected_qualities, config['intrinsic_value_multiplier'])
             comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
             stopping_point = get_optimal_stopping_point(comprehensive_values)
