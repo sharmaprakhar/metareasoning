@@ -1,13 +1,14 @@
 import json
 
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+import pylab as pl
 import numpy as np
 
 import computation
 import monitor
 import performance
 import tsp
-import tsp_problem
 import tsp_solver
 import utils
 
@@ -167,9 +168,41 @@ def print_solution_quality_map(instances_filename, get_solution_qualities):
     print(json.dumps(solution_quality_map))
 
 
+def get_statistics(instances):
+    optimal_stopping_points = []
+
+    for instance in instances:
+        qualities = instances[instance]['solution_qualities']
+
+        limit = len(qualities)
+        steps = range(limit)
+
+        intrinsic_values = computation.get_intrinsic_values(qualities, INTRINSIC_VALUE_MULTIPLIER)
+        time_costs = computation.get_time_costs(steps, TIME_COST_MULTIPLIER)
+        comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
+
+        stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
+        optimal_stopping_points.append(stopping_point)
+
+    sorted_stopping_points = sorted(optimal_stopping_points)
+    fit = stats.norm.pdf(sorted_stopping_points, np.mean(sorted_stopping_points), np.std(sorted_stopping_points))
+    pl.plot(sorted_stopping_points, fit, '-o')
+    pl.hist(sorted_stopping_points, normed=True)
+    pl.show()
+
+    return {
+        'mean': np.mean(optimal_stopping_points),
+        'std': np.std(optimal_stopping_points),
+        'variance': np.var(optimal_stopping_points),
+        'median': np.median(optimal_stopping_points),
+        'min': np.amin(optimal_stopping_points),
+        'max': np.amax(optimal_stopping_points)
+    }
+
+
 def main():
-    instance_map = utils.get_instance_map('maps/50-tsp-naive-solution-quality-map.json')
-    run_experiments(instance_map, 'plots')
+    instances = utils.get_instance_map('maps/50-tsp-naive-solution-quality-map.json')
+    run_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
