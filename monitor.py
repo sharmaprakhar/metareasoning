@@ -62,7 +62,7 @@ def get_projected_stopping_point(qualities, steps, limit, config):
 
             if stopping_point < end - 1:
                 return end - 1, intrinsic_value_groups
-        except RuntimeError:
+        except (RuntimeError, TypeError):
             pass
 
     return stopping_point, intrinsic_value_groups
