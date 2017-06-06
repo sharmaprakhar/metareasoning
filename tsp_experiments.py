@@ -12,13 +12,13 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 20
-INTRINSIC_VALUE_MULTIPLIER = 10000
-SOLUTION_QUALITY_CLASS_COUNT = 21
+TIME_COST_MULTIPLIER = 0.1
+INTRINSIC_VALUE_MULTIPLIER = 200
+SOLUTION_QUALITY_CLASS_COUNT = 20
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
-WINDOW = 25
+WINDOW = None
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -37,9 +37,10 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
 def run_experiments(instances, directory):
-    profile_1 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_1)
-    profile_2 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_2)
-    profile_3 = performance.get_performance_profile(instances, CONFIG, performance.TYPE_3)
+    profile_1 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_1)
+    profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
+    profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
+    profile_4 = performance.get_probabilistic_performance_profile(instances, CONFIG)
     average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
     projected_monitoring_losses = []
@@ -53,7 +54,7 @@ def run_experiments(instances, directory):
         qualities = instances[instance]['solution_qualities']
         estimated_qualities = instances[instance]['estimated_solution_qualities']
 
-        plt, results = run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3)
+        plt, results = run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, profile_4)
 
         filename = directory + '/' + instance + '.png'
         plt.savefig(filename)
@@ -70,7 +71,7 @@ def run_experiments(instances, directory):
     print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
 
 
-def run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3):
+def run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, profile_4):
     time_limit = len(qualities)
     steps = range(time_limit)
 
@@ -84,7 +85,29 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
-    fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIG)
+    # fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIG)
+
+    best_values = []
+
+    for step in steps:
+        expected_value = 0
+
+        for target_class in SOLUTION_QUALITY_CLASSES:
+            intrinsic_value = computation.get_intrinsic_values(target_class, INTRINSIC_VALUE_MULTIPLIER)
+            time_cost = computation.get_time_costs(step, TIME_COST_MULTIPLIER)
+            comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
+
+            import copy
+            new_profile = copy.deepcopy(profile_4)
+            new_profile[step][:target_class] = [0] * target_class
+            normalizer = sum(new_profile[step]) + np.nextafter(0, 1)
+            probabilities = [probability / normalizer for probability in new_profile[step]]
+
+            expected_value += probabilities[target_class] * comprehensive_value
+
+        best_values.append(expected_value)
+
+    fixed_stopping_point = monitor.get_optimal_stopping_point(best_values)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
     projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[projected_stopping_point])

@@ -13,8 +13,7 @@ def get_intrinsic_values(qualities, multiplier):
 
 
 def get_time_costs(steps, multiplier):
-    # return np.exp(np.multiply(multiplier, steps))
-    return np.multiply(multiplier, steps)
+    return np.exp(np.multiply(multiplier, steps))
 
 
 def get_comprehensive_values(instrinsic_values, time_costs):
