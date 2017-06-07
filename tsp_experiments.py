@@ -1,9 +1,9 @@
 import json
 
 import matplotlib.pyplot as plt
-import scipy.stats as stats
-import pylab as pl
 import numpy as np
+import pylab as pl
+import scipy.stats as stats
 
 import computation
 import monitor
@@ -14,7 +14,7 @@ import utils
 
 TIME_COST_MULTIPLIER = 0.1
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASS_COUNT = 20
+SOLUTION_QUALITY_CLASS_COUNT = 15
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
@@ -37,11 +37,12 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
 def run_experiments(instances, directory):
+    average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
+    
     profile_1 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_1)
     profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
     profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
     profile_4 = performance.get_probabilistic_performance_profile(instances, CONFIG)
-    average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
     projected_monitoring_losses = []
     nonmyopic_monitoring_losses = []
@@ -86,28 +87,7 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
     # fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIG)
-
-    best_values = []
-
-    for step in steps:
-        expected_value = 0
-
-        for target_class in SOLUTION_QUALITY_CLASSES:
-            intrinsic_value = computation.get_intrinsic_values(target_class, INTRINSIC_VALUE_MULTIPLIER)
-            time_cost = computation.get_time_costs(step, TIME_COST_MULTIPLIER)
-            comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
-
-            import copy
-            new_profile = copy.deepcopy(profile_4)
-            new_profile[step][:target_class] = [0] * target_class
-            normalizer = sum(new_profile[step]) + np.nextafter(0, 1)
-            probabilities = [probability / normalizer for probability in new_profile[step]]
-
-            expected_value += probabilities[target_class] * comprehensive_value
-
-        best_values.append(expected_value)
-
-    fixed_stopping_point = monitor.get_optimal_stopping_point(best_values)
+    fixed_stopping_point = monitor.get_fixed_stopping_point(steps, profile_4, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
     projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[projected_stopping_point])

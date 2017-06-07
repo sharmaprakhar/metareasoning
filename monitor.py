@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 from scipy.optimize import curve_fit
 
@@ -8,12 +10,36 @@ def get_optimal_stopping_point(comprehensive_values):
     return list(comprehensive_values).index(max(comprehensive_values))
 
 
-def get_fixed_stopping_point(intrinsic_values, limit, config):
-    steps = range(len(intrinsic_values))
-    time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
-    comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
-    stopping_point = get_optimal_stopping_point(comprehensive_values)
-    return stopping_point if stopping_point < limit else limit - 1
+# def get_fixed_stopping_point(intrinsic_values, limit, config):
+#     steps = range(len(intrinsic_values))
+#     time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
+#     comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
+#     stopping_point = get_optimal_stopping_point(comprehensive_values)
+#     return stopping_point if stopping_point < limit else limit - 1
+
+
+def get_fixed_stopping_point(steps, profile_4, config):
+    best_values = []
+    fudge = np.nextafter(0, 1)
+
+    for step in steps:
+        expected_value = 0
+
+        for target_class in config['solution_quality_classes']:
+            intrinsic_value = computation.get_intrinsic_values(target_class, config['intrinsic_value_multiplier'])
+            time_cost = computation.get_time_costs(step, config['time_cost_multiplier'])
+            comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
+
+            probabilities = list(profile_4[step])
+            probabilities[:target_class] = [0] * target_class
+            normalizer = sum(probabilities) + fudge
+            normalized_probabilities = [probability / normalizer for probability in probabilities]
+
+            expected_value += normalized_probabilities[target_class] * comprehensive_value
+
+        best_values.append(expected_value)
+
+    return get_optimal_stopping_point(best_values)
 
 
 def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, limit, config):
