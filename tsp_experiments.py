@@ -86,7 +86,6 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
-    # fixed_stopping_point = monitor.get_fixed_stopping_point(average_intrinsic_values, time_limit, CONFIG)
     fixed_stopping_point = monitor.get_fixed_stopping_point(steps, profile_4, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]

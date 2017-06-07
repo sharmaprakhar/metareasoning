@@ -5,6 +5,8 @@ from scipy.optimize import curve_fit
 
 import computation
 
+import utils
+
 
 def get_optimal_stopping_point(comprehensive_values):
     return list(comprehensive_values).index(max(comprehensive_values))
@@ -26,7 +28,8 @@ def get_fixed_stopping_point(steps, profile_4, config):
         expected_value = 0
 
         for target_class in config['solution_quality_classes']:
-            intrinsic_value = computation.get_intrinsic_values(target_class, config['intrinsic_value_multiplier'])
+            target_quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
+            intrinsic_value = computation.get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
             time_cost = computation.get_time_costs(step, config['time_cost_multiplier'])
             comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
 
