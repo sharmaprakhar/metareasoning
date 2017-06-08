@@ -12,13 +12,13 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = .1
+TIME_COST_MULTIPLIER = 0.1
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASS_COUNT = 10
+SOLUTION_QUALITY_CLASS_COUNT = 15
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
-WINDOW = 20
+WINDOW = None
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -37,19 +37,23 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
 def run_experiments(instances, directory):
-    average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
+    keys = list(instances.keys())
+    training_instances = {key: instances[key] for key in keys[:70]}
+    test_instances = {key: instances[key] for key in keys[30:]}
 
-    profile_1 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_1)
-    profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
-    profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
-    profile_4 = performance.get_probabilistic_performance_profile(instances, CONFIG)
+    average_intrinsic_values = utils.get_average_intrinsic_values(training_instances, INTRINSIC_VALUE_MULTIPLIER)
+
+    profile_1 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_1)
+    profile_2 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_2)
+    profile_3 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_3)
+    profile_4 = performance.get_probabilistic_performance_profile(training_instances, CONFIG)
 
     projected_monitoring_losses = []
     nonmyopic_monitoring_losses = []
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    for instance in instances:
+    for instance in test_instances:
         print('Experiment: %s' % instance)
 
         qualities = instances[instance]['solution_qualities']
@@ -215,7 +219,7 @@ def get_statistics(instances):
 def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
 
-    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json.old.4')
+    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
 
     # statistics = get_statistics(instances)
     # print(statistics)
