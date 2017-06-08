@@ -215,7 +215,7 @@ def get_statistics(instances):
 def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
 
-    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
+    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json.old.4')
 
     # statistics = get_statistics(instances)
     # print(statistics)

@@ -22,7 +22,6 @@ def get_optimal_stopping_point(comprehensive_values):
 
 def get_fixed_stopping_point(steps, profile_4, config):
     best_values = []
-    fudge = np.nextafter(0, 1)
 
     for step in steps:
         expected_value = 0
@@ -34,12 +33,7 @@ def get_fixed_stopping_point(steps, profile_4, config):
             time_cost = computation.get_time_costs(step, config['time_cost_multiplier'])
             comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
 
-            probabilities = list(profile_4[step])
-            # probabilities[:target_class] = [0] * target_class
-            normalizer = sum(probabilities) + fudge
-            normalized_probabilities = [probability / normalizer for probability in probabilities]
-
-            expected_value += normalized_probabilities[target_class] * comprehensive_value
+            expected_value += profile_4[step][target_class] * comprehensive_value
 
         best_values.append(expected_value)
 

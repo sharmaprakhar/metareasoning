@@ -21,9 +21,9 @@ COMMENT = 'No Comment'
 CITY_PATTERN = '\d+ (\d+) (\d+)'
 DELIMITER = '\n'
 
-COUNT = 50
-MINIMUM_SIZE = 30
-MAXIMUM_SIZE = 70
+COUNT = 100
+MINIMUM_SIZE = 40
+MAXIMUM_SIZE = 60
 
 
 def get_initial_random_tour(states, start_state):
@@ -130,7 +130,7 @@ def get_instance(size, start_position, end_position, minimum_distance):
     return cities
 
 
-def get_clustered_instance(size, start_position, end_position, minimum_distance, centroid_count, radius):
+def get_clustered_instance(size, start_position, end_position, minimum_distance, centroid_count, radius, centroid_step):
     choices = np.arange(start_position, end_position, minimum_distance)
     centroids = []
     normalizer = 0
@@ -148,7 +148,7 @@ def get_clustered_instance(size, start_position, end_position, minimum_distance,
     for centroid in centroids:
         centroid['weight'] /= normalizer
 
-    choices = np.arange(-radius, radius, minimum_distance)
+    choices = np.arange(-radius, radius, centroid_step)
     cities = set()
 
     while len(cities) < size:
@@ -214,8 +214,21 @@ def main():
             frequency[size] = 0
         frequency[size] += 1
 
-        # cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
-        cities = get_instance(size, 0, 2000, 1)
+
+        minimum_distance = random.randrange(1, 20)
+        centroid_count = random.randrange(5, 20)
+        radius = random.randrange(50, 400)
+        centroid_step = random.randrange(1, 20)
+        cities = get_clustered_instance(size, 0, 1000, minimum_distance, centroid_count, radius, centroid_step)
+
+        # plt.figure()
+        # plt.title('Map')
+        # plt.xlabel('X')
+        # plt.ylabel('Y')
+        # x, y = zip(*cities)
+        # plt.scatter(x, y)
+        # plt.show()
+        # cities = get_instance(size, 0, 2000, 1)
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
     print(frequency)
