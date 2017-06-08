@@ -214,7 +214,8 @@ def main():
             frequency[size] = 0
         frequency[size] += 1
 
-        cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
+        # cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
+        cities = get_instance(size, 0, 2000, 1)
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
         plt.figure()
