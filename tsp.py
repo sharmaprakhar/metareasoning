@@ -208,22 +208,22 @@ def main():
     frequency = {}
 
     for i in range(COUNT):
-        size = 50  # random.randrange(MINIMUM_SIZE, MAXIMUM_SIZE + 1)
+        size = random.randrange(MINIMUM_SIZE, MAXIMUM_SIZE + 1)
 
         if size not in frequency:
             frequency[size] = 0
         frequency[size] += 1
 
         cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
-        save_instance('instances/clustered-diverse-tsp/instance-%d.tsp' % i, COMMENT, cities)
+        save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
-        # plt.figure()
-        # plt.title('TSP')
-        # plt.xlabel('X')
-        # plt.ylabel('Y')
-        # x, y = zip(*cities)
-        # plt.scatter(x, y)
-        # plt.show()
+        plt.figure()
+        plt.title('TSP')
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        x, y = zip(*cities)
+        plt.scatter(x, y)
+        plt.show()
 
     print(frequency)
 
