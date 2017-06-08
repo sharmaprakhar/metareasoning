@@ -2,11 +2,10 @@ import random
 import re
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 import utils
-
-import matplotlib.pyplot as plt
 
 FILE_TEMPLATE = '''NAME : %s
 COMMENT : %s
