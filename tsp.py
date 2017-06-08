@@ -218,13 +218,13 @@ def main():
         cities = get_instance(size, 0, 2000, 1)
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
-        plt.figure()
-        plt.title('TSP')
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        x, y = zip(*cities)
-        plt.scatter(x, y)
-        plt.show()
+        # plt.figure()
+        # plt.title('TSP')
+        # plt.xlabel('X')
+        # plt.ylabel('Y')
+        # x, y = zip(*cities)
+        # plt.scatter(x, y)
+        # plt.show()
 
     print(frequency)
 
