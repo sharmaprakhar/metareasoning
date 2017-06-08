@@ -18,7 +18,7 @@ SOLUTION_QUALITY_CLASS_COUNT = 15
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
-WINDOW = None
+WINDOW = 20
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -132,7 +132,8 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     plt.annotate('%0.2f - Best Value - Myopic Monitoring' % comprehensive_values[myopic_stopping_point], xy=(0, 0), xytext=(10, 65), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
     plt.annotate('%0.2f - Best Value - Fixed Time Allocation' % comprehensive_values[fixed_stopping_point], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
-    decrement = DIFFERENCE / len(projected_intrinsic_value_groups)
+    fudge = np.nextafter(0, 1)
+    decrement = DIFFERENCE / (len(projected_intrinsic_value_groups) + fudge)
     current_color = INITIAL_GRAY
 
     for projected_intrinsic_values in projected_intrinsic_value_groups:
@@ -149,20 +150,22 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     return plt, results
 
 
-def print_solution_quality_map(instances_filename, get_solution_qualities):
+def print_solution_quality_map(instances_directory, index_name, get_solution_qualities):
     solution_quality_map = {}
 
-    with open(instances_filename) as f:
+    instances_directory_index = '%s/%s.csv' % (instances_directory, index_name)
+    with open(instances_directory_index) as f:
         for line in f.readlines():
-            instance_filename, optimal_distance = utils.get_line_components(line)
+            instance_name, optimal_distance = utils.get_line_components(line)
+            instance_path = '%s/%s.tsp' % (instances_directory, instance_name)
 
-            cities, start_city = tsp.load_instance(instance_filename)
+            cities, start_city = tsp.load_instance(instance_path)
             statistics = {'time': [], 'distances': []}
             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
             estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
 
-            solution_quality_map[instance_filename] = {
+            solution_quality_map[instance_name] = {
                 'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
                 'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
             }
@@ -203,8 +206,9 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('maps/50-tsp-naive-solution-quality-map.json')
+    instances = utils.get_instances('maps/diverse-tsp-naive-solution-quality-map.json')
     run_experiments(instances, 'plots')
+    # print_solution_quality_map('instances/clustered-diverse-tsp', 'instances', performance.get_naive_solution_qualities)
 
 
 if __name__ == '__main__':

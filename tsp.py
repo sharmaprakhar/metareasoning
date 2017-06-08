@@ -6,6 +6,8 @@ import numpy as np
 
 import utils
 
+import matplotlib.pyplot as plt
+
 FILE_TEMPLATE = '''NAME : %s
 COMMENT : %s
 TYPE : TSP
@@ -20,7 +22,9 @@ COMMENT = 'No Comment'
 CITY_PATTERN = '\d+ (\d+) (\d+)'
 DELIMITER = '\n'
 
-SIZE = 50
+COUNT = 50
+MINIMUM_SIZE = 45
+MAXIMUM_SIZE = 55
 
 
 def get_initial_random_tour(states, start_state):
@@ -115,7 +119,7 @@ def get_mst_distance(start_city, cities):
     return cost + 2 * get_nearest_city_distance(start_city, cities)
 
 
-def get_instance(size, start_position=0, end_position=1, minimum_distance=0.001):
+def get_instance(size, start_position, end_position, minimum_distance):
     choices = np.arange(start_position, end_position, minimum_distance)
 
     cities = set()
@@ -123,6 +127,47 @@ def get_instance(size, start_position=0, end_position=1, minimum_distance=0.001)
         x = round(random.choice(choices), 3)
         y = round(random.choice(choices), 3)
         cities.add((x, y))
+
+    return cities
+
+
+def get_clustered_instance(size, start_position, end_position, minimum_distance, centroid_count, radius):
+    choices = np.arange(start_position, end_position, minimum_distance)
+    centroids = []
+    normalizer = 0
+
+    for _ in range(centroid_count):
+        threshold = random.random()
+        normalizer += threshold
+
+        centroids.append({
+            'weight': threshold,
+            'x': round(random.choice(choices), 3),
+            'y': round(random.choice(choices), 3)
+        })
+
+    for centroid in centroids:
+        centroid['weight'] /= normalizer
+
+    choices = np.arange(-radius, radius, minimum_distance)
+    cities = set()
+
+    while len(cities) < size:
+        threshold = random.random()
+
+        selected_centroid = None
+        for centroid in centroids:
+            threshold -= centroid['weight']
+            selected_centroid = centroid
+
+            if threshold <= 0:
+                break
+
+        new_x = round(selected_centroid['x'] + random.choice(choices), 3)
+        new_y = round(selected_centroid['y'] + random.choice(choices), 3)
+        city = (new_x, new_y)
+
+        cities.add(city)
 
     return cities
 
@@ -160,14 +205,28 @@ def load_instance(filename):
     return cities, start_city
 
 
-def generate_instance_file(size, name):
-    cities = get_instance(size, start_position=0, end_position=2000, minimum_distance=1)
-    save_instance(name, COMMENT, cities)
-
-
 def main():
-    for i in range(SIZE):
-        generate_instance_file(SIZE, 'instances/%d-tsp/instance-%d.tsp' % (SIZE, i))
+    frequency = {}
+
+    for i in range(COUNT):
+        size = 50  # random.randrange(MINIMUM_SIZE, MAXIMUM_SIZE + 1)
+
+        if size not in frequency:
+            frequency[size] = 0
+        frequency[size] += 1
+
+        cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
+        save_instance('instances/clustered-diverse-tsp/instance-%d.tsp' % i, COMMENT, cities)
+        
+        # plt.figure()
+        # plt.title('TSP')
+        # plt.xlabel('X')
+        # plt.ylabel('Y')
+        # x, y = zip(*cities)
+        # plt.scatter(x, y)
+        # plt.show()
+
+    print(frequency)
 
 
 if __name__ == '__main__':
