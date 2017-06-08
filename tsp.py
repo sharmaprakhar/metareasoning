@@ -216,7 +216,7 @@ def main():
 
         cities = get_clustered_instance(size, 0, 2000, 1, 10, 100)
         save_instance('instances/clustered-diverse-tsp/instance-%d.tsp' % i, COMMENT, cities)
-        
+
         # plt.figure()
         # plt.title('TSP')
         # plt.xlabel('X')

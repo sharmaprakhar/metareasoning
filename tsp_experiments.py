@@ -38,7 +38,7 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 def run_experiments(instances, directory):
     average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
-    
+
     profile_1 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_1)
     profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
     profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
@@ -206,9 +206,9 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('maps/diverse-tsp-naive-solution-quality-map.json')
+    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
     run_experiments(instances, 'plots')
-    # print_solution_quality_map('instances/clustered-diverse-tsp', 'instances', performance.get_naive_solution_qualities)
+    # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
 
 
 if __name__ == '__main__':
