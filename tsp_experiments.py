@@ -206,9 +206,11 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
-    run_experiments(instances, 'plots')
+    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json.old.2')
+    # run_experiments(instances, 'plots')
     # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
+    statistics = get_statistics(instances)
+    print(statistics)
 
 
 if __name__ == '__main__':

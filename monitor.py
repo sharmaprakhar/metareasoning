@@ -29,13 +29,13 @@ def get_fixed_stopping_point(steps, profile_4, config):
 
         for target_class in config['solution_quality_classes']:
             target_quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
-            
+
             intrinsic_value = computation.get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
             time_cost = computation.get_time_costs(step, config['time_cost_multiplier'])
             comprehensive_value = computation.get_comprehensive_values(intrinsic_value, time_cost)
 
             probabilities = list(profile_4[step])
-            probabilities[:target_class] = [0] * target_class
+            # probabilities[:target_class] = [0] * target_class
             normalizer = sum(probabilities) + fudge
             normalized_probabilities = [probability / normalizer for probability in probabilities]
 
