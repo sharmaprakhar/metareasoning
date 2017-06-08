@@ -22,8 +22,8 @@ CITY_PATTERN = '\d+ (\d+) (\d+)'
 DELIMITER = '\n'
 
 COUNT = 50
-MINIMUM_SIZE = 45
-MAXIMUM_SIZE = 55
+MINIMUM_SIZE = 30
+MAXIMUM_SIZE = 70
 
 
 def get_initial_random_tour(states, start_state):

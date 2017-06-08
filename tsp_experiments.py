@@ -12,9 +12,9 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 0.1
+TIME_COST_MULTIPLIER = .1
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASS_COUNT = 15
+SOLUTION_QUALITY_CLASS_COUNT = 10
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
@@ -93,6 +93,12 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
     myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
     fixed_loss = utils.get_percent_error(optimal_value, comprehensive_values[fixed_stopping_point])
+
+    # optimal_value = comprehensive_values[optimal_stopping_point]
+    # projected_loss = abs(projected_stopping_point - optimal_stopping_point)
+    # nonmyopic_loss = abs(nonmyopic_stopping_point - optimal_stopping_point)
+    # myopic_loss = abs(myopic_stopping_point - optimal_stopping_point)
+    # fixed_loss = abs(fixed_stopping_point - optimal_stopping_point)
 
     results = {
         'projected_monitoring_loss': projected_loss,
@@ -186,8 +192,9 @@ def get_statistics(instances):
         time_costs = computation.get_time_costs(steps, TIME_COST_MULTIPLIER)
         comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
 
-        stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
-        optimal_stopping_points.append(stopping_point)
+        optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
+        optimal_stopping_points.append(optimal_stopping_point)
+
 
     sorted_stopping_points = sorted(optimal_stopping_points)
     fit = stats.norm.pdf(sorted_stopping_points, np.mean(sorted_stopping_points), np.std(sorted_stopping_points))
@@ -206,11 +213,14 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json.old.2')
-    # run_experiments(instances, 'plots')
     # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
-    statistics = get_statistics(instances)
-    print(statistics)
+
+    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
+
+    # statistics = get_statistics(instances)
+    # print(statistics)
+
+    run_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
