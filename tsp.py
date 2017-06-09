@@ -215,20 +215,22 @@ def main():
         frequency[size] += 1
 
 
+        boundary = random.randrange(1000, 10000)
         minimum_step = random.randrange(1, 20)
-        centroid_count = random.randrange(5, 20)
-        centroid_radius = random.randrange(50, 400)
-        centroid_minimum_step = random.randrange(1, 20)
-        cities = get_clustered_instance(size, 0, 1000, minimum_step, centroid_count, centroid_radius, centroid_minimum_step)
+        centroid_count = random.randrange(1, 10)
+        centroid_radius = random.randrange(int(boundary / 20), int(boundary / 10))
+        centroid_minimum_step = 1
+        cities = get_clustered_instance(size, 0, boundary, minimum_step, centroid_count, centroid_radius, centroid_minimum_step)
 
-        # plt.figure()
-        # plt.title('Map')
-        # plt.xlabel('X')
-        # plt.ylabel('Y')
-        # x, y = zip(*cities)
-        # plt.scatter(x, y)
-        # plt.show()
         # cities = get_instance(size, 0, 2000, 1)
+
+        plt.figure()
+        plt.title('Map')
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        x, y = zip(*cities)
+        plt.scatter(x, y)
+        plt.show()
 
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
