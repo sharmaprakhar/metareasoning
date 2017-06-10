@@ -1,4 +1,5 @@
 import json
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,11 +14,11 @@ import tsp_solver
 import utils
 
 TIME_COST_MULTIPLIER = 0.1
-INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASS_COUNT = 13
-SOLUTION_QUALITY_CLASS_BOUNDS = [0, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.80, 0.90, 1] # np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
+INTRINSIC_VALUE_MULTIPLIER = 5000
+SOLUTION_QUALITY_CLASS_COUNT = 5
+SOLUTION_QUALITY_CLASS_BOUNDS = [0, 0.60, 0.70, 0.80, 0.90, 1.01] # np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 10
+MONITOR_THRESHOLD = 5
 WINDOW = None
 
 CONFIG = {
@@ -37,23 +38,19 @@ DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
 
 
 def run_experiments(instances, directory):
-    keys = list(instances.keys())
-    training_instances = {key: instances[key] for key in keys[:70]}
-    test_instances = {key: instances[key] for key in keys[30:]}
+    average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
-    average_intrinsic_values = utils.get_average_intrinsic_values(training_instances, INTRINSIC_VALUE_MULTIPLIER)
-
-    profile_1 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_1)
-    profile_2 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_2)
-    profile_3 = performance.get_dynamic_performance_profile(training_instances, CONFIG, performance.TYPE_3)
-    profile_4 = performance.get_probabilistic_performance_profile(training_instances, CONFIG)
+    profile_1 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_1)
+    profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
+    profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
+    profile_4 = performance.get_probabilistic_performance_profile(instances, CONFIG)
 
     projected_monitoring_losses = []
     nonmyopic_monitoring_losses = []
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    for instance in test_instances:
+    for instance in instances:
         print('Experiment: %s' % instance)
 
         qualities = instances[instance]['solution_qualities']
@@ -160,25 +157,55 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     return plt, results
 
 
-def print_solution_quality_map(instances_directory, index_name, get_solution_qualities):
+# def print_solution_quality_map(instances_directory, index_name, get_solution_qualities):
+#     solution_quality_map = {}
+
+#     instances_directory_index = '%s/%s.csv' % (instances_directory, index_name)
+#     with open(instances_directory_index) as f:
+#         for line in f.readlines():
+#             instance_name, optimal_distance = utils.get_line_components(line)
+#             instance_path = '%s/%s.tsp' % (instances_directory, instance_name)
+
+#             cities, start_city = tsp.load_instance(instance_path)
+#             statistics = {'time': [], 'distances': []}
+#             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
+
+#             estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
+
+#             solution_quality_map[instance_name] = {
+#                 'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
+#                 'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
+#             }
+
+#     print(json.dumps(solution_quality_map))
+
+
+def print_solution_quality_map(instances_directory, costs_directory, get_solution_qualities):
     solution_quality_map = {}
 
-    instances_directory_index = '%s/%s.csv' % (instances_directory, index_name)
-    with open(instances_directory_index) as f:
-        for line in f.readlines():
-            instance_name, optimal_distance = utils.get_line_components(line)
-            instance_path = '%s/%s.tsp' % (instances_directory, instance_name)
+    for filename in os.listdir(instances_directory):
+        instance_name = filename.split('.')[0]
+        instances_file_path = os.path.join(instances_directory, filename)
+        costs_file_path = os.path.join(costs_directory, filename)
+        costs_file = open(costs_file_path)
+        full_costs = costs_file.readlines()
 
-            cities, start_city = tsp.load_instance(instance_path)
-            statistics = {'time': [], 'distances': []}
-            tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
+        costs = []
+        for i in range(len(full_costs)):
+            if i % 10 == 0:
+                cost = full_costs[i]
+                costs.append(float(cost))
 
-            estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
+        optimal_distance = float(full_costs[-1])
 
-            solution_quality_map[instance_name] = {
-                'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
-                'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
-            }
+        # TODO Is my optimal distance actually optimal?
+        cities, start_city = tsp.load_instance(instances_file_path)
+        estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
+
+        solution_quality_map[instance_name] = {
+            'solution_qualities': get_solution_qualities(costs, optimal_distance),
+            'estimated_solution_qualities': get_solution_qualities(costs, estimated_optimal_distance)
+        }
 
     print(json.dumps(solution_quality_map))
 
@@ -217,7 +244,7 @@ def get_statistics(instances):
 
 
 def main():
-    # print_solution_quality_map('instances/clustered-mixed-tsp', 'instances', performance.get_naive_solution_qualities)
+    # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
 
     instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
 

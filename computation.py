@@ -41,7 +41,7 @@ def get_mevc(estimated_quality, step, profile_1, profile_3, config):
     return next_expected_value - current_expected_value
 
 
-def get_optimal_values(steps, profile_2, profile_3, config, epsilon=0.01):
+def get_optimal_values(steps, profile_2, profile_3, config, epsilon=0.1):
     limit = len(steps)
 
     values = {origin_class: limit * [0] for origin_class in config['solution_quality_classes']}

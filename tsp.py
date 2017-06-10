@@ -205,14 +205,8 @@ def load_instance(filename):
 
 
 def main():
-    frequency = {}
-
     for i in range(COUNT):
         size = random.randrange(MINIMUM_SIZE, MAXIMUM_SIZE + 1)
-
-        if size not in frequency:
-            frequency[size] = 0
-        frequency[size] += 1
 
         boundary = random.randrange(1000, 10000)
         minimum_step = random.randrange(1, 20)
@@ -221,31 +215,7 @@ def main():
         centroid_minimum_step = 1
         cities = get_clustered_instance(size, 0, boundary, minimum_step, centroid_count, centroid_radius, centroid_minimum_step)
 
-        # plt.figure()
-        # plt.title('Map')
-        # plt.xlabel('X')
-        # plt.ylabel('Y')
-        # x, y = zip(*cities)
-        # plt.scatter(x, y)
-        # plt.show()
-
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
-
-    print(frequency)
-
-    # import performance 
-
-    # with open('/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/out.tsp') as f:
-    #     lines = f.readlines()
-    #     costs = [float(line) for line in lines]
-    #     qualities = performance.get_naive_solution_qualities(costs, 11492.9)
-
-    #     plt.figure()
-    #     plt.title('Map')
-    #     plt.xlabel('X')
-    #     plt.ylabel('Y')
-    #     plt.scatter(range(len(qualities)), qualities)
-    #     plt.show()
 
 
 if __name__ == '__main__':

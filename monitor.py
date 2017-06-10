@@ -41,6 +41,7 @@ def get_fixed_stopping_point(steps, profile_4, config):
 
 
 def get_nonmyopic_stopping_point(qualities, steps, profile_2, profile_3, limit, config):
+    print(steps)
     values = computation.get_optimal_values(steps, profile_2, profile_3, config)
 
     for step in steps:
