@@ -171,7 +171,7 @@ def get_clustered_instance(size, start_position, end_position, minimum_step, cen
     return cities
 
 
-def save_instance(name, comment, cities):
+def save_instance(name, comment, cities, use_template=False):
     size = len(cities)
 
     node_coord_section = ''
@@ -180,7 +180,7 @@ def save_instance(name, comment, cities):
         delimiter = DELIMITER if i < size - 1 else ''
         node_coord_section += CITY_TEMPLATE % (i + 1, x, y, delimiter)
 
-    instance = FILE_TEMPLATE % (name, comment, size, node_coord_section)
+    instance = FILE_TEMPLATE % (name, comment, size, node_coord_section) if use_template else node_coord_section
 
     f = open(name, 'w')
     f.write(instance)
@@ -214,15 +214,12 @@ def main():
             frequency[size] = 0
         frequency[size] += 1
 
-
         boundary = random.randrange(1000, 10000)
         minimum_step = random.randrange(1, 20)
         centroid_count = random.randrange(1, 10)
         centroid_radius = random.randrange(int(boundary / 20), int(boundary / 10))
         centroid_minimum_step = 1
         cities = get_clustered_instance(size, 0, boundary, minimum_step, centroid_count, centroid_radius, centroid_minimum_step)
-
-        # cities = get_instance(size, 0, 2000, 1)
 
         # plt.figure()
         # plt.title('Map')
@@ -235,6 +232,20 @@ def main():
         save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
 
     print(frequency)
+
+    # import performance 
+
+    # with open('/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/out.tsp') as f:
+    #     lines = f.readlines()
+    #     costs = [float(line) for line in lines]
+    #     qualities = performance.get_naive_solution_qualities(costs, 11492.9)
+
+    #     plt.figure()
+    #     plt.title('Map')
+    #     plt.xlabel('X')
+    #     plt.ylabel('Y')
+    #     plt.scatter(range(len(qualities)), qualities)
+    #     plt.show()
 
 
 if __name__ == '__main__':
