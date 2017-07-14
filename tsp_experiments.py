@@ -14,12 +14,12 @@ import tsp_solver
 import utils
 
 TIME_COST_MULTIPLIER = 0.1
-INTRINSIC_VALUE_MULTIPLIER = 5000
-SOLUTION_QUALITY_CLASS_COUNT = 5
-SOLUTION_QUALITY_CLASS_BOUNDS = [0, 0.60, 0.70, 0.80, 0.90, 1.01] # np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
+INTRINSIC_VALUE_MULTIPLIER = 200
+SOLUTION_QUALITY_CLASS_COUNT = 20
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 5
-WINDOW = None
+MONITOR_THRESHOLD = 10
+WINDOW = 25
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -94,12 +94,6 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
     myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
     fixed_loss = utils.get_percent_error(optimal_value, comprehensive_values[fixed_stopping_point])
-
-    # optimal_value = comprehensive_values[optimal_stopping_point]
-    # projected_loss = abs(projected_stopping_point - optimal_stopping_point)
-    # nonmyopic_loss = abs(nonmyopic_stopping_point - optimal_stopping_point)
-    # myopic_loss = abs(myopic_stopping_point - optimal_stopping_point)
-    # fixed_loss = abs(fixed_stopping_point - optimal_stopping_point)
 
     results = {
         'projected_monitoring_loss': projected_loss,
@@ -246,7 +240,7 @@ def get_statistics(instances):
 def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
 
-    instances = utils.get_instances('maps/clustered-mixed-tsp-naive-map.json')
+    instances = utils.get_instances('maps/50-tsp-naive-map.json')
 
     # statistics = get_statistics(instances)
     # print(statistics)
