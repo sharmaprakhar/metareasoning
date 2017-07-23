@@ -13,26 +13,21 @@ ALPHA_CLASS_COUNT = 4
 ALPHA_CLASS_BOUNDS = np.linspace(0.0001, 0.0005, ALPHA_CLASS_COUNT + 1)
 ALPHA_CLASSES = range(ALPHA_CLASS_COUNT)
 
-TIME_PERIOD = 0.1
+PROBLEMS = 10000
+SLEEP_INTERVAL = 0.1
 LEARNING_RATE = 0.1
 
-ITERATIONS = 5
-TIME_STEPS = range(ITERATIONS)
-
-PROBLEMS = 10000
 SIZE = 100
 BIAS = 25
 VARIANCE = 10
 
+NUM_ITERATIONS = 5
+ITERATIONS = range(NUM_ITERATIONS)
+
 
 def get_initial_action_value_function():
-    states = list(itertools.product(SOLUTION_QUALITY_CLASSES, TIME_STEPS)) 
+    states = list(itertools.product(SOLUTION_QUALITY_CLASSES, ITERATIONS)) 
     return {(state, action): 0 for action in ALPHA_CLASSES for state in states}
-
-
-def get_initial_policy():
-    states = list(itertools.product(SOLUTION_QUALITY_CLASSES, TIME_STEPS)) 
-    return {state: random.choice(ALPHA_CLASSES) for state in states}
 
 
 def get_greedy_action(action_value_function, state):
@@ -40,53 +35,82 @@ def get_greedy_action(action_value_function, state):
 
 
 def get_policy(action_value_function):
-    states = list(itertools.product(SOLUTION_QUALITY_CLASSES, TIME_STEPS)) 
+    states = list(itertools.product(SOLUTION_QUALITY_CLASSES, ITERATIONS)) 
     return {state: get_greedy_action(action_value_function, state) for state in states}
 
 
-def get_action_value_function(problems):
+# TODO Should this work on classes or actual values?
+def get_utility(quality, time):
+    return 100 * quality - 0.1 * time
+
+
+def get_action_values(action_value_function, state):
+    return [action_value_function[state][action] for action in action_value_function[state]]
+
+
+def get_action_value_function():
     action_value_function = get_initial_action_value_function()
 
-    for _ in range(problems):
+    for _ in range(PROBLEMS):
         examples, labels = get_problem(SIZE, BIAS, VARIANCE)
-
         policy = get_policy(action_value_function)
 
-        d = Manager().dict()
-        state = d['state'] = (0, 0)
-        action = d['action'] = policy[state]
-        current_value = d['current_value'] = 0
-        previous_value = d['previous_value'] = None
+        previous_quality = 0
+        start_time = time.time()
 
-        process = Process(target=get_weights, args=(d,))
+        memory = Manager().dict()
+        quality = memory['quality'] = previous_quality
+        time = memory['time'] = start_time
+
+        # TODO Calculate the state properly
+        state = (quality, time)
+
+        action = memory['action'] = policy[state]
+
+        process = Process(target=get_weights, args=(examples, labels, memory))
         process.start()
-        time.sleep(TIME_PERIOD)
+        time.sleep(SLEEP_INTERVAL)
 
         while process.is_alive():
-            reward = d['current_value'] - d['previous_value']
-            action_value_function[state, action] = action_value_function[state, action] + LEARNING_RATE * (reward + max(reward) - action_value_function[state, action])
+            next_quality = memory['quality']
+            next_time = memory['time']
 
+            next_state = (next_quality, next_time)
             
-            d['action'] = policy[d['state']]
-            time.sleep(TIME_PERIOD)
+            reward = get_utility(next_quality, next_time) - get_utility(quality, time)
+            action_values = get_action_values(action_value_function, next_state)
+            action_value_function[state][action] = action_value_function[state][action] + LEARNING_RATE * (reward + max(action_values) - action_value_function[state][action])
+
+            # TODO Is this right?
+            quality = next_quality
+            time = next_time
+
+            memory['action'] = policy[state]
+            time.sleep(SLEEP_INTERVAL)
 
     return action_value_function
 
 
 
-def get_weights(x, y, weights, m, iterations):
-    transposed_x = x.transpose()
+def get_weights(examples, labels, memory):
+    num_examples, num_features = np.shape(examples)
+    weights = np.ones(num_features)    
+    transposed_examples = examples.transpose()
 
-    for i in range(0, iterations):
-        hypothesis = np.dot(x, weights)
-        loss = hypothesis - y
-        cost = np.sum(loss ** 2) / (2 * m)
+    for i in range(0, NUM_ITERATIONS):
+        hypothesis = np.dot(examples, weights)
+        loss = hypothesis - labels
+        cost = np.sum(loss ** 2) / (2 * num_examples)
 
-        gradient = np.dot(transposed_x, loss) / m
-        weights = weights - GLOBAL_ALPHA * gradient
+        memory['quality'] = cost
+        memory['time'] = time.time()
+        alpha = memory['action']
 
-        print("Iteration %d | Cost = %f | alpha = %f " % (i, cost, GLOBAL_ALPHA))
+        gradient = np.dot(transposed_examples, loss) / num_examples
+        weights = weights - alpha * gradient
 
+        print("Iteration %d | Cost = %f | alpha = %f " % (i, cost, alpha))
+        
     return weights
 
 
@@ -103,19 +127,7 @@ def get_problem(size, bias, variance):
 
 
 def main():
-    manager = Manager()
-
-    d = manager.dict()
-    d['action'] = '1'
-    d['value'] = 2
-    d['state'] = 0
-
-    p1 = Process(target=f, args=(d,))
-    p2 = Process(target=f, args=(d,))
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
+    print(get_action_value_function())
 
 
 if __name__ == "__main__":
