@@ -16,7 +16,7 @@ ALPHA_CLASSES = np.linspace(0.0001, 0.0006, ALPHA_CLASS_COUNT + 1)
 
 PROBLEMS = 100
 SLEEP_INTERVAL = 0.01
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.2
 
 SIZE = 100
 BIAS = 25
@@ -37,11 +37,15 @@ def get_policy(action_value_function):
 
 
 def digitize(item, bins):
+    if bins[0] < item:
+        return 0
+
     for i, _ in enumerate(bins):
         if i + 1 < len(bins):
-            if bins[i + 1] < item <= bins[i]:
+            if bins[i] >= item > bins[i + 1]:
                 return i
-    return 0
+             
+    return len(bins) - 1
 
 
 def get_utility(quality, time):
