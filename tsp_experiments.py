@@ -18,7 +18,7 @@ INTRINSIC_VALUE_MULTIPLIER = 200
 SOLUTION_QUALITY_CLASS_COUNT = 20
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 10
+MONITOR_THRESHOLD = 4
 WINDOW = 25
 
 CONFIG = {
@@ -242,8 +242,7 @@ def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
     # print_solution_quality_map('instances/test', 'instances', performance.get_naive_solution_qualities)
 
-    # instances = utils.get_instances('maps/50-tsp-naive-map.json')
-    instances = utils.get_instances('maps/mixed-tsp-naive-map.json')
+    instances = utils.get_instances('maps/simulations.json')
 
     # statistics = get_statistics(instances)
     # print(statistics)

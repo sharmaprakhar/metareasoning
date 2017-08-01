@@ -9,15 +9,7 @@ import utils
 
 
 def get_optimal_stopping_point(comprehensive_values):
-    return list(comprehensive_values).index(max(comprehensive_values))
-
-
-# def get_fixed_stopping_point(intrinsic_values, limit, config):
-#     steps = range(len(intrinsic_values))
-#     time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
-#     comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
-#     stopping_point = get_optimal_stopping_point(comprehensive_values)
-#     return stopping_point if stopping_point < limit else limit - 1
+    return list(comprehensive_values).index(max(comprehensive_values))# def get_fixed_stopping_point(intrinsic_values, limit, config):
 
 
 def get_fixed_stopping_point(steps, profile_4, config):
@@ -72,7 +64,7 @@ def get_projected_stopping_point(qualities, steps, limit, config):
 
     for end in range(config['monitor_threshold'], limit):
         try:
-            start = 0 if config['window'] is None else end - config['window']
+            start = 0 #if config['window'] is None else end - config['window']
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
             projections = model(steps, params[0], params[1], params[2])
@@ -86,7 +78,7 @@ def get_projected_stopping_point(qualities, steps, limit, config):
 
             if stopping_point < end - 1:
                 return end - 1, intrinsic_value_groups
-        except (RuntimeError, TypeError):
-            pass
+        except (RuntimeError, TypeError) as e:
+            print(e)
 
     return stopping_point, intrinsic_value_groups
