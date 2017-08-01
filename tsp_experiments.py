@@ -50,6 +50,7 @@ def run_experiments(instances, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
+    instances = utils.get_instances('maps/test-map.json')
     for instance in instances:
         print('Experiment: %s' % instance)
 
@@ -151,57 +152,57 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     return plt, results
 
 
-# def print_solution_quality_map(instances_directory, index_name, get_solution_qualities):
-#     solution_quality_map = {}
-
-#     instances_directory_index = '%s/%s.csv' % (instances_directory, index_name)
-#     with open(instances_directory_index) as f:
-#         for line in f.readlines():
-#             instance_name, optimal_distance = utils.get_line_components(line)
-#             instance_path = '%s/%s.tsp' % (instances_directory, instance_name)
-
-#             cities, start_city = tsp.load_instance(instance_path)
-#             statistics = {'time': [], 'distances': []}
-#             tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
-
-#             estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
-
-#             solution_quality_map[instance_name] = {
-#                 'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
-#                 'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
-#             }
-
-#     print(json.dumps(solution_quality_map))
-
-
-def print_solution_quality_map(instances_directory, costs_directory, get_solution_qualities):
+def print_solution_quality_map(instances_directory, index_name, get_solution_qualities):
     solution_quality_map = {}
 
-    for filename in os.listdir(instances_directory):
-        instance_name = filename.split('.')[0]
-        instances_file_path = os.path.join(instances_directory, filename)
-        costs_file_path = os.path.join(costs_directory, filename)
-        costs_file = open(costs_file_path)
-        full_costs = costs_file.readlines()
+    instances_directory_index = '%s/%s.csv' % (instances_directory, index_name)
+    with open(instances_directory_index) as f:
+        for line in f.readlines():
+            instance_name, optimal_distance = utils.get_line_components(line)
+            instance_path = '%s/%s.tsp' % (instances_directory, instance_name)
 
-        costs = []
-        for i in range(len(full_costs)):
-            if i % 10 == 0:
-                cost = full_costs[i]
-                costs.append(float(cost))
+            cities, start_city = tsp.load_instance(instance_path)
+            statistics = {'time': [], 'distances': []}
+            tsp_solver.k_opt_solve(cities, start_city, statistics, 100)
 
-        optimal_distance = float(full_costs[-1])
+            estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
 
-        # TODO Is my optimal distance actually optimal?
-        cities, start_city = tsp.load_instance(instances_file_path)
-        estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
-
-        solution_quality_map[instance_name] = {
-            'solution_qualities': get_solution_qualities(costs, optimal_distance),
-            'estimated_solution_qualities': get_solution_qualities(costs, estimated_optimal_distance)
-        }
+            solution_quality_map[instance_name] = {
+                'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
+                'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
+            }
 
     print(json.dumps(solution_quality_map))
+
+
+# def print_solution_quality_map(instances_directory, costs_directory, get_solution_qualities):
+#     solution_quality_map = {}
+
+#     for filename in os.listdir(instances_directory):
+#         instance_name = filename.split('.')[0]
+#         instances_file_path = os.path.join(instances_directory, filename)
+#         costs_file_path = os.path.join(costs_directory, filename)
+#         costs_file = open(costs_file_path)
+#         full_costs = costs_file.readlines()
+
+#         costs = []
+#         for i in range(len(full_costs)):
+#             if i % 10 == 0:
+#                 cost = full_costs[i]
+#                 costs.append(float(cost))
+
+#         optimal_distance = float(full_costs[-1])
+
+#         # TODO Is my optimal distance actually optimal?
+#         cities, start_city = tsp.load_instance(instances_file_path)
+#         estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
+
+#         solution_quality_map[instance_name] = {
+#             'solution_qualities': get_solution_qualities(costs, optimal_distance),
+#             'estimated_solution_qualities': get_solution_qualities(costs, estimated_optimal_distance)
+#         }
+
+#     print(json.dumps(solution_quality_map))
 
 
 def get_statistics(instances):
@@ -239,8 +240,10 @@ def get_statistics(instances):
 
 def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
+    # print_solution_quality_map('instances/test', 'instances', performance.get_naive_solution_qualities)
 
-    instances = utils.get_instances('maps/50-tsp-naive-map.json')
+    # instances = utils.get_instances('maps/50-tsp-naive-map.json')
+    instances = utils.get_instances('maps/mixed-tsp-naive-map.json')
 
     # statistics = get_statistics(instances)
     # print(statistics)
