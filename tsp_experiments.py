@@ -49,8 +49,6 @@ def run_experiments(instances, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    # instances = utils.get_instances('maps/test-map.json')
-    # instances = {"instance-59": instances['instance-59']}
     for instance in instances:
         print('Experiment: %s' % instance)
 
