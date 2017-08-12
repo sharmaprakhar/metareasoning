@@ -18,7 +18,7 @@ INTRINSIC_VALUE_MULTIPLIER = 200
 SOLUTION_QUALITY_CLASS_COUNT = 20
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 10
+MONITOR_THRESHOLD = 4
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -26,8 +26,7 @@ CONFIG = {
     'solution_quality_classes': SOLUTION_QUALITY_CLASSES,
     'solution_quality_class_bounds': SOLUTION_QUALITY_CLASS_BOUNDS,
     'solution_quality_class_count': SOLUTION_QUALITY_CLASS_COUNT,
-    'monitor_threshold': MONITOR_THRESHOLD,
-    'window': WINDOW
+    'monitor_threshold': MONITOR_THRESHOLD
 }
 
 TOUR_SIZE = 50
@@ -52,8 +51,8 @@ def run_experiments(instances, directory):
     for instance in instances:
         print('Experiment: %s' % instance)
 
-        qualities = instances[instance]['solution_qualities']
-        estimated_qualities = instances[instance]['estimated_solution_qualities']
+        qualities = instances[instance]['qualities']
+        estimated_qualities = instances[instance]['estimated_qualities']
 
         plt, results = run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, profile_4)
 
@@ -169,8 +168,8 @@ def print_solution_quality_map(instances_directory, index_name, get_solution_qua
             estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
 
             solution_quality_map[instance_name] = {
-                'solution_qualities': get_solution_qualities(statistics['distances'], optimal_distance),
-                'estimated_solution_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
+                'qualities': get_solution_qualities(statistics['distances'], optimal_distance),
+                'estimated_qualities': get_solution_qualities(statistics['distances'], estimated_optimal_distance)
             }
 
     print(json.dumps(solution_quality_map))
@@ -210,7 +209,7 @@ def get_statistics(instances):
     optimal_stopping_points = []
 
     for instance in instances:
-        qualities = instances[instance]['solution_qualities']
+        qualities = instances[instance]['qualities']
 
         limit = len(qualities)
         steps = range(limit)
@@ -240,13 +239,7 @@ def get_statistics(instances):
 
 
 def main():
-    # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
-    # print_solution_quality_map('instances/test', 'instances', performance.get_naive_solution_qualities)
-
-    instances = utils.get_instances('maps/test-map-0.1seconds.json')
-    # statistics = get_statistics(instances)
-    # print(statistics)
-
+    instances = utils.get_instances('simulations/40-tsp-0.1s.json')
     run_experiments(instances, 'plots')
 
 

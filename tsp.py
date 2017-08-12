@@ -198,25 +198,3 @@ def load_instance(filename):
     start_city = list(cities)[0]
 
     return cities, start_city
-
-
-def main():
-    # for i in range(COUNT):
-    #     size = random.randrange(MINIMUM_SIZE, MAXIMUM_SIZE + 1)
-
-    #     boundary = random.randrange(1000, 10000)
-    #     minimum_step = random.randrange(1, 20)
-    #     centroid_count = random.randrange(1, 10)
-    #     centroid_radius = random.randrange(int(boundary / 20), int(boundary / 10))
-    #     centroid_minimum_step = 1
-    #     cities = get_clustered_instance(size, 0, boundary, minimum_step, centroid_count, centroid_radius, centroid_minimum_step)
-
-    #     save_instance('instances/clustered-mixed-tsp/instance-%d.tsp' % i, COMMENT, cities)
-
-    for size in range(20, 121):
-        cities = get_instance(size, 0, 10000, 1)
-        save_instance('instances/20-120-tsp/instance-%d.tsp' % size, COMMENT, cities)
-
-
-if __name__ == '__main__':
-    main()

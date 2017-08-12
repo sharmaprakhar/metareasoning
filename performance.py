@@ -20,7 +20,7 @@ def get_initial_probabilistic_performance_profile(count, steps):
 
 
 def get_probabilistic_performance_profile(instances, config):
-    groups = utils.get_groups(instances, 'solution_qualities')
+    groups = utils.get_groups(instances, 'qualities')
 
     length = utils.get_max_list_length(groups)
     steps = range(length)
@@ -66,8 +66,8 @@ def get_dynamic_performance_profile(instances, config, selector):
     bounds = config['solution_quality_class_bounds']
     count = config['solution_quality_class_count']
 
-    groups = utils.get_groups(instances, 'solution_qualities')
-    estimated_groups = utils.get_groups(instances, 'estimated_solution_qualities')
+    groups = utils.get_groups(instances, 'qualities')
+    estimated_groups = utils.get_groups(instances, 'estimated_qualities')
 
     length = utils.get_max_list_length(groups)
     steps = range(length)

@@ -161,7 +161,7 @@ def get_percent_error(accepted_value, approximate_value):
 
 
 def get_average_intrinsic_values(instances, multiplier):
-    intrinsic_value_groups = get_intrinsic_value_groups(instances, multiplier, 'solution_qualities')
+    intrinsic_value_groups = get_intrinsic_value_groups(instances, multiplier, 'qualities')
     max_length = get_max_list_length(intrinsic_value_groups)
     trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
