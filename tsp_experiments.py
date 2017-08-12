@@ -13,13 +13,12 @@ import tsp
 import tsp_solver
 import utils
 
-TIME_COST_MULTIPLIER = 0.1
+TIME_COST_MULTIPLIER = 0.15
 INTRINSIC_VALUE_MULTIPLIER = 200
 SOLUTION_QUALITY_CLASS_COUNT = 20
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 4
-WINDOW = 25
+MONITOR_THRESHOLD = 10
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -50,7 +49,8 @@ def run_experiments(instances, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
-    instances = utils.get_instances('maps/test-map.json')
+    # instances = utils.get_instances('maps/test-map.json')
+    # instances = {"instance-59": instances['instance-59']}
     for instance in instances:
         print('Experiment: %s' % instance)
 
@@ -107,6 +107,9 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     plt.title('Performance Profile')
     plt.xlabel('Time')
     plt.ylabel('Value')
+
+    axes = plt.gca()
+    axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
 
     plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 172), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_COUNT, xy=(0, 0), xytext=(10, 162), va='bottom', xycoords='axes fraction', textcoords='offset points')
@@ -242,8 +245,7 @@ def main():
     # print_solution_quality_map('instances/clustered-mixed-tsp', '/Users/jsvegliato/Documents/Development/Playground/LK-Heuristic/results/instances/', performance.get_naive_solution_qualities)
     # print_solution_quality_map('instances/test', 'instances', performance.get_naive_solution_qualities)
 
-    instances = utils.get_instances('maps/simulations.json')
-
+    instances = utils.get_instances('maps/test-map-0.1seconds.json')
     # statistics = get_statistics(instances)
     # print(statistics)
 

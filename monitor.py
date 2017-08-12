@@ -9,7 +9,7 @@ import utils
 
 
 def get_optimal_stopping_point(comprehensive_values):
-    return list(comprehensive_values).index(max(comprehensive_values))# def get_fixed_stopping_point(intrinsic_values, limit, config):
+    return list(comprehensive_values).index(max(comprehensive_values))
 
 
 def get_fixed_stopping_point(steps, profile_4, config):
@@ -64,7 +64,7 @@ def get_projected_stopping_point(qualities, steps, limit, config):
 
     for end in range(config['monitor_threshold'], limit):
         try:
-            start = 0 #if config['window'] is None else end - config['window']
+            start = 0
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
             projections = model(steps, params[0], params[1], params[2])

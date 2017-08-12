@@ -13,7 +13,7 @@ def get_intrinsic_values(qualities, multiplier):
 
 
 def get_time_costs(steps, multiplier):
-    return np.exp(np.multiply(multiplier, steps))
+    return np.multiply(multiplier, steps)
 
 
 def get_comprehensive_values(instrinsic_values, time_costs):
@@ -63,7 +63,6 @@ def get_optimal_values(steps, profile_2, profile_3, config, epsilon=0.1):
                         intrinsic_value = get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
                         time_cost = get_time_costs(step, config['time_cost_multiplier'])
                         comprehensive_value = get_comprehensive_values(intrinsic_value, time_cost)
-
                         stop_value += profile_3[origin_class][step][target_class] * comprehensive_value
                         continue_value += profile_2[origin_class][step][target_class] * values[target_class][step + 1]
 
