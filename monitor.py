@@ -56,9 +56,38 @@ def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, limit, con
             return step
 
 
-def get_projected_stopping_point(qualities, steps, limit, config):
+def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
     intrinsic_value_groups = []
     stopping_point = 0
+
+    model = lambda x, a, b, c: a * np.arctan(x + b) + c
+
+    for end in range(config['monitor_threshold'], limit):
+        try:
+            start = end - 180
+
+            params, _ = curve_fit(model, steps[start:end], qualities[start:end])
+            # TODO Fix this to include the actual performance
+            projections = model(steps, params[0], params[1], params[2])
+
+            intrinsic_values = computation.get_intrinsic_values(projections, config['intrinsic_value_multiplier'])
+            time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
+            comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
+            stopping_point = get_optimal_stopping_point(comprehensive_values)
+
+            intrinsic_value_groups.append(intrinsic_values)
+
+            if stopping_point < end - 1:
+                return end - 1, intrinsic_value_groups
+        except (RuntimeError, TypeError) as e:
+            print(e)
+
+    return stopping_point, intrinsic_value_groups
+
+
+def get_myopic_projected_stopping_point(qualities, steps, limit, config):
+    intrinsic_value_groups = []
+    stopping_point = limit - 1
 
     model = lambda x, a, b, c: a * np.arctan(x + b) + c
 
@@ -72,12 +101,20 @@ def get_projected_stopping_point(qualities, steps, limit, config):
             intrinsic_values = computation.get_intrinsic_values(projections, config['intrinsic_value_multiplier'])
             time_costs = computation.get_time_costs(steps, config['time_cost_multiplier'])
             comprehensive_values = computation.get_comprehensive_values(intrinsic_values, time_costs)
-            stopping_point = get_optimal_stopping_point(comprehensive_values)
 
             intrinsic_value_groups.append(intrinsic_values)
 
-            if stopping_point < end - 1:
+            current_intrinsic_value = computation.get_intrinsic_values(qualities[end - 1], config['intrinsic_value_multiplier'])
+            current_time_cost = computation.get_time_costs(end - 1, config['time_cost_multiplier'])
+            current_comprehensive_value = computation.get_comprehensive_values(current_intrinsic_value, current_time_cost)
+
+            next_intrinsic_value = computation.get_intrinsic_values(projections[end], config['intrinsic_value_multiplier'])
+            next_time_cost = computation.get_time_costs(end, config['time_cost_multiplier'])
+            next_comprehensive_value = computation.get_comprehensive_values(next_intrinsic_value, next_time_cost)
+
+            if next_comprehensive_value - current_comprehensive_value <= 0:
                 return end - 1, intrinsic_value_groups
+
         except (RuntimeError, TypeError) as e:
             print(e)
 

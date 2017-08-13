@@ -18,7 +18,7 @@ INTRINSIC_VALUE_MULTIPLIER = 200
 SOLUTION_QUALITY_CLASS_COUNT = 20
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-MONITOR_THRESHOLD = 4
+MONITOR_THRESHOLD = 50
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -48,6 +48,7 @@ def run_experiments(instances, directory):
     myopic_monitoring_losses = []
     fixed_time_allocation_losses = []
 
+    # instances = {'instance-17': instances['instance-17']}
     for instance in instances:
         print('Experiment: %s' % instance)
 
@@ -61,14 +62,14 @@ def run_experiments(instances, directory):
         plt.close()
 
         projected_monitoring_losses.append(results['projected_monitoring_loss'])
-        nonmyopic_monitoring_losses.append(results['nonmyopic_monitoring_loss'])
-        myopic_monitoring_losses.append(results['myopic_monitoring_loss'])
-        fixed_time_allocation_losses.append(results['fixed_time_allocation_loss'])
+        # nonmyopic_monitoring_losses.append(results['nonmyopic_monitoring_loss'])
+        # myopic_monitoring_losses.append(results['myopic_monitoring_loss'])
+        # fixed_time_allocation_losses.append(results['fixed_time_allocation_loss'])
 
     print('Projected Monitoring Average Percent Error: %f%%' % np.average(projected_monitoring_losses))
-    print('Nonmyopic Monitoring Average Percent Error: %f%%' % np.average(nonmyopic_monitoring_losses))
-    print('Myopic Monitoring Average Percent Error: %f%%' % np.average(myopic_monitoring_losses))
-    print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
+    # print('Nonmyopic Monitoring Average Percent Error: %f%%' % np.average(nonmyopic_monitoring_losses))
+    # print('Myopic Monitoring Average Percent Error: %f%%' % np.average(myopic_monitoring_losses))
+    # print('Fixed Time Allocation Average Percent Error: %f%%' % np.average(fixed_time_allocation_losses))
 
 
 def run_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, profile_4):
@@ -82,22 +83,23 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     estimated_intrinsic_values = computation.get_intrinsic_values(estimated_qualities, INTRINSIC_VALUE_MULTIPLIER)
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
-    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
-    myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
-    fixed_stopping_point = monitor.get_fixed_stopping_point(steps, profile_4, CONFIG)
+    # TODO Change this back!
+    projected_stopping_point, projected_intrinsic_value_groups = monitor.get_myopic_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
+    # nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
+    # myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
+    # fixed_stopping_point = monitor.get_fixed_stopping_point(steps, profile_4, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
     projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[projected_stopping_point])
-    nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
-    myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
-    fixed_loss = utils.get_percent_error(optimal_value, comprehensive_values[fixed_stopping_point])
+    # nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+    # myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
+    # fixed_loss = utils.get_percent_error(optimal_value, comprehensive_values[fixed_stopping_point])
 
     results = {
         'projected_monitoring_loss': projected_loss,
-        'nonmyopic_monitoring_loss':  nonmyopic_loss,
-        'myopic_monitoring_loss': myopic_loss,
-        'fixed_time_allocation_loss': fixed_loss
+        # 'nonmyopic_monitoring_loss':  nonmyopic_loss,
+        # 'myopic_monitoring_loss': myopic_loss,
+        # 'fixed_time_allocation_loss': fixed_loss
     }
 
     plt.figure(figsize=(16, 12), dpi=80)
@@ -124,15 +126,15 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
 
     plt.scatter([optimal_stopping_point], comprehensive_values[optimal_stopping_point], color='limegreen', zorder=4, label='Optimal Stopping Point')
     plt.scatter([projected_stopping_point], comprehensive_values[projected_stopping_point], color='m', zorder=4, label='Projected Stopping Point')
-    plt.scatter([nonmyopic_stopping_point], comprehensive_values[nonmyopic_stopping_point], color='maroon', zorder=4, label='Nonmyopic Stopping Point')
-    plt.scatter([myopic_stopping_point], comprehensive_values[myopic_stopping_point], color='y', zorder=4, label='Myopic Stopping Point')
-    plt.scatter([fixed_stopping_point], comprehensive_values[fixed_stopping_point], color='c', zorder=4, label='Fixed Stopping Point')
+    # plt.scatter([nonmyopic_stopping_point], comprehensive_values[nonmyopic_stopping_point], color='maroon', zorder=4, label='Nonmyopic Stopping Point')
+    # plt.scatter([myopic_stopping_point], comprehensive_values[myopic_stopping_point], color='y', zorder=4, label='Myopic Stopping Point')
+    # plt.scatter([fixed_stopping_point], comprehensive_values[fixed_stopping_point], color='c', zorder=4, label='Fixed Stopping Point')
 
     plt.annotate('%0.2f - Best Value' % comprehensive_values[optimal_stopping_point], xy=(0, 0), xytext=(10, 95), va='bottom', xycoords='axes fraction', textcoords='offset points', color='limegreen')
     plt.annotate('%0.2f - Best Value - Projected Monitoring' % comprehensive_values[projected_stopping_point], xy=(0, 0), xytext=(10, 85), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f - Best Value - Nonmyopic Monitoring' % comprehensive_values[nonmyopic_stopping_point], xy=(0, 0), xytext=(10, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
-    plt.annotate('%0.2f - Best Value - Myopic Monitoring' % comprehensive_values[myopic_stopping_point], xy=(0, 0), xytext=(10, 65), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
-    plt.annotate('%0.2f - Best Value - Fixed Time Allocation' % comprehensive_values[fixed_stopping_point], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
+    # plt.annotate('%0.2f - Best Value - Nonmyopic Monitoring' % comprehensive_values[nonmyopic_stopping_point], xy=(0, 0), xytext=(10, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
+    # plt.annotate('%0.2f - Best Value - Myopic Monitoring' % comprehensive_values[myopic_stopping_point], xy=(0, 0), xytext=(10, 65), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
+    # plt.annotate('%0.2f - Best Value - Fixed Time Allocation' % comprehensive_values[fixed_stopping_point], xy=(0, 0), xytext=(10, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
     fudge = np.nextafter(0, 1)
     decrement = DIFFERENCE / (len(projected_intrinsic_value_groups) + fudge)
@@ -143,9 +145,9 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
         current_color -= decrement
 
     plt.annotate('%0.2f%% - Error - Projected Monitoring' % projected_loss, xy=(0, 0), xytext=(10, 35), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
-    plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
-    plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
+    # plt.annotate('%0.2f%% - Error - Nonmyopic Monitoring' % nonmyopic_loss, xy=(0, 0), xytext=(10, 25), va='bottom', xycoords='axes fraction', textcoords='offset points', color='maroon')
+    # plt.annotate('%0.2f%% - Error - Myopic Monitoring' % myopic_loss, xy=(0, 0), xytext=(10, 15), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
+    # plt.annotate('%0.2f%% - Error - Fixed Time Allocation' % fixed_loss, xy=(0, 0), xytext=(10, 5), va='bottom', xycoords='axes fraction', textcoords='offset points', color='c')
 
     plt.legend(bbox_to_anchor=(0.0, 1.04, 1.0, 0.102), loc=3, ncol=3, mode='expand', borderaxespad=0.0)
 
@@ -239,7 +241,7 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('simulations/40-tsp-0.1s.json')
+    instances = utils.get_instances('simulations/80-tsp-0.1s.json')
     run_experiments(instances, 'plots')
 
 
