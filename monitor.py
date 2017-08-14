@@ -64,7 +64,7 @@ def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
 
     for end in range(config['monitor_threshold'], limit):
         try:
-            start = end - 180
+            start = 0 if config['window'] is None else end - config['window']
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
             # TODO Fix this to include the actual performance
@@ -93,7 +93,7 @@ def get_myopic_projected_stopping_point(qualities, steps, limit, config):
 
     for end in range(config['monitor_threshold'], limit):
         try:
-            start = end - 180
+            start = 0 if config['window'] is None else end - config['window']
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
             projections = model(steps, params[0], params[1], params[2])
@@ -114,7 +114,6 @@ def get_myopic_projected_stopping_point(qualities, steps, limit, config):
 
             if next_comprehensive_value - current_comprehensive_value <= 0:
                 return end - 1, intrinsic_value_groups
-
         except (RuntimeError, TypeError) as e:
             print(e)
 
