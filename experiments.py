@@ -15,7 +15,7 @@ import utils
 
 TIME_COST_MULTIPLIER = 0.15
 INTRINSIC_VALUE_MULTIPLIER = 200
-SOLUTION_QUALITY_CLASS_COUNT = 20
+SOLUTION_QUALITY_CLASS_COUNT = 10
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 50
@@ -29,7 +29,6 @@ CONFIG = {
     'monitor_threshold': MONITOR_THRESHOLD
 }
 
-TOUR_SIZE = 50
 INITIAL_GRAY = 0.9
 TERMINAL_GRAY = 0.3
 DIFFERENCE = INITIAL_GRAY - TERMINAL_GRAY
@@ -110,7 +109,6 @@ def run_experiment(qualities, estimated_qualities, average_intrinsic_values, pro
     axes = plt.gca()
     axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
 
-    plt.annotate('%d-TSP' % TOUR_SIZE, xy=(0, 0), xytext=(10, 172), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('%d Discrete Solution Qualities' % SOLUTION_QUALITY_CLASS_COUNT, xy=(0, 0), xytext=(10, 162), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$q(s) = Length_{MST} / Length(s)$', xy=(0, 0), xytext=(10, 152), va='bottom', xycoords='axes fraction', textcoords='offset points')
     plt.annotate('$U_C(t) = -e^{%.2ft}$' % TIME_COST_MULTIPLIER, xy=(0, 0), xytext=(10, 135), va='bottom', xycoords='axes fraction', textcoords='offset points')
@@ -177,36 +175,6 @@ def print_solution_quality_map(instances_directory, index_name, get_solution_qua
     print(json.dumps(solution_quality_map))
 
 
-# def print_solution_quality_map(instances_directory, costs_directory, get_solution_qualities):
-#     solution_quality_map = {}
-
-#     for filename in os.listdir(instances_directory):
-#         instance_name = filename.split('.')[0]
-#         instances_file_path = os.path.join(instances_directory, filename)
-#         costs_file_path = os.path.join(costs_directory, filename)
-#         costs_file = open(costs_file_path)
-#         full_costs = costs_file.readlines()
-
-#         costs = []
-#         for i in range(len(full_costs)):
-#             if i % 10 == 0:
-#                 cost = full_costs[i]
-#                 costs.append(float(cost))
-
-#         optimal_distance = float(full_costs[-1])
-
-#         # TODO Is my optimal distance actually optimal?
-#         cities, start_city = tsp.load_instance(instances_file_path)
-#         estimated_optimal_distance = tsp.get_mst_distance(start_city, cities)
-
-#         solution_quality_map[instance_name] = {
-#             'solution_qualities': get_solution_qualities(costs, optimal_distance),
-#             'estimated_solution_qualities': get_solution_qualities(costs, estimated_optimal_distance)
-#         }
-
-#     print(json.dumps(solution_quality_map))
-
-
 def get_statistics(instances):
     optimal_stopping_points = []
 
@@ -241,7 +209,7 @@ def get_statistics(instances):
 
 
 def main():
-    instances = utils.get_instances('simulations/80-tsp-0.1s.json')
+    instances = utils.get_instances('simulations/30-tsp-0.1s.json')
     run_experiments(instances, 'plots')
 
 

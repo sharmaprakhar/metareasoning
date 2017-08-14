@@ -93,7 +93,7 @@ def get_myopic_projected_stopping_point(qualities, steps, limit, config):
 
     for end in range(config['monitor_threshold'], limit):
         try:
-            start = 0
+            start = end - 180
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
             projections = model(steps, params[0], params[1], params[2])
