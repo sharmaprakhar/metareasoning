@@ -16,12 +16,12 @@ import utils
 TIME_COST_MULTIPLIER = 0.15
 INTRINSIC_VALUE_MULTIPLIER = 200
 
-SOLUTION_QUALITY_CLASS_COUNT = 20
+SOLUTION_QUALITY_CLASS_COUNT = 15
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 
-MONITOR_THRESHOLD = 30
-WINDOW = None
+MONITOR_THRESHOLD = 4
+WINDOW = 20
 
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
@@ -45,7 +45,7 @@ def run_proposal_experiments(instances, directory):
         estimated_qualities = instances[instance]['estimated_qualities']
 
         file_path = directory + '/' + instance + '.png'
-        results = run_projected_monitoring_experiment(qualities, estimated_qualities, file_path)
+        results = run_proposal_experiment(qualities, estimated_qualities, file_path)
 
         myopic_projected_monitoring_losses.append(results['myopic_projected_monitoring_loss'])
         nonmyopic_projected_monitoring_losses.append(results['nonmyopic_projected_monitoring_loss'])
@@ -117,6 +117,8 @@ def run_benchmark_experiments(instances, directory):
     profile_2 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_2)
     profile_3 = performance.get_dynamic_performance_profile(instances, CONFIG, performance.TYPE_3)
 
+    values = computation.get_optimal_values(profile_2, profile_3, CONFIG)
+
     myopic_monitoring_losses = []
     nonmyopic_monitoring_losses = []
 
@@ -127,7 +129,7 @@ def run_benchmark_experiments(instances, directory):
         estimated_qualities = instances[instance]['estimated_qualities']
 
         file_path = directory + '/' + instance + '.png'
-        results = run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, file_path)
+        results = run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_values, values, profile_1, profile_2, profile_3, file_path)
 
         myopic_monitoring_losses.append(results['myopic_monitoring_loss'])
         nonmyopic_monitoring_losses.append(results['nonmyopic_monitoring_loss'])
@@ -136,7 +138,7 @@ def run_benchmark_experiments(instances, directory):
     print('Myopic Monitoring Average Percent Error: %f%%' % np.average(myopic_monitoring_losses))
 
 
-def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_values, profile_1, profile_2, profile_3, file_path):
+def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_values, values, profile_1, profile_2, profile_3, file_path):
     time_limit = len(qualities)
     steps = range(time_limit)
 
@@ -148,7 +150,7 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
-    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, profile_2, profile_3, time_limit, CONFIG)
+    nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, values, profile_2, profile_3, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
     myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
@@ -192,9 +194,9 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/30-tsp-0.1s.json')
-    run_benchmark_experiments(instances, 'plots')
-    # run_proposal_experiments(instances, 'plots')
+    instances = utils.get_instances('simulations/50-tsp-0.1s.json')
+    # run_benchmark_experiments(instances, 'plots')
+    run_proposal_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
