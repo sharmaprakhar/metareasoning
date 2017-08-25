@@ -85,14 +85,9 @@ def get_dynamic_performance_profile(instances, config, selector):
             if step + 1 < length:
                 origin_quality, target_quality = selector(qualities, estimated_qualities, step)
 
-                # # TODO Figure out why this is happening
-                # origin_quality = 0.999999 if origin_quality > 1 else origin_quality
-                # target_quality = 0.999999 if target_quality > 1 else target_quality
-
                 origin_class = utils.digitize(origin_quality, bounds)
                 target_class = utils.digitize(target_quality, bounds)
 
                 profile[origin_class][step][target_class] += 1
-
 
     return get_normalized_performance_profile(profile, classes, steps)

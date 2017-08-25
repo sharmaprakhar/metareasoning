@@ -54,6 +54,17 @@ def get_myopic_stopping_point(qualities, steps, profile_1, profile_3, limit, con
             return step
 
 
+# def get_myopic_stopping_point(qualities, steps, profile_2, limit, config):
+#     for step in steps:
+#         if step + 1 == limit:
+#             return step
+
+#         mevc = computation.get_mevc(qualities[step], step, profile_2, config)
+
+#         if mevc <= 0:
+#             return step
+
+
 def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
     intrinsic_value_groups = []
     stopping_point = 0
@@ -78,7 +89,8 @@ def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
             if stopping_point < end - 1:
                 return end - 1, intrinsic_value_groups
         except (RuntimeError, TypeError) as e:
-            print(e)
+            # print(e)
+            pass
 
     return stopping_point, intrinsic_value_groups
 
@@ -113,6 +125,7 @@ def get_myopic_projected_stopping_point(qualities, steps, limit, config):
             if next_comprehensive_value - current_comprehensive_value <= 0:
                 return end - 1, intrinsic_value_groups
         except (RuntimeError, TypeError) as e:
-            print(e)
+            # print(e)
+            pass
 
     return stopping_point, intrinsic_value_groups
