@@ -83,8 +83,10 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     nonmyopic_projected_stopping_point, nonmyopic_projected_intrinsic_value_groups = monitor.get_nonmyopic_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
-    nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
+    # myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
+    # nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
+    myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
+    nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
 
     results = {
         'myopic_projected_monitoring_loss': myopic_projected_loss,
@@ -192,8 +194,11 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, values, profile_2, profile_3, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
-    nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+    # myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
+    # nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+
+    myopic_loss = comprehensive_values[myopic_stopping_point]
+    nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
 
     results = {
         'myopic_monitoring_loss': myopic_loss,
