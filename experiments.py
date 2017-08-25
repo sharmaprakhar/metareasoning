@@ -25,7 +25,7 @@ import utils
 # - 10 Q
 # - 0.5 to 1
 
-TIME_COST_MULTIPLIER = 0.001
+TIME_COST_MULTIPLIER = 0.01
 INTRINSIC_VALUE_MULTIPLIER = 200
 
 SOLUTION_QUALITY_CLASS_COUNT = 10
@@ -239,9 +239,9 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/200-qap.json')
-    # run_benchmark_experiments(instances, 'plots')
-    run_proposal_experiments(instances, 'plots')
+    instances = utils.get_instances('simulations/50-qap.json')
+    run_benchmark_experiments(instances, 'plots')
+    # run_proposal_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
