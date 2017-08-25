@@ -25,7 +25,7 @@ import utils
 # - 10 Q
 # - 0.5 to 1
 
-TIME_COST_MULTIPLIER = 0.01
+TIME_COST_MULTIPLIER = 0.001
 INTRINSIC_VALUE_MULTIPLIER = 200
 
 SOLUTION_QUALITY_CLASS_COUNT = 10
@@ -62,10 +62,10 @@ def run_proposal_experiments(instances, directory):
         myopic_projected_monitoring_losses.append(results['myopic_projected_monitoring_loss'])
         nonmyopic_projected_monitoring_losses.append(results['nonmyopic_projected_monitoring_loss'])
 
-    print('Nonmyopic Projected Monitoring Average Percent Error: %f%%' % np.average(nonmyopic_projected_monitoring_losses))
-    print('Nonmyopic Projected Monitoring Standard Error: %f%%' % stats.sem(nonmyopic_projected_monitoring_losses))
-    print('Myopic Projected Monitoring Average Percent Error: %f%%' % np.average(myopic_projected_monitoring_losses))
-    print('Myopic Projected Monitoring Standard Error: %f%%' % stats.sem(myopic_projected_monitoring_losses))
+    print('Nonmyopic Projected Monitoring Average Value: %f' % np.average(nonmyopic_projected_monitoring_losses))
+    print('Nonmyopic Projected Monitoring Standard Error: %f' % stats.sem(nonmyopic_projected_monitoring_losses))
+    print('Myopic Projected Monitoring Average Value: %f' % np.average(myopic_projected_monitoring_losses))
+    print('Myopic Projected Monitoring Standard Error: %f' % stats.sem(myopic_projected_monitoring_losses))
 
 
 def run_proposal_experiment(qualities, estimated_qualities, file_path):
@@ -172,10 +172,10 @@ def run_benchmark_experiments(instances, directory):
         myopic_monitoring_losses.append(results['myopic_monitoring_loss'])
         nonmyopic_monitoring_losses.append(results['nonmyopic_monitoring_loss'])
 
-    print('Nonmyopic Monitoring Average Percent Error: %f%%' % np.average(nonmyopic_monitoring_losses))
-    print('Nonmyopic Monitoring Standard Error: %f%%' % stats.sem(nonmyopic_monitoring_losses))
-    print('Myopic Monitoring Average Percent Error: %f%%' % np.average(myopic_monitoring_losses))
-    print('Myopic Monitoring Standard Error: %f%%' % stats.sem(myopic_monitoring_losses))
+    print('Nonmyopic Monitoring Average Value: %f' % np.average(nonmyopic_monitoring_losses))
+    print('Nonmyopic Monitoring Standard Error: %f' % stats.sem(nonmyopic_monitoring_losses))
+    print('Myopic Monitoring Average Value: %f' % np.average(myopic_monitoring_losses))
+    print('Myopic Monitoring Standard Error: %f' % stats.sem(myopic_monitoring_losses))
 
 
 def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_values, values, profile_1, profile_2, profile_3, file_path):
@@ -240,8 +240,8 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 def main():
     instances = utils.get_instances('simulations/200-qap.json')
-    run_benchmark_experiments(instances, 'plots')
-    # run_proposal_experiments(instances, 'plots')
+    # run_benchmark_experiments(instances, 'plots')
+    run_proposal_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
