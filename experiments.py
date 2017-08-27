@@ -25,14 +25,14 @@ import utils
 # - 10 Q
 # - 0.5 to 1
 
-TIME_COST_MULTIPLIER = 0.01
+TIME_COST_MULTIPLIER = 0.009
 INTRINSIC_VALUE_MULTIPLIER = 200
 
 SOLUTION_QUALITY_CLASS_COUNT = 10
-SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0.70, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1.2, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 
-MONITOR_THRESHOLD = 50
+MONITOR_THRESHOLD = 100
 WINDOW = None
 
 CONFIG = {
@@ -99,7 +99,7 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     plt.ylabel('Value')
 
     axes = plt.gca()
-    axes.set_ylim(bottom=150, top=175)
+    axes.set_ylim(bottom=80, top=120)
     # axes.set_xlim(left=0, right=100)
     # axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
 
@@ -120,8 +120,8 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     plt.annotate('%0.2f - Best Value' % comprehensive_values[optimal_stopping_point], xy=(0, 0), xytext=(10, 160), va='bottom', xycoords='axes fraction', textcoords='offset points', color='limegreen')
     plt.annotate('%0.2f - Best Value - Myopic Projected Monitoring' % comprehensive_values[myopic_projected_stopping_point], xy=(0, 0), xytext=(10, 150), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
     plt.annotate('%0.2f - Best Value - Nonmyopic Projected Monitoring' % comprehensive_values[nonmyopic_projected_stopping_point], xy=(0, 0), xytext=(10, 140), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
-    plt.annotate('%0.2f%% - Error - Myopic Projected Monitoring' % myopic_projected_loss, xy=(0, 0), xytext=(10, 110), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
-    plt.annotate('%0.2f%% - Error - Nonmyopic Projected Monitoring' % nonmyopic_projected_loss, xy=(0, 0), xytext=(10, 100), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
+    plt.annotate('%0.2f - Error - Myopic Projected Monitoring' % myopic_projected_loss, xy=(0, 0), xytext=(10, 110), va='bottom', xycoords='axes fraction', textcoords='offset points', color='m')
+    plt.annotate('%0.2f - Error - Nonmyopic Projected Monitoring' % nonmyopic_projected_loss, xy=(0, 0), xytext=(10, 100), va='bottom', xycoords='axes fraction', textcoords='offset points', color='y')
 
     plt.legend(bbox_to_anchor=(0.0, 1.04, 1.0, 0.102), loc=3, ncol=3, mode='expand', borderaxespad=0.0)
 
@@ -212,7 +212,7 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
     axes = plt.gca()
     # axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
-    axes.set_ylim(bottom=150, top=175)
+    axes.set_ylim(bottom=165, top=190)
 
     plt.plot(steps, average_intrinsic_values[:time_limit], color='b', label='Expected Performance Profile')
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
@@ -239,7 +239,9 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/50-qap.json')
+    instances = utils.get_instances('simulations/10-10-60-jsp.json')
+    # print(get_quality_statistics(instances))
+    # print(instances)
     run_benchmark_experiments(instances, 'plots')
     # run_proposal_experiments(instances, 'plots')
 

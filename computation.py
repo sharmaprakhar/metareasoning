@@ -92,6 +92,8 @@ def get_optimal_values(profile_2, profile_3, config, epsilon=0.1):
 
         values = new_values
         
+        print('Delta: %f' % delta)
+        
         if delta < epsilon:
             return values
 
