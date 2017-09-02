@@ -25,14 +25,14 @@ import utils
 # - 10 Q
 # - 0.5 to 1
 
-TIME_COST_MULTIPLIER = 0.009
+TIME_COST_MULTIPLIER = 0.01
 INTRINSIC_VALUE_MULTIPLIER = 200
 
-SOLUTION_QUALITY_CLASS_COUNT = 10
-SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1.2, SOLUTION_QUALITY_CLASS_COUNT + 1)
+SOLUTION_QUALITY_CLASS_COUNT = 15
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 
-MONITOR_THRESHOLD = 100
+MONITOR_THRESHOLD = 50
 WINDOW = None
 
 CONFIG = {
@@ -85,6 +85,8 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     optimal_value = comprehensive_values[optimal_stopping_point]
     # myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
     # nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
+    # myopic_projected_loss = optimal_value - comprehensive_values[myopic_projected_stopping_point]
+    # nonmyopic_projected_loss = optimal_value - comprehensive_values[nonmyopic_projected_stopping_point]
     myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
     nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
 
@@ -99,9 +101,9 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     plt.ylabel('Value')
 
     axes = plt.gca()
-    axes.set_ylim(bottom=80, top=120)
+    # axes.set_ylim(bottom=80, top=120)
     # axes.set_xlim(left=0, right=100)
-    # axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
+    axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
 
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
@@ -190,12 +192,14 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
     optimal_stopping_point = monitor.get_optimal_stopping_point(comprehensive_values)
     myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_1, profile_3, time_limit, CONFIG)
-    # myopic_stopping_point = monitor.get_myopic_stopping_point(estimated_qualities, steps, profile_2, time_limit, CONFIG)
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, values, profile_2, profile_3, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
     # myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
     # nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+
+    # myopic_loss = optimal_value - comprehensive_values[myopic_stopping_point]
+    # nonmyopic_loss = optimal_value - comprehensive_values[nonmyopic_stopping_point]
 
     myopic_loss = comprehensive_values[myopic_stopping_point]
     nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
@@ -211,8 +215,8 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     plt.ylabel('Value')
 
     axes = plt.gca()
-    # axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
-    axes.set_ylim(bottom=165, top=190)
+    axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
+    # axes.set_ylim(bottom=165, top=190)
 
     plt.plot(steps, average_intrinsic_values[:time_limit], color='b', label='Expected Performance Profile')
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
@@ -239,11 +243,9 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/10-10-60-jsp.json')
-    # print(get_quality_statistics(instances))
-    # print(instances)
-    run_benchmark_experiments(instances, 'plots')
+    instances = utils.get_instances('simulations/70-tsp-0.1s.json')
     # run_proposal_experiments(instances, 'plots')
+    run_benchmark_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
