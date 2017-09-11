@@ -25,14 +25,16 @@ import utils
 # - 10 Q
 # - 0.5 to 1
 
-TIME_COST_MULTIPLIER = 0.01
+
 INTRINSIC_VALUE_MULTIPLIER = 200
 
+TIME_COST_MULTIPLIER = 0.005
 SOLUTION_QUALITY_CLASS_COUNT = 15
+MONITOR_THRESHOLD = 50
+
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 
-MONITOR_THRESHOLD = 50
 WINDOW = None
 
 CONFIG = {
@@ -83,12 +85,13 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     nonmyopic_projected_stopping_point, nonmyopic_projected_intrinsic_value_groups = monitor.get_nonmyopic_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    # myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
-    # nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
+    myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
+    nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
+
     # myopic_projected_loss = optimal_value - comprehensive_values[myopic_projected_stopping_point]
     # nonmyopic_projected_loss = optimal_value - comprehensive_values[nonmyopic_projected_stopping_point]
-    myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
-    nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
+    # myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
+    # nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
 
     results = {
         'myopic_projected_monitoring_loss': myopic_projected_loss,
@@ -195,14 +198,13 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, values, profile_2, profile_3, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    # myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
-    # nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
+    myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
+    nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
 
     # myopic_loss = optimal_value - comprehensive_values[myopic_stopping_point]
     # nonmyopic_loss = optimal_value - comprehensive_values[nonmyopic_stopping_point]
-
-    myopic_loss = comprehensive_values[myopic_stopping_point]
-    nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
+    # myopic_loss = comprehensive_values[myopic_stopping_point]
+    # nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
 
     results = {
         'myopic_monitoring_loss': myopic_loss,
@@ -219,7 +221,7 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     # axes.set_ylim(bottom=165, top=190)
 
     plt.plot(steps, average_intrinsic_values[:time_limit], color='b', label='Expected Performance Profile')
-    plt.plot(steps, -time_costs, color='r', label='Cost of Time')
+    plt.plot(steps, -time_costs, color='r', label='Cost of Time')   
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
 
     plt.scatter(steps, intrinsic_values, color='g', zorder=3, label='Intrinsic Values')
@@ -243,7 +245,7 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/70-tsp-0.1s.json')
+    instances = utils.get_instances('simulations/80-tsp-0.1s.json')
     # run_proposal_experiments(instances, 'plots')
     run_benchmark_experiments(instances, 'plots')
 
