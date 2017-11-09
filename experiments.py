@@ -13,22 +13,8 @@ import tsp
 import tsp_solver
 import utils
 
-# TSP Experiments
-# - 200 IVM
-# - 0.15 CM (Linear)
-# - 15 Q
-# - 0 to 1
-
-# QAP Experiments
-# - 200 IVM
-# - 0.01 CM (Exponential)
-# - 10 Q
-# - 0.5 to 1
-
-
 INTRINSIC_VALUE_MULTIPLIER = 200
-
-TIME_COST_MULTIPLIER = 0.005
+TIME_COST_MULTIPLIER = 0.003
 SOLUTION_QUALITY_CLASS_COUNT = 15
 MONITOR_THRESHOLD = 50
 
@@ -245,7 +231,7 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/80-tsp-0.1s.json')
+    instances = utils.get_instances('simulations/90-tsp-0.1s.json')
     # run_proposal_experiments(instances, 'plots')
     run_benchmark_experiments(instances, 'plots')
 
