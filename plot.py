@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 INTRINSIC_VALUE_MULTIPLIER = 100
 TIME_COST_MULTIPLIER = 0.035
 
-instances = utils.get_instances('simulations/50-tsp-0.1s.json')
+# instances = utils.get_instances('simulations/50-tsp-0.1s.json')
 
 qualities = instances['instance-14']['qualities']
 average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
