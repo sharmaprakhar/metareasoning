@@ -16,7 +16,7 @@ QUALITY_CLASS_COUNT = 100
 QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
 QUALITY_CLASS_BOUNDS = np.linspace(0, 1, QUALITY_CLASS_COUNT)
 TIME_CLASSES = range(50)
-ACTIONS = [0, 1]
+ACTIONS = ['STOP', 'CONTINUE']
 SLEEP_INTERVAL = 0.5
 EPISODES = 200
 LEARNING_RATE = 0.01
@@ -59,7 +59,7 @@ def get_S():
 
 
 def get_initial_Q_function():
-    return {s: {0: random.random(), 1: random.random()} for s in get_S()}
+    return {s: {'STOP': random.random(), 'CONTINUE': random.random()} for s in get_S()}
 
 
 def get_pi(Q):
@@ -93,7 +93,7 @@ def get_Q_function(episodes, learning_rate, epsilon):
         q_class = 0
         t_class = 0
         s = (q_class, t_class)
-        a = 1
+        a = 'CONTINUE'
 
         states = tsp.get_instance(50, 0, 10000, 1)
         start_state = list(states)[0]
@@ -124,7 +124,7 @@ def get_Q_function(episodes, learning_rate, epsilon):
             t_class = next_t_class
             s = (q_class, t_class)
 
-            if a == 0:
+            if a is 'STOP':
                 process.terminate()
                 values.append(t_class)
                 break
