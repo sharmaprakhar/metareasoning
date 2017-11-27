@@ -12,15 +12,16 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 import pylab as pl
 
-SOLUTION_QUALITY_CLASS_COUNT = 100 #20
+SOLUTION_QUALITY_CLASS_COUNT = 100
 SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 
-TIME_CLASSES = range(20)
+TIME_CLASSES = range(50)
 ACTIONS = [0, 1]
 
-EPISODES = 1500
+EPISODES = 200
 LEARNING_RATE = 0.01
+EPSILON = 0.1
 
 SLEEP_INTERVAL = 0.5
 
@@ -30,8 +31,8 @@ def get_S():
 
 
 def get_initial_Q_function():
-    # return {s: {0: 0.1, 1: 0} for s in get_S()}
-    return {s: {0: random.random(), 1: random.random()} for s in get_S()}
+    return {s: {0: 0.1, 1: 0} for s in get_S()}
+    # return {s: {0: random.random(), 1: random.random()} for s in get_S()}
 
 
 def get_pi(Q):
@@ -39,6 +40,7 @@ def get_pi(Q):
 
 
 def U(q, t):
+    # return 100 * q - np.exp((1 / 2) * t)
     return 1000 * q
 
 
@@ -78,17 +80,18 @@ def k_opt_tsp_solver(states, start_state, iterations, memory):
     return tour
 
 
-def get_Q_function():
+def get_Q_function(episodes, learning_rate, epsilon):
+    print('Starting experiment with episodes = %f, learning_rate = %f, and epsilon = %f...' % (episodes, learning_rate, epsilon))
+
     # Create a list to keep track of the stopping points of each episode
     stopping_points = []
-    values = []
 
     # Generate a random Q-value function and its associated policy
     Q = get_initial_Q_function()
     pi = get_pi(Q)
 
     # Learn the Q-value function for all episodes
-    for episode in range(EPISODES):
+    for episode in range(episodes):
         print('Episode %d' % episode)
 
         # Initialize the previous solution quality and computation time
@@ -134,14 +137,10 @@ def get_Q_function():
             # Update the Q-value function and the policy
             r = U(next_q_class, next_t_class) - U(q_class, t_class)
             next_Q_values = get_Q_values(Q, next_s)
-            Q[s][a] += LEARNING_RATE * (r + max(next_Q_values) - Q[s][a])
+            Q[s][a] += learning_rate * (r + max(next_Q_values) - Q[s][a])
             pi[s] = max(Q[s].items(), key=operator.itemgetter(1))[0]
 
-            # Retrieve the action recommended by our exploration policy
-            if episode < 1000:
-                a = pi[next_s] if random.random() > 0.1 else random.choice(ACTIONS)
-            else:
-                a = pi[next_s]
+            a = pi[next_s] if random.random() > epsilon else random.choice(ACTIONS)
 
             # Update the current state
             q = next_q
@@ -152,31 +151,46 @@ def get_Q_function():
 
             # Stop the anytime algorithm accordingly
             if a == 0:
-                # process.terminate()
+                process.terminate()
                 stopping_points.append(t_class)
-                values.append(np.mean(stopping_points[-10:]))
-                # break
-            print((t_class, q_class, r))
+                break
 
             # Sleep to give the anytime algorithm time to compute more solutions
             time.sleep(SLEEP_INTERVAL)
 
-        print(np.mean(stopping_points[-10:]))
+        print(np.mean(stopping_points[-20:]))
 
-
-    plt.figure()
-    plt.title('Learning Curve')
-    plt.xlabel('Episodes')
-    plt.ylabel('Value')
-    plt.plot(range(EPISODES), values)
-    plt.savefig('test.png')
-    plt.close()
+        f = open('experiment-%d-%f-%f.png' % (episodes, learning_rate, epsilon), 'w')
+        for stopping_point in stopping_points:
+            f.write('%d\n' % stopping_point)
+        f.close()
 
     return Q
 
 
 def main():
-    get_Q_function()
+    epsilons = [1, 0]
+
+    for epsilon in epsilons:
+        get_Q_function(EPISODES, epsilon, EPSILON)
+
+    # with open('experiment-200-0.010000-0.000000.png') as f:
+    #     lines = f.read().splitlines()
+
+    # lines = [float(line) for line in lines]
+
+    # values = []
+    # for i in range(len(lines)):
+    #     start = 0 if i - 100 <= 0 else i - 100
+    #     values.append(np.average(lines[start:i]))
+
+    # plt.figure()
+    # plt.title('Learning Curve')
+    # plt.xlabel('Episodes')
+    # plt.ylabel('Value')
+    # plt.plot(range(len(values)), values)
+    # plt.savefig('test.png')
+    # plt.show()
 
 
 if __name__ == "__main__":

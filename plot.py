@@ -9,16 +9,16 @@ TIME_COST_MULTIPLIER = 0.035
 
 # instances = utils.get_instances('simulations/50-tsp-0.1s.json')
 
-qualities = instances['instance-14']['qualities']
-average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
+# qualities = instances['instance-14']['qualities']
+# average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
-TIME_LIMIT = len(qualities)
-STEPS = range(TIME_LIMIT)
-# STEPS = range(50)
-INTRINSIC_VALUES = average_intrinsic_values[:TIME_LIMIT]
-TIME_COSTS = -np.exp(np.multiply(TIME_COST_MULTIPLIER, STEPS))
-COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
-HISTORY_THRESHOLD = 10
+# TIME_LIMIT = len(qualities)
+# STEPS = range(TIME_LIMIT)
+# # STEPS = range(50)
+# INTRINSIC_VALUES = average_intrinsic_values[:TIME_LIMIT]
+# TIME_COSTS = -np.exp(np.multiply(TIME_COST_MULTIPLIER, STEPS))
+# COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
+# HISTORY_THRESHOLD = 10
 
 plt.figure(figsize=(7, 3))
 
@@ -102,20 +102,20 @@ plt.grid(True)
 # plt.annotate('time-dependent\nutility function', xy=(0, 0), xytext=(305, 9), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
 # plt.show()
 
-plt.xlabel('Executions')
-plt.ylabel('Value')
+# plt.xlabel('Executions')
+# plt.ylabel('Value')
 
-plt.scatter(range(21), np.log(range(21)), zorder=5, s=10, color='green')#, zorder=5, color='green', linewidth=2)
-plt.scatter(range(21, 41), np.log(range(10, 30)), zorder=3, s=10, color='red')#, color='red', linewidth=2, zorder=3)
-# plt.plot([70, 70], [100, 250], 'k-', lw=2)
-# plt.plot([20, 21], [np.log(20), np.log(10)], zorder=3, color='red', linewidth=2)
-plt.plot([20.5, 20.5], [0, np.log(20) * 1.2], zorder=2, color='0.2', linewidth=1.75, linestyle='--', dashes=(1, 1))
-# plt.plot([20] * 2, [0, 1], zorder=2, color='C0', linewidth=2)
-plt.annotate('50-TSP', xy=(0, 0), xytext=(80, 112), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
-plt.annotate('60-TSP', xy=(0, 0), xytext=(330, 115), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
-plt.annotate('problem\ntransition', xy=(0, 0), xytext=(228, 37), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+# plt.scatter(range(21), np.log(range(21)), zorder=5, s=10, color='green')#, zorder=5, color='green', linewidth=2)
+# plt.scatter(range(21, 41), np.log(range(10, 30)), zorder=3, s=10, color='red')#, color='red', linewidth=2, zorder=3)
+# # plt.plot([70, 70], [100, 250], 'k-', lw=2)
+# # plt.plot([20, 21], [np.log(20), np.log(10)], zorder=3, color='red', linewidth=2)
+# plt.plot([20.5, 20.5], [0, np.log(20) * 1.2], zorder=2, color='0.2', linewidth=1.75, linestyle='--', dashes=(1, 1))
+# # plt.plot([20] * 2, [0, 1], zorder=2, color='C0', linewidth=2)
+# plt.annotate('50-TSP', xy=(0, 0), xytext=(80, 112), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+# plt.annotate('60-TSP', xy=(0, 0), xytext=(330, 115), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+# plt.annotate('problem\ntransition', xy=(0, 0), xytext=(228, 37), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
 
-plt.show()
+# plt.show()
 
 # plt.xlabel('Steps')
 # plt.ylabel('Solution Quality')
@@ -139,3 +139,24 @@ plt.show()
 # plt.annotate('problem\ntransition', xy=(0, 0), xytext=(222, 37), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
 
 # plt.show()
+
+plt.xlabel('Steps')
+plt.ylabel('Solution Quality')
+
+end = 2.5
+bins = 100
+plt.plot(np.linspace(0, end, bins), np.arctan(np.multiply(1.1, np.linspace(0, end, bins))), zorder=6,  linewidth=2, color='green')#, zorder=5, color='green', linewidth=2)
+plt.plot(np.linspace(0, end, bins), np.arctan(np.power(np.linspace(0, end, bins), 1.7)), zorder=5,  linewidth=2, color='red')
+plt.scatter([1.16], [0.91], color='blue', zorder=77)
+# plt.scatter(range(21, 41), np.arctan(range(10, 30)), zorder=3, s=10, color='red')#, color='red', linewidth=2, zorder=3)
+# plt.plot([70, 70], [100, 250], 'k-', lw=2)
+# plt.plot([20, 21], [np.log(20), np.log(10)], zorder=3, color='red', linewidth=2)
+# plt.plot([20.5, 20.5], [0, np.log(20) * 1.2], zorder=2, color='0.2', linewidth=1.75, linestyle='--', dashes=(1, 1))
+# # plt.plot([20] * 2, [0, 1], zorder=2, color='C0', linewidth=2)
+# plt.annotate('50-TSP', xy=(0, 0), xytext=(80, 112), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+# plt.annotate('60-TSP', xy=(0, 0), xytext=(330, 115), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+plt.annotate('Weight 0.60', xy=(0, 0), xytext=(170, 55), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+plt.annotate('Weight 0.75', xy=(0, 0), xytext=(61, 75), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+# plt.annotate('problem\ntransition', xy=(0, 0), xytext=(228, 37), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+
+plt.show()
