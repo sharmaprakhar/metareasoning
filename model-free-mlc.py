@@ -67,7 +67,7 @@ def get_pi(Q):
 
 
 def U(q, t):
-    return 1000 * q
+    return 100 * q - np.exp(0.25 * t)
 
 
 def get_Q_values(Q, s):
@@ -77,12 +77,16 @@ def get_Q_values(Q, s):
 def get_Q_function(episodes, learning_rate, epsilon):
     print('{"episodes": %f, "learning_rate": %f, "epsilon": %f}' % (episodes, learning_rate, epsilon))
 
-    values = []
+    actual_values = []
+    optimal_values = []
 
     Q = get_initial_Q_function()
     pi = get_pi(Q)
 
     for episode in range(episodes):
+        is_terminated = False
+        observed_values = []
+
         start_q = 0
         start_t = time.time()
 
@@ -113,7 +117,8 @@ def get_Q_function(episodes, learning_rate, epsilon):
             next_t_class = round((next_t - start_t) / SLEEP_INTERVAL)
             next_s = (next_q_class, next_t_class)
 
-            r = U(next_q_class, next_t_class) - U(q_class, t_class)
+            current_value = U(next_q_class, next_t_class)
+            r = current_value - U(q_class, t_class)
             next_Q_values = get_Q_values(Q, next_s)
             Q[s][a] += learning_rate * (r + max(next_Q_values) - Q[s][a])
             pi[s] = max(Q[s].items(), key=operator.itemgetter(1))[0]
@@ -124,17 +129,21 @@ def get_Q_function(episodes, learning_rate, epsilon):
             t_class = next_t_class
             s = (q_class, t_class)
 
-            if a is 'STOP':
-                process.terminate()
-                values.append(t_class)
-                break
+            if a is 'STOP' and not is_terminated:
+                actual_values.append(current_value)
+                is_terminated = True
+
+            observed_values.append(current_value)
 
             time.sleep(SLEEP_INTERVAL)
 
-        print('{"episode": %d, "value": %f}' % (episode, np.mean(values[-20:])))
+        print(observed_values)
+        optimal_values.append(max(observed_values))
+
+        print('{"episode": %d, "actual_value": %f, "optimal_value": %f}' % (episode, actual_values[-1], optimal_values[-1]))
 
     f = open('experiment-%d-%f-%f.png' % (episodes, learning_rate, epsilon), 'w')
-    for value in values:
+    for value in actual_values:
         f.write('%d\n' % value)
     f.close()
 
