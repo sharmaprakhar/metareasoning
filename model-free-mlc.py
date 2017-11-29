@@ -16,11 +16,17 @@ QUALITY_CLASS_COUNT = 100
 QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
 QUALITY_CLASS_BOUNDS = np.linspace(0, 1, QUALITY_CLASS_COUNT)
 TIME_CLASSES = range(50)
+
 ACTIONS = ['STOP', 'CONTINUE']
 SLEEP_INTERVAL = 0.5
+
 EPISODES = 200
 LEARNING_RATE = 0.01
-EPSILON = 0.1
+EPSILON = 0.2
+
+TRAINING_INSTANCES = 500
+TEST_INSTANCES = 5
+
 
 def k_opt_tsp_solver(states, start_state, iterations, memory):
     tour = tsp.get_initial_random_tour(states, start_state)
@@ -74,16 +80,19 @@ def get_Q_values(Q, s):
     return [Q[s][a] for a in Q[s]]
 
 
-def get_Q_function(episodes, learning_rate, epsilon):
+def get_Q_function(episodes, learning_rate, epsilon, is_training=True, default_Q=None):
     print('{"episodes": %f, "learning_rate": %f, "epsilon": %f}' % (episodes, learning_rate, epsilon))
+    print("Training Mode" if is_training else "Testing Mode")
 
     actual_values = []
-    optimal_values = []
+    statistics = []
 
-    Q = get_initial_Q_function()
+    Q = get_initial_Q_function() if default_Q is None else default_Q
     pi = get_pi(Q)
 
     for episode in range(episodes):
+        print('    Episode %d' % episode)
+
         is_terminated = False
         observed_values = []
 
@@ -133,46 +142,23 @@ def get_Q_function(episodes, learning_rate, epsilon):
                 actual_values.append(current_value)
                 is_terminated = True
 
-            observed_values.append(current_value)
+                if is_training:
+                    process.terminate()
+                    break
 
+            observed_values.append(current_value)
             time.sleep(SLEEP_INTERVAL)
 
-        print(observed_values)
-        optimal_values.append(max(observed_values))
+        if observed_values:
+            statistics.append((actual_values[-1], max(observed_values)))
 
-        print('{"episode": %d, "actual_value": %f, "optimal_value": %f}' % (episode, actual_values[-1], optimal_values[-1]))
-
-    f = open('experiment-%d-%f-%f.png' % (episodes, learning_rate, epsilon), 'w')
-    for value in actual_values:
-        f.write('%d\n' % value)
-    f.close()
-
-    return Q
+    return Q, statistics
 
 
 def main():
-    epsilons = [1, 0]
-
-    for epsilon in epsilons:
-        get_Q_function(EPISODES, epsilon, EPSILON)
-
-    # with open('experiment-200-0.010000-0.000000.png') as f:
-    #     lines = f.read().splitlines()
-
-    # lines = [float(line) for line in lines]
-
-    # values = []
-    # for i in range(len(lines)):
-    #     start = 0 if i - 100 <= 0 else i - 100
-    #     values.append(np.average(lines[start:i]))
-
-    # plt.figure()
-    # plt.title('Learning Curve')
-    # plt.xlabel('Episodes')
-    # plt.ylabel('Value')
-    # plt.plot(range(len(values)), values)
-    # plt.savefig('test.png')
-    # plt.show()
+    Q, _ = get_Q_function(TRAINING_INSTANCES, LEARNING_RATE, EPSILON)
+    _, statistics = get_Q_function(TEST_INSTANCES, 0, 0, is_training=False, default_Q=Q)
+    print(statistics)
 
 
 if __name__ == "__main__":
