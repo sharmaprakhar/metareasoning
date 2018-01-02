@@ -4,7 +4,6 @@ import numpy as np
 
 import computation
 
-
 def pop(queue):
     minimum_value = float('inf')
     minimum_key = None

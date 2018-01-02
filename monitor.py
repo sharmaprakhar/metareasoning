@@ -7,7 +7,6 @@ import computation
 
 import utils
 
-
 def get_optimal_stopping_point(comprehensive_values):
     return list(comprehensive_values).index(max(comprehensive_values))
 

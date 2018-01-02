@@ -9,8 +9,6 @@ import scipy.stats as stats
 import computation
 import monitor
 import performance
-import tsp
-import tsp_solver
 import utils
 
 INTRINSIC_VALUE_MULTIPLIER = 200

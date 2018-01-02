@@ -71,9 +71,9 @@ def get_optimal_values(profile_2, profile_3, config, epsilon=0.2):
                     delta = max(delta, abs(new_values[origin_class][step] - values[origin_class][step]))
 
         values = new_values
-        
+
         print('Delta: %f' % delta)
-        
+
         if delta < epsilon:
             return values
 
