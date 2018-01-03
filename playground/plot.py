@@ -7,30 +7,30 @@ from scipy.optimize import curve_fit
 INTRINSIC_VALUE_MULTIPLIER = 100
 TIME_COST_MULTIPLIER = 0.035
 
-# instances = utils.get_instances('simulations/50-tsp-0.1s.json')
+instances = utils.get_instances('simulations/50-tsp-0.1s.json')
 
-# qualities = instances['instance-14']['qualities']
-# average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
+qualities = instances['instance-14']['qualities']
+average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
-# TIME_LIMIT = len(qualities)
-# STEPS = range(TIME_LIMIT)
-# # STEPS = range(50)
-# INTRINSIC_VALUES = average_intrinsic_values[:TIME_LIMIT]
-# TIME_COSTS = -np.exp(np.multiply(TIME_COST_MULTIPLIER, STEPS))
-# COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
-# HISTORY_THRESHOLD = 10
+TIME_LIMIT = len(qualities)
+STEPS = range(TIME_LIMIT)
+# STEPS = range(50)
+INTRINSIC_VALUES = average_intrinsic_values[:TIME_LIMIT]
+TIME_COSTS = -np.exp(np.multiply(TIME_COST_MULTIPLIER, STEPS))
+COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
+HISTORY_THRESHOLD = 10
 
-plt.figure(figsize=(7, 3))
+# plt.figure(figsize=(7, 3))
 
-plt.rcParams["font.family"] = "Times New Roman"
-plt.rcParams["font.size"] = 14
-ax = plt.gca()
-ax.spines['right'].set_visible(False)
-ax.set_yticklabels([])
-ax.set_xticklabels([])
-ax.spines['top'].set_visible(False)
-plt.rcParams['grid.linestyle'] = "-"
-plt.grid(True)
+# plt.rcParams["font.family"] = "Times New Roman"
+# plt.rcParams["font.size"] = 14
+# ax = plt.gca()
+# ax.spines['right'].set_visible(False)
+# ax.set_yticklabels([])
+# ax.set_xticklabels([])
+# ax.spines['top'].set_visible(False)
+# plt.rcParams['grid.linestyle'] = "-"
+# plt.grid(True)
 
 # Value vs. Time Plot instance 21
 # plt.xlabel('Time Steps')
@@ -82,25 +82,25 @@ plt.grid(True)
 
 # plt.show()
 
-# # Myopic vs. Nonmyopic Stopping Condition
-# plt.xlabel('Time Steps')
-# plt.ylabel('Utility')
+# Myopic vs. Nonmyopic Stopping Condition
+plt.xlabel('Time Steps')
+plt.ylabel('Utility')
 
-# INTRINSIC_VALUES[30:37] = list(reversed(np.arange(39, 43.381634140656061, 0.1)))[0:7]
-# COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
-# optimal_stopping_point = monitor.get_optimal_stopping_point(COMPREHENSIVE_VALUES) 
+INTRINSIC_VALUES[30:37] = list(reversed(np.arange(39, 43.381634140656061, 0.1)))[0:7]
+COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
+optimal_stopping_point = monitor.get_optimal_stopping_point(COMPREHENSIVE_VALUES) 
 
-# COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
+COMPREHENSIVE_VALUES = INTRINSIC_VALUES + TIME_COSTS
 
-# # plt.plot(np.divide(STEPS, 10), INTRINSIC_VALUES, color='green')
-# # plt.plot(np.divide(STEPS, 10), TIME_COSTS, color='red')
-# plt.plot(np.divide(STEPS, 10), COMPREHENSIVE_VALUES, linewidth=2)
-# plt.scatter([optimal_stopping_point / 10], COMPREHENSIVE_VALUES[optimal_stopping_point], color='green', zorder=5)
-# plt.scatter(2.9, 40.65, color='red', zorder=5)
-# plt.annotate('myopic\nstopping point', xy=(0, 0), xytext=(64, 132), va='bottom', xycoords='axes fraction', textcoords='offset points',  ha='center')
-# plt.annotate('nonmyopic\nstopping point', xy=(0, 0), xytext=(203, 121), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
-# plt.annotate('time-dependent\nutility function', xy=(0, 0), xytext=(305, 9), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
-# plt.show()
+# plt.plot(np.divide(STEPS, 10), INTRINSIC_VALUES, color='green')
+# plt.plot(np.divide(STEPS, 10), TIME_COSTS, color='red')
+plt.plot(np.divide(STEPS, 10), COMPREHENSIVE_VALUES, linewidth=2)
+plt.scatter([optimal_stopping_point / 10], COMPREHENSIVE_VALUES[optimal_stopping_point], color='green', zorder=5)
+plt.scatter(2.9, 40.65, color='red', zorder=5)
+plt.annotate('myopic\nstopping point', xy=(0, 0), xytext=(64, 132), va='bottom', xycoords='axes fraction', textcoords='offset points',  ha='center')
+plt.annotate('nonmyopic\nstopping point', xy=(0, 0), xytext=(203, 121), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+plt.annotate('time-dependent\nutility function', xy=(0, 0), xytext=(305, 9), va='bottom', xycoords='axes fraction', textcoords='offset points', ha='center')
+plt.show()
 
 # plt.xlabel('Executions')
 # plt.ylabel('Value')
