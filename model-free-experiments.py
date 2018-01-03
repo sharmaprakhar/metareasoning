@@ -1,64 +1,19 @@
 import itertools
 import operator
 import random
-import time
-from multiprocessing import Manager, Process
 
-import matplotlib.pyplot as plt
 import numpy as np
-import pylab as pl
-from sklearn import linear_model, svm
 
-import tsp
 import utils
 
 QUALITY_CLASS_COUNT = 100
 QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
 QUALITY_CLASS_BOUNDS = np.linspace(0, 1, QUALITY_CLASS_COUNT)
-TIME_CLASSES = range(50)
 
 ACTIONS = ['STOP', 'CONTINUE']
-SLEEP_INTERVAL = 0.5
 
-EPISODES = 200
 LEARNING_RATE = 0.01
 EPSILON = 0.2
-
-TRAINING_INSTANCES = 500
-TEST_INSTANCES = 5
-
-
-def k_opt_tsp_solver(states, start_state, iterations, memory):
-    tour = tsp.get_initial_random_tour(states, start_state)
-    cities = tsp.get_swappable_cities(tour)
-    distance = tsp.get_tour_distance(tour)
-
-    for _ in range(iterations):
-        has_changed = False
-
-        best_tour = tour
-        best_distance = distance
-        for first_key, second_key in itertools.combinations(cities, 2):
-            current_tour = tsp.get_mutated_tour(tour, first_key, second_key)
-            current_distance = tsp.get_tour_distance(current_tour)
-
-            if current_distance < best_distance:
-                best_tour = current_tour
-                best_distance = current_distance
-
-                has_changed = True
-
-        tour = best_tour
-        distance = best_distance
-
-        memory['q'] = distance
-        memory['t'] = time.time()
-
-        if not has_changed:
-            break
-
-    return tour
-
 
 def get_S():
     return list(itertools.product(QUALITY_CLASSES, TIME_CLASSES))
@@ -80,85 +35,41 @@ def get_Q_values(Q, s):
     return [Q[s][a] for a in Q[s]]
 
 
-def get_Q_function(episodes, learning_rate, epsilon, is_training=True, default_Q=None):
-    print('{"episodes": %f, "learning_rate": %f, "epsilon": %f}' % (episodes, learning_rate, epsilon))
-    print("Training Mode" if is_training else "Testing Mode")
-
-    actual_values = []
-    statistics = []
-
-    Q = get_initial_Q_function() if default_Q is None else default_Q
+def get_Q_function(instances, alpha, epsilon):
+    Q = get_initial_Q_function()
     pi = get_pi(Q)
 
-    for episode in range(episodes):
-        print('    Episode %d' % episode)
-
-        is_terminated = False
-        observed_values = []
-
-        start_q = 0
-        start_t = time.time()
-
-        memory = Manager().dict()
-        memory['q'] = start_q
-        memory['t'] = start_t
+    for instance in instances:
+        print('Episode:', instance)
 
         q_class = 0
         t_class = 0
         s = (q_class, t_class)
         a = 'CONTINUE'
 
-        states = tsp.get_instance(50, 0, 10000, 1)
-        start_state = list(states)[0]
-
-        heuristic = tsp.get_mst_distance(start_state, states)
-
-        process = Process(target=k_opt_tsp_solver, args=(states, start_state, 1000, memory))
-        process.start()
-
-        time.sleep(SLEEP_INTERVAL)
-
-        while process.is_alive():
-            next_q = heuristic / (memory['q'] + 0.00001)
-            next_t = memory['t']
-
-            next_q_class = utils.digitize(next_q, QUALITY_CLASS_BOUNDS)
-            next_t_class = round((next_t - start_t) / SLEEP_INTERVAL)
+        for q in instances[instance]['estimated_qualities']:
+            next_q_class = utils.digitize(q, QUALITY_CLASS_BOUNDS)
+            next_t_class = t_class + 1
             next_s = (next_q_class, next_t_class)
 
-            current_value = U(next_q_class, next_t_class)
-            r = current_value - U(q_class, t_class)
+            r = U(next_q_class, next_t_class) - U(q_class, t_class)
             next_Q_values = get_Q_values(Q, next_s)
-            Q[s][a] += learning_rate * (r + max(next_Q_values) - Q[s][a])
+            Q[s][a] += alpha * (r + max(next_Q_values) - Q[s][a])
             pi[s] = max(Q[s].items(), key=operator.itemgetter(1))[0]
-
-            a = pi[next_s] if random.random() > epsilon else random.choice(ACTIONS)
 
             q_class = next_q_class
             t_class = next_t_class
             s = (q_class, t_class)
+            a = pi[s] if random.random() > epsilon else random.choice(ACTIONS)
 
-            if a is 'STOP' and not is_terminated:
-                actual_values.append(current_value)
-                is_terminated = True
+            if a is 'STOP':
+                break
 
-                if is_training:
-                    process.terminate()
-                    break
-
-            observed_values.append(current_value)
-            time.sleep(SLEEP_INTERVAL)
-
-        if observed_values:
-            statistics.append((actual_values[-1], max(observed_values)))
-
-    return Q, statistics
+    return Q
 
 
 def main():
-    Q, _ = get_Q_function(TRAINING_INSTANCES, LEARNING_RATE, EPSILON)
-    _, statistics = get_Q_function(TEST_INSTANCES, 0, 0, is_training=False, default_Q=Q)
-    print(statistics)
+    pass
 
 
 if __name__ == "__main__":
