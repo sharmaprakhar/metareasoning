@@ -1,9 +1,5 @@
-import json
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
-import pylab as pl
 import scipy.stats as stats
 
 import computation
@@ -12,15 +8,12 @@ import performance
 import utils
 
 INTRINSIC_VALUE_MULTIPLIER = 200
-TIME_COST_MULTIPLIER = 0.003
+TIME_COST_MULTIPLIER = 0.075
 SOLUTION_QUALITY_CLASS_COUNT = 15
-MONITOR_THRESHOLD = 50
-
-SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(1, 150, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
-
+MONITOR_THRESHOLD = 10
 WINDOW = None
-
 CONFIG = {
     'time_cost_multiplier': TIME_COST_MULTIPLIER,
     'intrinsic_value_multiplier': INTRINSIC_VALUE_MULTIPLIER,
@@ -33,6 +26,8 @@ CONFIG = {
 
 
 def run_proposal_experiments(instances, directory):
+    instances = utils.get_transformed_instances(instances, lambda x:x + 150)
+
     myopic_projected_monitoring_losses = []
     nonmyopic_projected_monitoring_losses = []
 
@@ -40,7 +35,7 @@ def run_proposal_experiments(instances, directory):
         print('Experiment: %s' % instance)
 
         qualities = instances[instance]['qualities']
-        estimated_qualities = instances[instance]['estimated_qualities']
+        estimated_qualities =  instances[instance]['estimated_qualities']
 
         file_path = directory + '/' + instance + '.png'
         results = run_proposal_experiment(qualities, estimated_qualities, file_path)
@@ -69,13 +64,12 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     nonmyopic_projected_stopping_point, nonmyopic_projected_intrinsic_value_groups = monitor.get_nonmyopic_projected_stopping_point(estimated_qualities, steps, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
-    nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
-
+    # myopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_projected_stopping_point])
+    # nonmyopic_projected_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_projected_stopping_point])
     # myopic_projected_loss = optimal_value - comprehensive_values[myopic_projected_stopping_point]
     # nonmyopic_projected_loss = optimal_value - comprehensive_values[nonmyopic_projected_stopping_point]
-    # myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
-    # nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
+    myopic_projected_loss = comprehensive_values[myopic_projected_stopping_point]
+    nonmyopic_projected_loss = comprehensive_values[nonmyopic_projected_stopping_point]
 
     results = {
         'myopic_projected_monitoring_loss': myopic_projected_loss,
@@ -87,18 +81,10 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     plt.xlabel('Time')
     plt.ylabel('Value')
 
-    axes = plt.gca()
-    # axes.set_ylim(bottom=80, top=120)
-    # axes.set_xlim(left=0, right=100)
-    axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
-
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')
     plt.plot(steps, comprehensive_values, color='k', label='Comprehensive Values')
     plt.plot(steps, myopic_projected_intrinsic_value_groups[-1], color='m')
     plt.plot(steps, nonmyopic_projected_intrinsic_value_groups[-1], color='y')
-
-    # for group in nonmyopic_projected_intrinsic_value_groups:
-    #     plt.plot(steps, group)
 
     plt.scatter(steps, intrinsic_values, color='g', zorder=3, label='Intrinsic Values')
     plt.scatter(steps, estimated_intrinsic_values, color='darkorange', zorder=3, label='Estimated Intrinsic Values')
@@ -120,18 +106,9 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
     return results
 
 
-def get_quality_statistics(instances):
-    start_qualities = []
-    end_qualities = []
-
-    for key in instances:
-        start_qualities.append(instances[key]['estimated_qualities'][0])
-        end_qualities.append(instances[key]['estimated_qualities'][-1])
-
-    return min(start_qualities), max(end_qualities)
-
-
 def run_benchmark_experiments(instances, directory):
+    instances = utils.get_transformed_instances(instances, lambda x:x + 150)
+
     average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
     print('Making profile 1...')
@@ -182,13 +159,12 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     nonmyopic_stopping_point = monitor.get_nonmyopic_stopping_point(estimated_qualities, steps, values, profile_2, profile_3, time_limit, CONFIG)
 
     optimal_value = comprehensive_values[optimal_stopping_point]
-    myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
-    nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
-
+    # myopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[myopic_stopping_point])
+    # nonmyopic_loss = utils.get_percent_error(optimal_value, comprehensive_values[nonmyopic_stopping_point])
     # myopic_loss = optimal_value - comprehensive_values[myopic_stopping_point]
     # nonmyopic_loss = optimal_value - comprehensive_values[nonmyopic_stopping_point]
-    # myopic_loss = comprehensive_values[myopic_stopping_point]
-    # nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
+    myopic_loss = comprehensive_values[myopic_stopping_point]
+    nonmyopic_loss = comprehensive_values[nonmyopic_stopping_point]
 
     results = {
         'myopic_monitoring_loss': myopic_loss,
@@ -199,10 +175,6 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     plt.title('Performance Profile')
     plt.xlabel('Time')
     plt.ylabel('Value')
-
-    axes = plt.gca()
-    axes.set_ylim(bottom=time_costs[-1] * -1.1, top=intrinsic_values[-1] * 1.1)
-    # axes.set_ylim(bottom=165, top=190)
 
     plt.plot(steps, average_intrinsic_values[:time_limit], color='b', label='Expected Performance Profile')
     plt.plot(steps, -time_costs, color='r', label='Cost of Time')   
@@ -229,9 +201,9 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
 
 
 def main():
-    instances = utils.get_instances('simulations/90-tsp-0.1s.json')
-    # run_proposal_experiments(instances, 'plots')
-    run_benchmark_experiments(instances, 'plots')
+    instances = utils.get_instances('simulations/epic-test.json')
+    run_proposal_experiments(instances, 'plots')
+    # run_benchmark_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':
