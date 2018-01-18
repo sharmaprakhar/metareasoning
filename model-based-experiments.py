@@ -119,6 +119,10 @@ def run_benchmark_experiments(instances, directory):
     print('Computing optimal values...')
     values = computation.get_optimal_values(profile_2, profile_3, CONFIG)
 
+    print('Saving policy...')
+    policy = computation.get_policy(values, profile_2, profile_3, CONFIG)
+    utils.save_policy(policy, 'policy.json')
+
     myopic_monitoring_losses = []
     nonmyopic_monitoring_losses = []
 
@@ -222,10 +226,10 @@ def main():
     # instances = utils.get_transformed_instances(instances, lambda x:x / 399.673370361328
     
     instances = utils.get_instances('simulations/10-10-20-jsp.json')
-    instances = {'instance-48': instances['instance-48']}
+    # instances = {'instance-48': instances['instance-48']}
     # print(get_statistics(instances, 'qualities'))
-    run_proposal_experiments(instances, 'plots')
-    # run_benchmark_experiments(instances, 'plots')
+    # run_proposal_experiments(instances, 'plots')
+    run_benchmark_experiments(instances, 'plots')
 
 
 if __name__ == '__main__':

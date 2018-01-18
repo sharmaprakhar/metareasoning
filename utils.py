@@ -44,6 +44,11 @@ def get_intrinsic_value_groups(instances, multiplier, key):
     return [computation.get_intrinsic_values(instance[key], multiplier) for instance in instances.values()]
 
 
+def save_policy(policy, filename):
+    with open(filename, 'w') as file:
+        json.dump(policy, file, sort_keys=True, indent=4)
+
+
 def get_instances(filename):
     with open(filename) as file:
         return json.load(file)

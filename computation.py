@@ -95,3 +95,29 @@ def get_optimal_action(quality, step, values, profile_2, profile_3, config):
         continue_value += profile_2[origin_class][step][target_class] * values[target_class][step + 1]
 
     return STOP_SYMBOL if stop_value >= continue_value else CONTINUE_SYMBOL
+
+
+def get_policy(values, profile_2, profile_3, config):
+    limit = len(profile_3[0])
+
+    policy = {quality_class: limit * [0] for quality_class in config['solution_quality_classes']}
+
+    for quality_class in config['solution_quality_classes']:
+        for step in range(limit):
+            if step + 1 < limit:
+                stop_value = 0
+                continue_value = 0
+
+                for target_class in config['solution_quality_classes']:
+                    target_quality = utils.get_bin_value(target_class, config['solution_quality_class_count'])
+
+                    intrinsic_value = get_intrinsic_values(target_quality, config['intrinsic_value_multiplier'])
+                    time_cost = get_time_costs(step, config['time_cost_multiplier'])
+                    comprehensive_value = get_comprehensive_values(intrinsic_value, time_cost)
+                    
+                    stop_value += profile_3[quality_class][step][target_class] * comprehensive_value
+                    continue_value += profile_2[quality_class][step][target_class] * values[target_class][step + 1]
+
+                policy[quality_class][step] = STOP_SYMBOL if stop_value >= continue_value else CONTINUE_SYMBOL
+
+    return policy
