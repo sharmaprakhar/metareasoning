@@ -10,7 +10,7 @@ import utils
 INTRINSIC_VALUE_MULTIPLIER = 200
 TIME_COST_MULTIPLIER = 0.075
 SOLUTION_QUALITY_CLASS_COUNT = 15
-SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(1, 150, SOLUTION_QUALITY_CLASS_COUNT + 1)
+SOLUTION_QUALITY_CLASS_BOUNDS = np.linspace(0, 1, SOLUTION_QUALITY_CLASS_COUNT + 1)
 SOLUTION_QUALITY_CLASSES = range(SOLUTION_QUALITY_CLASS_COUNT)
 MONITOR_THRESHOLD = 10
 WINDOW = None
@@ -26,8 +26,6 @@ CONFIG = {
 
 
 def run_proposal_experiments(instances, directory):
-    instances = utils.get_transformed_instances(instances, lambda x:x + 150)
-
     myopic_projected_monitoring_losses = []
     nonmyopic_projected_monitoring_losses = []
 
@@ -107,8 +105,6 @@ def run_proposal_experiment(qualities, estimated_qualities, file_path):
 
 
 def run_benchmark_experiments(instances, directory):
-    instances = utils.get_transformed_instances(instances, lambda x:x + 150)
-
     average_intrinsic_values = utils.get_average_intrinsic_values(instances, INTRINSIC_VALUE_MULTIPLIER)
 
     print('Making profile 1...')
@@ -200,8 +196,34 @@ def run_benchmark_experiment(qualities, estimated_qualities, average_intrinsic_v
     return results
 
 
+def get_statistics(instances, attribute):
+    minimum = float('inf')
+    maxiumum = float('-inf')
+    
+    for instance in instances:
+        current_minimum = min(instances[instance][attribute])
+        if minimum > current_minimum:
+            minimum = current_minimum
+
+        current_maximum = max(instances[instance][attribute])
+        if maxiumum < current_maximum:
+            maxiumum = current_maximum
+
+    return minimum, maxiumum
+
+
 def main():
-    instances = utils.get_instances('simulations/epic-test.json')
+    # instances = utils.get_instances('simulations/mine-s.json')
+    # instances = utils.get_transformed_instances(instances, lambda x:x + 258.6470031738281)
+    # instances = utils.get_transformed_instances(instances, lambda x:x / 258.6470031738281)
+
+    # instances = utils.get_instances('simulations/mine-l.json')
+    # instances = utils.get_transformed_instances(instances, lambda x:x + 399.6733703613281)
+    # instances = utils.get_transformed_instances(instances, lambda x:x / 399.673370361328
+    
+    instances = utils.get_instances('simulations/10-10-20-jsp.json')
+    instances = {'instance-48': instances['instance-48']}
+    # print(get_statistics(instances, 'qualities'))
     run_proposal_experiments(instances, 'plots')
     # run_benchmark_experiments(instances, 'plots')
 

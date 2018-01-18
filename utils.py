@@ -90,10 +90,8 @@ def get_average_intrinsic_values(instances, multiplier):
 
 
 def get_transformed_instances(instances, f):
-    transformed_instances = {}
+    transformed_instances = instances
     for instance in instances:
-        transformed_instances[instance] = {
-            'qualities': [f(q) for q in instances[instance]['qualities']],
-            'estimated_qualities': [f(q) for q in instances[instance]['estimated_qualities']]
-        }
+        transformed_instances[instance]['qualities'] = [f(q) for q in instances[instance]['qualities']]
+        transformed_instances[instance]['estimated_qualities'] = [f(q) for q in instances[instance]['estimated_qualities']]
     return transformed_instances
