@@ -64,7 +64,6 @@ def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
             start = 0 if config['window'] is None else end - config['window']
 
             params, _ = curve_fit(model, steps[start:end], qualities[start:end])
-            # TODO Fix this to include the actual performance
             projections = model(steps, params[0], params[1], params[2])
 
             intrinsic_values = computation.get_intrinsic_values(projections, config['intrinsic_value_multiplier'])
