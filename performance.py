@@ -32,10 +32,6 @@ def get_probabilistic_performance_profile(instances, config):
     for step in steps:
         for qualities in trimmed_groups:
             target_quality = qualities[step]
-
-            # TODO Figure out why this is happening
-            # target_quality = 0.999999 if target_quality > 1 else target_quality
-
             target_class = utils.digitize(target_quality, config['solution_quality_class_bounds'])
             profile[step][target_class] += 1
 
@@ -84,7 +80,6 @@ def get_dynamic_performance_profile(instances, config, selector):
         for step in steps:
             if step + 1 < length:
                 origin_quality, target_quality = selector(qualities, estimated_qualities, step)
-
                 origin_class = utils.digitize(origin_quality, bounds)
                 target_class = utils.digitize(target_quality, bounds)
 

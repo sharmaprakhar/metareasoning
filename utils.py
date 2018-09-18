@@ -44,6 +44,11 @@ def get_intrinsic_value_groups(instances, multiplier, key):
     return [computation.get_intrinsic_values(instance[key], multiplier) for instance in instances.values()]
 
 
+def save_policy(policy, filename):
+    with open(filename, 'w') as file:
+        json.dump(policy, file, sort_keys=True, indent=4)
+
+
 def get_instances(filename):
     with open(filename) as file:
         return json.load(file)
@@ -87,3 +92,11 @@ def get_average_intrinsic_values(instances, multiplier):
     max_length = get_max_list_length(intrinsic_value_groups)
     trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
     return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
+
+
+def get_transformed_instances(instances, f):
+    transformed_instances = instances
+    for instance in instances:
+        transformed_instances[instance]['qualities'] = [f(q) for q in instances[instance]['qualities']]
+        transformed_instances[instance]['estimated_qualities'] = [f(q) for q in instances[instance]['estimated_qualities']]
+    return transformed_instances

@@ -76,7 +76,6 @@ def get_nonmyopic_projected_stopping_point(qualities, steps, limit, config):
             if stopping_point < end - 1:
                 return end - 1, intrinsic_value_groups
         except (RuntimeError, TypeError) as e:
-            # print(e)
             pass
 
     return stopping_point, intrinsic_value_groups
@@ -112,7 +111,6 @@ def get_myopic_projected_stopping_point(qualities, steps, limit, config):
             if next_comprehensive_value - current_comprehensive_value <= 0:
                 return end - 1, intrinsic_value_groups
         except (RuntimeError, TypeError) as e:
-            # print(e)
             pass
 
     return stopping_point, intrinsic_value_groups
