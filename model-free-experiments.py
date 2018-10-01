@@ -26,10 +26,12 @@ def get_S():
 
 
 def get_initial_Q_value_function():
+	#random q function
     return {s: {'STOP': random.random(), 'CONTINUE': random.random()} for s in get_S()}
 
 
 def get_pi(Q):
+	#get greedy policy
     return {s: max(Q[s].items(), key=operator.itemgetter(1))[0] for s in get_S()}
 
 
@@ -51,15 +53,17 @@ def get_Q_value_function(instances, alpha, epsilon, default_Q_value_function=Non
 
     Q = get_initial_Q_value_function() if default_Q_value_function is None else default_Q_value_function
     pi = get_pi(Q)
-
+    #run the training loop for every instance
     for instance in instances:
         is_terminated = False
 
         q_class = 0
         t_class = 0
+        #initial state is (0,0)
         s = (q_class, t_class)
         a = 'CONTINUE'
 
+        #for every instance of the TSP(e.g. 50, 60, 90 etc.)
         for q in instance:
             next_q_class = utils.digitize(q, QUALITY_CLASS_BOUNDS)
             next_t_class = t_class + 1
@@ -98,21 +102,21 @@ def main():
     Q_value_function, training_statistics = get_Q_value_function(dataset, LEARNING_RATE, EPSILON)
     # _, test_statistics = get_Q_value_function(dataset[:1000], 0, 0, default_Q_value_function=Q_value_function)
 
-    plt.figure(figsize=(7, 3))
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.size"] = 14
-    ax = plt.gca()
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    plt.rcParams['grid.linestyle'] = "-"
-    plt.grid(True)
+    # plt.figure(figsize=(7, 3))
+    # plt.rcParams["font.family"] = "Times New Roman"
+    # plt.rcParams["font.size"] = 14
+    # ax = plt.gca()
+    # ax.spines['right'].set_visible(False)
+    # ax.spines['top'].set_visible(False)
+    # plt.rcParams['grid.linestyle'] = "-"
+    # plt.grid(True)
 
-    plt.xlabel('Trials')
-    plt.ylabel('Utility')
+    # plt.xlabel('Trials')
+    # plt.ylabel('Utility')
 
-    plt.plot(range(len(training_statistics['smoothed_actual_stopping_values'])), training_statistics['smoothed_actual_stopping_values'], color='green', linewidth=2)
-    plt.tight_layout()
-    plt.show()
+    # plt.plot(range(len(training_statistics['smoothed_actual_stopping_values'])), training_statistics['smoothed_actual_stopping_values'], color='green', linewidth=2)
+    # plt.tight_layout()
+    # plt.show()
 
 
 if __name__ == '__main__':
