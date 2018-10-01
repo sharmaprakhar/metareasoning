@@ -77,7 +77,7 @@ class agent:
         if p>=self.params['epsilon']:
             a = np.argmax(self.curr_Q)
         else:
-            a = random.randint(0,1)
+            a = random.randint(0,1) #check this - choosing random action from 0,1 right now
         return a 
 
     def mini_method(self, env):
