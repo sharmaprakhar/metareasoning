@@ -26,6 +26,10 @@ class fnApprox:
         for a in self.params_dict['actions']:
             self.weights_init.update({a:np.zeros((1, self.psi_shape))})
 
+    def reset_weights(self):
+        self.init_weights()
+        self.curr_weights = self.weights_init
+
     def update_Q(self, psi_s):
         for each_action in self.params_dict['actions']:
             self.current_Q[each_action] = ((self.curr_weights[each_action]).dot(self.psi_s))
@@ -55,9 +59,13 @@ class fnApprox:
     def norm_state(self, s):
         """
         As solution qualities are in [0,1), no need to normalize q
-        How do I normalize t -- ? from timesteps !
         """
-        return [0.5, 1]
+        #taking max t as a general t=200 to be safe
+        norm_s = s[0]
+        norm_t = (s[1]-0)/200
+        assert norm_t < 1
+        assert norm_s < 1
+        return [norm_s, norm_t]
 
 
 
@@ -76,7 +84,7 @@ class agent:
 
     def next_action(self):
         p = random.uniform(0,1)
-        if p>=self.params['epsilon']:
+        if p<=self.params['epsilon']:
             a = np.argmax(self.curr_Q)
         else:
             a = random.randint(0,1)
@@ -99,69 +107,66 @@ class agent:
         action is pushed to fnApprox
         """
         print('Running sarsa on:', env.___name___)
-        max_reward = 0
         RAS_mean = np.zeros((self.params['trials'], self.params['episodes']))
         self.mini_method(env)
         for t in range(self.params['trials']):
+            self.fn.reset_weights()
             for e in range(self.params['episodes']):
-                # initial s already set while setiing curr_Q above in mini_method
                 self.mini_method(env)
                 a = self.next_action()
                 r_cum = 0
-                for ti in range(self.params['timesteps']):
+                while True:
                     s_prime, r, done = env.step(a)
                     r_cum += r
-                    if r_cum>max_reward:
-                        max_reward = r_cum
                     if done:
                         break
                     psi_prime = self.fn.calculate_fourier(s_prime)
                     self.curr_Q = self.fn.update_Q(psi_prime)
                     a_prime = self.next_action()
-                    # update weights for each a using TD update rule
                     self.fn.update_params(a, a_prime, self.psi, psi_prime, r)
-                    # previous s/a/psi = next s/a/psi and repeat
                     s = s_prime
                     a = a_prime
                     self.psi = psi_prime
-                # The current algo runs till either
-                # data exhaustion or till stopped by RL agent
                 RAS_mean[t][e] = r_cum
-        print(max_reward)
-        #plot_mean(RAS_mean)
+            # print('\n cumulative reward for first episode', r_cum)
+            # import sys
+            # sys.exit()
+        #print(max_reward)
+        plot_mean(RAS_mean)
         return
 
     def run_Q(self):
-        print('Running Q-learning on:', env.___name___)
-        max_reward = 0
-        RAS_mean = np.zeros((self.params['trials'], self.params['episodes']))
-        self.mini_method(env)
-        for t in range(self.params['trials']):
-            for e in range(self.params['episodes']):
-                # initial s already set while setiing curr_Q above in mini_method
-                self.mini_method(env)
-                r_cum = 0
-                for ti in range(self.params['timesteps']):
-                    # self.mini_method(env) - write this function !! - calculate fourier not this
-                    a = self.next_action()
-                    s_prime, r, done = env.step(a)
-                    r_cum += r
-                    if r_cum>max_reward:
-                        max_reward = r_cum
-                    if done:
-                        break
-                    psi_prime = self.fn.calculate_fourier(s_prime)
-                    self.curr_Q = self.fn.update_Q(psi_prime)
-                    a_prime = self.next_action()
-                    # update weights for each a using TD update rule
-                    self.fn.update_params(a, a_prime, self.psi, psi_prime, r)
-                    # previous s/a/psi = next s/a/psi and repeat
-                    s = s_prime
-                    self.psi = psi_prime
-                # The current algo runs till either
-                # data exhaustion or till stopped by RL agent
-                RAS_mean[t][e] = r_cum
-        print(max_reward)
-        plot_mean(RAS_mean)
+        pass
+        # print('Running Q-learning on:', env.___name___)
+        # max_reward = 0
+        # RAS_mean = np.zeros((self.params['trials'], self.params['episodes']))
+        # self.mini_method(env)
+        # for t in range(self.params['trials']):
+        #     for e in range(self.params['episodes']):
+        #         # initial s already set while setiing curr_Q above in mini_method
+        #         self.mini_method(env)
+        #         r_cum = 0
+        #         for ti in range(self.params['timesteps']):
+        #             # self.mini_method(env) - write this function !! - calculate fourier not this
+        #             a = self.next_action()
+        #             s_prime, r, done = env.step(a)
+        #             r_cum += r
+        #             if r_cum>max_reward:
+        #                 max_reward = r_cum
+        #             if done:
+        #                 break
+        #             psi_prime = self.fn.calculate_fourier(s_prime)
+        #             self.curr_Q = self.fn.update_Q(psi_prime)
+        #             a_prime = self.next_action()
+        #             # update weights for each a using TD update rule
+        #             self.fn.update_params(a, a_prime, self.psi, psi_prime, r)
+        #             # previous s/a/psi = next s/a/psi and repeat
+        #             s = s_prime
+        #             self.psi = psi_prime
+        #         # The current algo runs till either
+        #         # data exhaustion or till stopped by RL agent
+        #         RAS_mean[t][e] = r_cum
+        # print(max_reward)
+        # plot_mean(RAS_mean)
         return
 

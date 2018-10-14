@@ -1,8 +1,9 @@
 import sys
 import argparse
-import metaPyAgent
+# import metaPyAgent
+import mpyAg
 #import gym
-import environment 
+import en
 ##############################
 # AGENT PARAMS:
 # Fixed: num_actions, num_states(if applicable)
@@ -19,7 +20,7 @@ parser.add_argument('-gamma', type=float, required=True, help='discount factor')
 parser.add_argument('-order', type=int, required=True, help='fourier basis order')
 parser.add_argument('-episodes', type=int, required=True, help='number of epiosdes to be run')
 parser.add_argument('-trials', type=int, required=True, help='number of trials')
-parser.add_argument('-ti', type=int, required=True, help='number of timesteps')
+parser.add_argument('-ti', type=int, required=False, help='number of timesteps')
 
 #trials and timesteps are optional because they both can be extracted from the dataset
 args = parser.parse_args()
@@ -37,8 +38,8 @@ params['alpha'] = args.alpha
 def main():
     #env = gym.make('MountainCar-v0')
     performance_file = '../simulations/50-tsp-0.1s.json'
-    e = environment.env(performance_file)
-    agent = metaPyAgent.agent(params)
+    e = en.env(performance_file)
+    agent = mpyAg.agent(params)
     if args.algo=='sarsa':
         agent.run_sarsa(e)
     elif args.algo=='Q':
