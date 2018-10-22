@@ -36,14 +36,14 @@ params['alpha'] = args.alpha
 
 
 def main():
-    #env = gym.make('MountainCar-v0')
     performance_file = '../simulations/50-tsp-0.1s.json'
     e = en.env(performance_file)
     agent = mpyAg.agent(params)
     if args.algo=='sarsa':
         agent.run_sarsa(e)
     elif args.algo=='Q':
-        agent.run_Q(e)
+    	print('running Q ... ')
+    	agent.run_Q(e)
 
 if __name__=="__main__":
     main()

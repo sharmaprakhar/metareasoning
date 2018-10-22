@@ -8,7 +8,7 @@ def plot_data(y_data, err=None, x_data=None):
 		x_axis = range(len(y_data))
 	# plt.errorbar(x_axis, y_data, yerr=err, linestyle='--')
 	plt.errorbar(x_axis, y_data, yerr=err, ecolor='r')
-	plt.title('SARSA')
+	plt.title('PERFORMANCE')
 	plt.xlabel('episodes')
 	plt.ylabel('cumulative reward')
 	plt.grid(True)

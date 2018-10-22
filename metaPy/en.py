@@ -48,6 +48,19 @@ class env:
             return True
         return False
 
+    def optim_point(self):
+        alpha = 200.0
+        beta = 0.25
+        maxU_list = []
+        for inst in self.d.appended_dataset:
+            maxU = 0
+            for qt in inst:
+                U = alpha*qt[0] - math.exp(beta*qt[1])
+                if U>maxU:
+                    maxU=U
+            maxU_list.append(maxU)
+        return maxU_list
+
     def s(self):
         return self.d.appended_dataset[self.instance_identifier][self.current_quality_identifier]
 
