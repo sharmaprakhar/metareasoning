@@ -93,12 +93,10 @@ def get_Q_value_function(instances, alpha, epsilon, default_Q_value_function=Non
 
 def main():
     instances = utils.get_instances('simulations/50-tsp-0.1s.json')
-
     dataset = []
     for _ in range(INSTANCE_COUNT):
         key = random.choice(list(instances.keys()))
         dataset.append(instances[key]['estimated_qualities'])
-
     Q_value_function, training_statistics = get_Q_value_function(dataset, LEARNING_RATE, EPSILON)
     # _, test_statistics = get_Q_value_function(dataset[:1000], 0, 0, default_Q_value_function=Q_value_function)
 
