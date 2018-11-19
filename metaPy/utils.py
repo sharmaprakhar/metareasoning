@@ -26,3 +26,42 @@ def plot_mean(arr):
 	mean=mean.reshape(mean.shape[1])
 	std=std.reshape(std.shape[1])
 	plot_data(mean, std)
+
+def init_interface(numfeatures, numactions):
+    lamda = .888
+    #LSTD params
+    w = np.zeros((numfeatures * numactions, 1))
+    numTheta = numfeatures * numactions
+    A = np.zeros((numfeatures + numTheta, numfeatures + numTheta))
+    b = np.zeros((numfeatures + numTheta,1))
+    z_stat=np.zeros((numfeatures + numTheta,1))
+    theta = np.zeros((numfeatures * numactions, 1))
+    # w = np.zeros((numfeatures * numactions, 1))
+    return theta, lamda, A, b, z_stat
+
+def getactionProbabilities(features, numactions, theta):
+    # actionProbabilities = np.zeros((1,numactions))
+    actionProbabilities = np.zeros((numactions))
+    numfeatures = len(features)
+    for a in range(numactions):
+        actionProbabilities[a] = features.T.dot(theta[numfeatures*a : (numfeatures*a + numfeatures)])
+    actionProbabilities_exp = np.exp(actionProbabilities)
+    actionProbabilities_sum = np.sum(actionProbabilities_exp)
+    actionProbabilities = actionProbabilities_exp/actionProbabilities_sum
+    return actionProbabilities
+    
+def dlnpi(features, theta, numactions, action, numfeatures):
+    action += 1
+    actionProbabilities = getactionProbabilities(features, numactions, theta)
+    result = np.zeros((1, (numactions * numfeatures))) #row vector
+    for a in range(numactions):
+        if a==action:
+            result[0, numfeatures*action : (numfeatures*action + numfeatures)] = features.T * (1 - actionProbabilities[action])
+        else: 
+            result[0, numfeatures*a : (numfeatures*a + numfeatures)] = -1 * features.T * actionProbabilities[a]
+    return result
+
+def getAction(actionProbabilities, actions): #specific to three actions
+    #probs = np.ndarray.flatten(actionProbabilities)
+    action = np.random.choice(actions, p=actionProbabilities)
+    return action

@@ -1,7 +1,7 @@
 import sys
 import argparse
 # import metaPyAgent
-import mpyAg
+import mpyAg_test
 #import gym
 import en
 ##############################
@@ -38,12 +38,15 @@ params['alpha'] = args.alpha
 def main():
     performance_file = '../simulations/50-tsp-0.1s.json'
     e = en.env(performance_file)
-    agent = mpyAg.agent(params)
+    agent = mpyAg_test.agent(params)
     if args.algo=='sarsa':
         agent.run_sarsa(e)
     elif args.algo=='Q':
     	print('running Q ... ')
     	agent.run_Q(e)
+    elif args.algo=='nac-lstd':
+    	print('running NAC-LSTD')
+    	agent.run_nac_lstd(e)
 
 if __name__=="__main__":
     main()
