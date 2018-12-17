@@ -27,6 +27,8 @@ def plot_mean(arr):
 	std=std.reshape(std.shape[1])
 	plot_data(mean, std)
 
+
+## NAC LSTD UTILS ##
 def init_interface(numfeatures, numactions):
     lamda = .888
     #LSTD params
@@ -49,7 +51,7 @@ def getactionProbabilities(features, numactions, theta):
     actionProbabilities_sum = np.sum(actionProbabilities_exp)
     actionProbabilities = actionProbabilities_exp/actionProbabilities_sum
     return actionProbabilities
-    
+
 def dlnpi(features, theta, numactions, action, numfeatures):
     action += 1
     actionProbabilities = getactionProbabilities(features, numactions, theta)

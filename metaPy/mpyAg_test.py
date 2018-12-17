@@ -169,10 +169,11 @@ class agent:
         RAS_mean = np.zeros((self.params['trials'], self.params['episodes']))
         ti = 0
         for t in range(self.params['trials']):
+            z_stat.fill(0)
             for e in range(self.params['episodes']):
                 s=env.reset()
                 r_cum=0
-                z_stat.fill(0) #reset z after every episode
+                #z_stat.fill(0) #reset z after every episode
                 # for ti in range(timesteps):
                 while True:
                     ti += 1
@@ -190,7 +191,7 @@ class agent:
                     z_stat = lamda * z_stat + phi_hat
                     A = A + np.outer(z_stat, (phi_hat - self.params['gamma'] * phi_tilde)) 
                     b = b + z_stat * r
-                    if ti%20==0: #hyperparameter
+                    if ti%1==0: #hyperparameter
                         A_inv = np.linalg.pinv(A)
                         v_w_update = A_inv.dot(b) #separate the two!!
                         w = v_w_update[numfeatures : numfeatures+(numfeatures * numactions)]

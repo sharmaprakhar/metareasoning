@@ -4,6 +4,7 @@ import argparse
 import mpyAg_test
 #import gym
 import en
+import tab_q
 ##############################
 # AGENT PARAMS:
 # Fixed: num_actions, num_states(if applicable)
@@ -39,6 +40,12 @@ def main():
     performance_file = '../simulations/50-tsp-0.1s.json'
     e = en.env(performance_file)
     agent = mpyAg_test.agent(params)
+    baseline = tab_q.tabQ(params)
+
+    baseline.run_tabQ(e)
+    import sys
+    sys.exit()
+
     if args.algo=='sarsa':
         agent.run_sarsa(e)
     elif args.algo=='Q':
