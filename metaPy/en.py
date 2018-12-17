@@ -1,3 +1,9 @@
+##############################################################################
+# TSP solution profiles as RL environments
+# Input: json files comtaining TSP instances
+# import scheme: import en
+# Author: Prakhar Sharma
+##############################################################################
 import numpy as np
 import json
 import math

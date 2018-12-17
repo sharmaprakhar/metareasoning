@@ -67,3 +67,10 @@ def getAction(actionProbabilities, actions): #specific to three actions
     #probs = np.ndarray.flatten(actionProbabilities)
     action = np.random.choice(actions, p=actionProbabilities)
     return action
+
+def digitize(item, bins):
+    for i, _ in enumerate(bins):
+        if i + 1 < len(bins):
+            if bins[i] <= item < bins[i + 1]:
+                return i
+    return len(bins) - 1

@@ -1,4 +1,8 @@
-#import gym
+##############################################################################
+# SARSA and Q-learning for metareasoning
+# Author: Prakhar Sharma
+##############################################################################
+
 import sys
 import math
 import random

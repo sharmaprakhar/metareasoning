@@ -1,22 +1,22 @@
+##############################################################################
+# Tabular Q-learning for metareasoning - treated as a baseline
+# Author: Prakhar Sharma
+##############################################################################
 import itertools
 import operator
 import random
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-# import utils_orig
 from utils import *
-from utils_orig import *
+# from utils_orig import *
 
 
 QUALITY_CLASS_COUNT = 100
 QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
 QUALITY_CLASS_BOUNDS = np.linspace(0, 1, QUALITY_CLASS_COUNT)
-
 TIME_CLASS_COUNT = 200
 TIME_CLASSES = range(TIME_CLASS_COUNT)
-INSTANCE_COUNT = 5000
 
 class tabQ:
     def __init__(self, params_dict=None):
