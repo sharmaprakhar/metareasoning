@@ -1,3 +1,7 @@
+##############################################################################
+# Main module for metaPy
+# Author: Prakhar Sharma
+##############################################################################
 import sys
 import argparse
 # import metaPyAgent
@@ -42,17 +46,15 @@ def main():
     agent = mpyAg_test.agent(params)
     baseline = tab_q.tabQ(params)
 
-    baseline.run_tabQ(e)
+    baseline.run_tabSarsa(e)
     import sys
     sys.exit()
 
     if args.algo=='sarsa':
         agent.run_sarsa(e)
     elif args.algo=='Q':
-    	print('running Q ... ')
     	agent.run_Q(e)
     elif args.algo=='nac-lstd':
-    	print('running NAC-LSTD')
     	agent.run_nac_lstd(e)
 
 if __name__=="__main__":

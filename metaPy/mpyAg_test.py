@@ -195,7 +195,7 @@ class agent:
                     z_stat = lamda * z_stat + phi_hat
                     A = A + np.outer(z_stat, (phi_hat - self.params['gamma'] * phi_tilde)) 
                     b = b + z_stat * r
-                    if ti%1==0: #hyperparameter
+                    if ti%10==0: #hyperparameter
                         A_inv = np.linalg.pinv(A)
                         v_w_update = A_inv.dot(b) #separate the two!!
                         w = v_w_update[numfeatures : numfeatures+(numfeatures * numactions)]
@@ -206,6 +206,7 @@ class agent:
                         A = A * 0
                         b = b * 0
                 RAS_mean[t][e] = r_cum
-                print("NAC_LSTD: total_reward for Trial {2} episode {0} : {1}".format(e,r_cum,t))
+                # print("NAC_LSTD: total_reward for Trial {2} episode {0} : {1}".format(e,r_cum,t))
+        plot_mean(RAS_mean)
         # return mean, std
 
