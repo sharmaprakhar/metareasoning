@@ -156,10 +156,10 @@ class agent:
                     self.fn.update_params(a, a_prime, self.psi, psi_prime, r)
                     s = s_prime
                 RAS_mean[t][e] = r_cum
-        maxU_list = env.optim_point()
-        assert len(r_track_list)==len(maxU_list)
-        for i in range(49):
-            print('{} : {}'.format(r_track_list[i], maxU_list[i]))
+        # maxU_list = env.optim_point()
+        # assert len(r_track_list)==len(maxU_list)
+        # for i in range(49):
+        #     print('{} : {}'.format(r_track_list[i], maxU_list[i]))
         plot_mean(RAS_mean)
         return
 

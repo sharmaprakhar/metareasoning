@@ -44,11 +44,11 @@ def main():
     performance_file = '../simulations/50-tsp-0.1s.json'
     e = en.env(performance_file)
     agent = mpyAg_test.agent(params)
-    baseline = tab_q.tabQ(params)
+    # baseline = tab_q.tabQ(params)
 
-    baseline.run_tabSarsa(e)
-    import sys
-    sys.exit()
+    # baseline.run_tabSarsa(e)
+    # import sys
+    # sys.exit()
 
     if args.algo=='sarsa':
         agent.run_sarsa(e)

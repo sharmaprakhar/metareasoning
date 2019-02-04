@@ -56,7 +56,8 @@ class env:
 
     def optim_point(self):
         alpha = 200.0
-        beta = 0.25
+        # beta = 0.25
+        beta = 0.03
         maxU_list = []
         for inst in self.d.appended_dataset:
             maxU = 0
