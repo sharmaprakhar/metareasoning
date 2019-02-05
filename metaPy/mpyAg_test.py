@@ -125,6 +125,7 @@ class agent:
 
     def run_Q(self, env):
         print('Running Q-learning on:', env.___name___)
+        inst=0
         RAS_mean = np.zeros((self.params['trials'], self.params['episodes']))
         self.mini_method(env)
         for t in range(self.params['trials']):
@@ -147,6 +148,7 @@ class agent:
                     if a==0 and e==199:
                         r_track_list.append(r_track)
                         r_track = 0
+                        inst+=1
 
                     if done:
                         break
@@ -156,11 +158,13 @@ class agent:
                     self.fn.update_params(a, a_prime, self.psi, psi_prime, r)
                     s = s_prime
                 RAS_mean[t][e] = r_cum
-        # maxU_list = env.optim_point()
+        print(len(r_track_list))
+        maxU_list = env.optim_point()
+        print(len(maxU_list))
         # assert len(r_track_list)==len(maxU_list)
-        # for i in range(49):
-        #     print('{} : {}'.format(r_track_list[i], maxU_list[i]))
-        plot_mean(RAS_mean)
+        for i in range(49):
+            print('{} : {} : {}%'.format(r_track_list[i], maxU_list[i], int((r_track_list[i]/maxU_list[i])*100)))
+        # plot_mean(RAS_mean)
         return
 
     def run_nac_lstd(self, env):
