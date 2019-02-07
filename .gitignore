@@ -4,3 +4,5 @@ launch.json
 plots/
 .vscode
 tags
+__pycache__
+*.pyc
