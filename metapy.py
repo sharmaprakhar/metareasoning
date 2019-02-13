@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt
 
 import env
-import fourier_agent
+import linear_agent
 import table_agent
 
 
@@ -46,7 +46,7 @@ def main():
         prakhar = table_agent.Agent(params, anytime_algorithm_env)
     elif args.function == "fourier":
         print("Using the Fourier function approximation...")
-        prakhar = fourier_agent.Agent(params, anytime_algorithm_env)
+        prakhar = linear_agent.Agent(params, anytime_algorithm_env)
     else:
         print("Encountered an unrecognized function approximation:", args.function)
         sys.exit()

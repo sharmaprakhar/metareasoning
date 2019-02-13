@@ -17,20 +17,22 @@ class Agent:
         self.function_approximation = FunctionApproximation(params, env)
         self.action_value_function = self.function_approximation.get_initial_action_value_function()
 
-    def get_action(self):
+    def get_optimal_action(self, state):
+        return np.argmax(self.action_value_function[state])
+
+    def get_action(self, state):
         if random.random() > self.params["epsilon"]:
-            return np.argmax(self.action_value_function)
+            return self.get_optimal_action(state)
         return random.choice(self.env.ACTIONS)
 
     def run_q_learning(self, statistics):
         for _ in range(self.params['episodes']):
             state = self.env.reset()
+            psi = self.function_approximation.calculate_fourier_approximation(state)
 
             while True:
-                psi = self.function_approximation.calculate_fourier(state)
-                self.action_value_function = self.function_approximation.update_action_value_function(psi)
-
-                action = self.get_action()
+                self.action_value_function = self.function_approximation.update_action_value_function(state, psi)
+                action = self.get_action(state)
 
                 next_state, reward, is_episode_done = self.env.step(action)
 
@@ -45,29 +47,27 @@ class Agent:
 
                     break
 
-                psi_prime = self.function_approximation.calculate_fourier(next_state)
-                self.action_value_function = self.function_approximation.update_action_value_function(psi_prime)
+                next_action = self.get_optimal_action(next_state)
+                next_psi = self.function_approximation.calculate_fourier_approximation(next_state)
+                self.function_approximation.update_weights(action, next_action, psi, next_psi, reward)
 
-                next_action = self.get_action()
-                self.function_approximation.update_weights(action, next_action, psi, psi_prime, reward)
                 state = next_state
+                psi = next_psi
 
     def run_sarsa(self, statistics):
         for _ in range(self.params['episodes']):
             state = self.env.reset()
+            psi = self.function_approximation.calculate_fourier_approximation(state)
 
-            psi = self.function_approximation.calculate_fourier(state)
-            self.action_value_function = self.function_approximation.update_action_value_function(psi)
-
-            action = self.get_action()
+            self.action_value_function = self.function_approximation.update_action_value_function(state, psi)
+            action = self.get_action(state)
 
             while True:
                 next_state, reward, is_episode_done = self.env.step(action)
+                next_psi = self.function_approximation.calculate_fourier_approximation(next_state)
 
-                next_psi = self.function_approximation.calculate_fourier(state)
-                self.action_value_function = self.function_approximation.update_action_value_function(next_psi)
-
-                next_action = self.get_action()
+                self.action_value_function = self.function_approximation.update_action_value_function(next_state, next_psi)
+                next_action = self.get_action(next_state)
 
                 self.function_approximation.update_weights(action, next_action, psi, next_psi, reward)
 
@@ -83,7 +83,7 @@ class Agent:
                     break
 
                 state = next_state
-                action = next_action
                 psi = next_psi
+                action = next_action
 
                 self.params['epsilon'] *= self.params['decay']
