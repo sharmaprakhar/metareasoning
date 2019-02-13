@@ -7,8 +7,8 @@ import numpy as np
 from function_approximation import FunctionApproximation
 
 
-# TODO Discuss with Prakhar each type of agent
-# TODO Perhaps make self.env.actions accessed through a getter
+# TODO Discuss with Prakhar each agent
+# TODO Maybe make self.env.actions accessed through a getter
 # TODO Clean up some more
 class Agent:
     def __init__(self, params, env):
