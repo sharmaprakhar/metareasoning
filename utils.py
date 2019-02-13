@@ -1,52 +1,20 @@
 import json
+import math
 
+import matplotlib.pyplot as plt
 import numpy as np
 
-import computation
+# TODO Remove unused functions if necessary
+def plot_data(y_data, yerr=None, x_data=None):
+    if not x_data:
+        x_axis = range(len(y_data))
 
-def pop(queue):
-    minimum_value = float('inf')
-    minimum_key = None
-
-    for key in queue:
-        if queue[key] < minimum_value:
-            minimum_value = queue[key]
-            minimum_key = key
-
-    del queue[minimum_key]
-
-    return minimum_key
-
-
-def get_max_list_length(lists):
-    return max(len(inner_list) for inner_list in lists)
-
-
-def get_trimmed_lists(groups, max_length):
-    trimmed_groups = []
-
-    for solution_qualities in groups:
-        trimmed_group = list(solution_qualities)
-
-        while len(trimmed_group) < max_length:
-            trimmed_group.append(trimmed_group[-1])
-
-        trimmed_groups.append(trimmed_group)
-
-    return trimmed_groups
-
-
-def get_groups(instances, key):
-    return [instance[key] for instance in instances.values()]
-
-
-def get_intrinsic_value_groups(instances, multiplier, key):
-    return [computation.get_intrinsic_values(instance[key], multiplier) for instance in instances.values()]
-
-
-def save_policy(policy, filename):
-    with open(filename, 'w') as file:
-        json.dump(policy, file, sort_keys=True, indent=4)
+    plt.errorbar(x_axis, y_data, yerr=yerr, ecolor="r")
+    plt.title("Performance")
+    plt.xlabel("Episodes")
+    plt.ylabel("Cumulative Reward")
+    plt.grid(True)
+    plt.show()
 
 
 def get_instances(filename):
@@ -54,9 +22,61 @@ def get_instances(filename):
         return json.load(file)
 
 
-def get_column(lists, index):
-    array = np.array(lists)
-    return array[:, index]
+def plot_mean(arr):
+    mean = arr.mean(axis=0, keepdims=True)
+    mean = mean.reshape(mean.shape[1])
+
+    std = np.std(arr, axis=0, keepdims=True)
+    std = std.reshape(std.shape[1])
+
+    plot_data(mean, std)
+
+
+def init_interface(num_features, num_actions, l=0.999):
+    num_theta = num_features * num_actions
+
+    theta = np.zeros((num_features * num_actions, 1))
+    A = np.zeros((num_features + num_theta, num_features + num_theta))
+    b = np.zeros((num_features + num_theta, 1))
+    z_stat = np.zeros((num_features + num_theta, 1))
+
+    return theta, l, A, b, z_stat
+
+
+def get_action_probabilities(features, num_actions, theta):
+    action_probabilities = np.zeros((num_actions))
+
+    num_features = len(features)
+
+    for i in range(num_actions):
+        start_index = num_features * i
+        end_index = num_features * i + num_features
+        action_probabilities[i] = features.T.dot(theta[start_index:end_index])
+
+    action_probabilities_exp = np.exp(action_probabilities)
+    action_probabilities_sum = np.sum(action_probabilities_exp)
+    action_probabilities = action_probabilities_exp / action_probabilities_sum
+
+    return action_probabilities
+
+
+def dlnpi(features, theta, num_actions, action, num_features):
+    action += 1
+
+    action_probabilities = get_action_probabilities(features, num_actions, theta)
+
+    result = np.zeros((1, (num_actions * num_features)))
+    for i in range(num_actions):
+        if i == action:
+            result[0, num_features*action : (num_features * action + num_features)] = features.T * (1 - action_probabilities[action])
+        else:
+            result[0, num_features * i : (num_features * i + num_features)] = -1 * features.T * action_probabilities[i]
+
+    return result
+
+
+def get_action(action_probabilities, actions):
+    return np.random.choice(actions, p=action_probabilities)
 
 
 def digitize(item, bins):
@@ -67,37 +87,15 @@ def digitize(item, bins):
     return len(bins) - 1
 
 
-def get_bin_value(bin, bin_size):
-    length = 1 / bin_size
-    offset = length / 2
-    return (bin / bin_size) + offset
+def get_dataset(problem_file):
+    instances = get_instances(problem_file)
+
+    dataset = []
+    for instance in instances.values():
+        dataset.append([(quality, time) for time, quality in enumerate(instance["estimated_qualities"])])
+
+    return dataset
 
 
-def get_line_components(line):
-    filename, raw_optimal_distance = line.split(',')
-
-    stripped_optimal_distance = raw_optimal_distance.strip()
-    truncated_optimal_distance = stripped_optimal_distance.split('.')[0]
-    casted_optimal_distance = int(truncated_optimal_distance)
-
-    return filename, casted_optimal_distance
-
-
-def get_percent_error(accepted_value, approximate_value):
-    return np.absolute(accepted_value - approximate_value) / accepted_value * 100
-
-
-def get_average_intrinsic_values(instances, multiplier):
-    intrinsic_value_groups = get_intrinsic_value_groups(instances, multiplier, 'qualities')
-    max_length = get_max_list_length(intrinsic_value_groups)
-    trimmed_intrinsic_value_groups = get_trimmed_lists(intrinsic_value_groups, max_length)
-    return [sum(intrinsic_values) / len(intrinsic_values) for intrinsic_values in zip(*trimmed_intrinsic_value_groups)]
-
-
-def get_transformed_instances(instances, f):
-    transformed_instances = instances
-    for instance in instances:
-        transformed_instances[instance]['qualities'] = [f(q) for q in instances[instance]['qualities']]
-        transformed_instances[instance]['estimated_qualities'] = [f(q) for q in instances[instance]['estimated_qualities']]
-    return transformed_instances
-    
+def get_time_dependent_utility(quality, time, alpha, beta):
+    return alpha * quality - math.exp(beta * time)

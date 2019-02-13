@@ -4,7 +4,7 @@ import numpy as np
 
 import utils
 
-# Clean up some more
+# TODO Clean up some more
 class Environment:
     STOP_ACTION = 0
     CONTINUE_ACTION = 1

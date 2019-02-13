@@ -11,6 +11,7 @@ import table_agent
 def main():
     # TODO Add more accurate fields to each argument
     # TODO Add back in trials if necessary
+    # TODO Should this really be a fork?
     parser = argparse.ArgumentParser(description="Run a reinforcement learning agent with a function approximation.")
     parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent")
     parser.add_argument("-problem", type=str, required=True, help="The problem file")
