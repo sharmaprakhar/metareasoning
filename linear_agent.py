@@ -7,15 +7,17 @@ import numpy as np
 from function_approximation import FunctionApproximation
 
 
-# TODO Discuss with Prakhar each agent
-# TODO Maybe make self.env.actions accessed through a getter
-# TODO Clean up some more
 class Agent:
     def __init__(self, params, env):
         self.params = params
         self.env = env
         self.function_approximation = FunctionApproximation(params, env)
         self.action_value_function = self.function_approximation.get_initial_action_value_function()
+
+    def transfer(self, params, env, action_value_function):
+        self.params = params
+        self.env = env
+        self.function_approximation = FunctionApproximation(params, env, action_value_function)
 
     def get_optimal_action(self, state):
         return np.argmax(self.action_value_function[state])
@@ -42,8 +44,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-20]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
 
                     break
 
@@ -77,8 +80,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-20]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
 
                     break
 

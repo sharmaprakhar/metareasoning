@@ -4,14 +4,12 @@ import math
 import numpy as np
 
 
-# TODO Should I rename this class?
-# TODO Verify with Prakhar that I didn't break anything
 class FunctionApproximation:
-    def __init__(self, param, env):
+    def __init__(self, param, env, action_value_function=None):
         self.param = param
         self.env = env
         self.weights = self.get_initial_weights()
-        self.action_value_function = self.get_initial_action_value_function()
+        self.action_value_function = action_value_function if action_value_function else self.get_initial_action_value_function()
 
     def get_initial_weights(self):
         shape = (1, pow(self.param["order"] + 1, 2))

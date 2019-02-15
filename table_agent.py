@@ -4,16 +4,23 @@ import random
 
 import numpy as np
 
-# TODO Clean up some more
+
 class Agent:
     def __init__(self, params, env):
         self.params = params
         self.env = env
         self.action_value_function = {state: [random.random(), random.random()] for state in env.get_states()}
 
+    def transfer(self, params, env):
+        self.params = params
+        self.env = env
+
+    def get_optimal_action(self, state):
+        return np.argmax(self.action_value_function[state])
+
     def get_action(self, state):
         if random.random() > self.params["epsilon"]:
-            return np.argmax(self.action_value_function[state])
+            return self.get_optimal_action(state)
         return random.choice(self.env.ACTIONS)
 
     def run_q_learning(self, statistics):
@@ -37,8 +44,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-20]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
 
                     break
 
@@ -68,8 +76,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-20]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
 
                     break
 
