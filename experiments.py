@@ -1,24 +1,24 @@
 import matplotlib.pyplot as plt
 
 import env
-import table_agent as agent
+import linear_agent as agent
 import utils
 
 CONVERGENCE_THRESHOLD = 0.0001
 CONVERGENCE_PERIOD = 50
 
-PROBLEM = "problems/tsp/70-tsp.json"
+PROBLEM = "problems/tsp/80-tsp.json"
 ALPHA = 200
-BETA = 0.0175
-INCREMENT = 5
+BETA = 0.05
+INCREMENT = 2
 
 PARAMS = {
     "order": 5,
     "gamma": 1.0,
-    "alpha": 0.1,
-    "epsilon": 0.2,
-    "decay": 0.999,
-    "episodes": 2000
+    "alpha": 0.0001,
+    "epsilon": 0.1,
+    "decay": 0.9999,
+    "episodes": 5000
 }
 
 
@@ -32,7 +32,7 @@ def test():
     }
 
     prakhar = agent.Agent(PARAMS, metareasoning_env)
-    prakhar.run_sarsa(statistics)
+    prakhar.run_q_learning(statistics)
 
     data = statistics["smoothed_errors"]
     threshold_iterations = 0
@@ -99,6 +99,8 @@ def plot():
     plt.grid(True)
 
     axis = plt.gca()
+    axis.set_xlim([0, 1.5 * utilities.index(max(utilities))])
+    axis.set_ylim([-1, 1.1 * max(utilities)])
     axis.spines["top"].set_visible(False)
 
     plt.plot(range(len(utilities)), utilities, color='r')

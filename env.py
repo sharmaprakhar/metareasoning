@@ -11,20 +11,19 @@ class Environment:
     ACTIONS = [STOP_ACTION, CONTINUE_ACTION]
 
     QUALITY_CLASS_COUNT = 200
-    TIME_CLASS_COUNT = 300
+    TIME_CLASS_COUNT = 200
 
     QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
     TIME_CLASSES = range(TIME_CLASS_COUNT)
 
     def __init__(self, problem_file, alpha, beta, increment):
-        self.dataset = utils.get_dataset(problem_file)
+        self.dataset = utils.get_dataset(problem_file, increment)
 
         self.instance_id = 0
         self.state_id = 0
 
         self.alpha = alpha
         self.beta = beta
-        self.increment = increment
 
     def get_states(self):
         return list(itertools.product(self.QUALITY_CLASSES, self.TIME_CLASSES))
@@ -61,7 +60,7 @@ class Environment:
         return utils.digitize(raw_quality, bounds), raw_time
 
     def get_previous_state(self):
-        raw_state = self.dataset[self.instance_id][self.state_id - self.increment]
+        raw_state = self.dataset[self.instance_id][self.state_id - 1]
         return self.get_normalized_state(raw_state)
 
     def get_current_state(self):
@@ -72,7 +71,7 @@ class Environment:
         return self.instance_id == len(self.dataset) - 1
 
     def is_episode_done(self):
-        return self.state_id >= len(self.dataset[self.instance_id]) - self.increment
+        return self.state_id >= len(self.dataset[self.instance_id]) - 1
 
     def reset(self):
         self.instance_id = 0 if self.is_last_instance() else self.instance_id + 1
@@ -83,7 +82,7 @@ class Environment:
         if action == self.STOP_ACTION or self.is_episode_done():
             return self.get_current_state(), 0, True
 
-        self.state_id += self.increment
+        self.state_id += 1
         return self.get_current_state(), self.get_reward(), False
 
 

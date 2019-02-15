@@ -87,12 +87,13 @@ def digitize(item, bins):
     return len(bins) - 1
 
 
-def get_dataset(problem_file):
+def get_dataset(problem_file, increment):
     instances = get_instances(problem_file)
 
     dataset = []
     for instance in instances.values():
-        dataset.append([(quality, time) for time, quality in enumerate(instance["estimated_qualities"])])
+        entries = list(enumerate(instance["estimated_qualities"]))
+        dataset.append([(quality, time) for time, quality in entries[0:len(entries):increment]])
 
     return dataset
 
