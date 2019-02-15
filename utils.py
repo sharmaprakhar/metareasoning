@@ -4,7 +4,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-# TODO Remove unused functions if necessary
+
 def plot_data(y_data, yerr=None, x_data=None):
     if not x_data:
         x_axis = range(len(y_data))

@@ -7,11 +7,12 @@ import env
 import linear_agent
 import table_agent
 
+ALPHA = 200
+BETA = 0.02
+INCREMENT = 5
 
-# TODO Should this really be a fork?
+
 def main():
-    # TODO Add more accurate fields to each argument
-    # TODO Add back in trials if necessary
     parser = argparse.ArgumentParser(description="Run a reinforcement learning agent with a function approximation.")
     parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent")
     parser.add_argument("-problem", type=str, required=True, help="The problem file")
@@ -33,7 +34,7 @@ def main():
         "episodes": args.episodes
     }
 
-    anytime_algorithm_env = env.Environment(args.problem)
+    metareasoning_env = env.Environment(args.problem, ALPHA, BETA, INCREMENT)
 
     statistics = {
         "errors": [],
@@ -43,10 +44,10 @@ def main():
 
     if not args.function:
         print("Using a table function...")
-        prakhar = table_agent.Agent(params, anytime_algorithm_env)
+        prakhar = table_agent.Agent(params, metareasoning_env)
     elif args.function == "fourier":
         print("Using the Fourier function approximation...")
-        prakhar = linear_agent.Agent(params, anytime_algorithm_env)
+        prakhar = linear_agent.Agent(params, metareasoning_env)
     else:
         print("Encountered an unrecognized function approximation:", args.function)
         sys.exit()

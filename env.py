@@ -4,25 +4,27 @@ import numpy as np
 
 import utils
 
-# TODO Clean up some more
+
 class Environment:
     STOP_ACTION = 0
     CONTINUE_ACTION = 1
     ACTIONS = [STOP_ACTION, CONTINUE_ACTION]
 
-    ALPHA = 200
-    BETA = 0.3
-
     QUALITY_CLASS_COUNT = 200
-    TIME_CLASS_COUNT = 200
+    TIME_CLASS_COUNT = 300
 
     QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
     TIME_CLASSES = range(TIME_CLASS_COUNT)
 
-    def __init__(self, problem_file):
+    def __init__(self, problem_file, alpha, beta, increment):
         self.dataset = utils.get_dataset(problem_file)
+
         self.instance_id = 0
         self.state_id = 0
+
+        self.alpha = alpha
+        self.beta = beta
+        self.increment = increment
 
     def get_states(self):
         return list(itertools.product(self.QUALITY_CLASSES, self.TIME_CLASSES))
@@ -31,22 +33,22 @@ class Environment:
         previous_quality, previous_time = self.get_previous_state()
         current_quality, current_time = self.get_current_state()
 
-        previous_utility = utils.get_time_dependent_utility(previous_quality, previous_time, self.ALPHA, self.BETA)
-        current_utility = utils.get_time_dependent_utility(current_quality, current_time, self.ALPHA, self.BETA)
+        previous_utility = utils.get_time_dependent_utility(previous_quality, previous_time, self.alpha, self.beta)
+        current_utility = utils.get_time_dependent_utility(current_quality, current_time, self.alpha, self.beta)
 
         return current_utility - previous_utility
 
     def get_utility(self):
         raw_state = self.dataset[self.instance_id][self.state_id]
         quality, time = self.get_normalized_state(raw_state)
-        return utils.get_time_dependent_utility(quality, time, self.ALPHA, self.BETA)
+        return utils.get_time_dependent_utility(quality, time, self.alpha, self.beta)
 
     def get_optimal_utility(self):
         max_utility = float("-inf")
 
         for raw_state in self.dataset[self.instance_id]:
             quality, time = self.get_normalized_state(raw_state)
-            utility = utils.get_time_dependent_utility(quality, time, self.ALPHA, self.BETA)
+            utility = utils.get_time_dependent_utility(quality, time, self.alpha, self.beta)
 
             if utility > max_utility:
                 max_utility = utility
@@ -59,7 +61,7 @@ class Environment:
         return utils.digitize(raw_quality, bounds), raw_time
 
     def get_previous_state(self):
-        raw_state = self.dataset[self.instance_id][self.state_id - 1]
+        raw_state = self.dataset[self.instance_id][self.state_id - self.increment]
         return self.get_normalized_state(raw_state)
 
     def get_current_state(self):
@@ -70,7 +72,7 @@ class Environment:
         return self.instance_id == len(self.dataset) - 1
 
     def is_episode_done(self):
-        return self.state_id == len(self.dataset[self.instance_id]) - 1
+        return self.state_id >= len(self.dataset[self.instance_id]) - self.increment
 
     def reset(self):
         self.instance_id = 0 if self.is_last_instance() else self.instance_id + 1
@@ -81,13 +83,13 @@ class Environment:
         if action == self.STOP_ACTION or self.is_episode_done():
             return self.get_current_state(), 0, True
 
-        self.state_id += 1
+        self.state_id += self.increment
         return self.get_current_state(), self.get_reward(), False
 
 
 def main():
     print("Testing the environment...")
-    env = Environment("problems/test-problem.json")
+    env = Environment("problems/test-problem.json", 200, 0.3, 5)
 
     print("Running episode 1...")
     print(env.reset())
