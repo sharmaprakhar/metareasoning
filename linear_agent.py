@@ -28,7 +28,9 @@ class Agent:
         return random.choice(self.env.ACTIONS)
 
     def run_q_learning(self, statistics):
-        for _ in range(self.params['episodes']):
+        print("Running linear Q-learning with the parameters {}".format(self.params))
+        
+        for _ in range(self.params["episodes"]):
             state = self.env.reset()
             psi = self.function_approximation.calculate_fourier_approximation(state)
 
@@ -44,9 +46,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][-50:]))
                     statistics["stopping_points"].append(next_state[1])
-                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
                     break
 
@@ -58,7 +60,9 @@ class Agent:
                 psi = next_psi
 
     def run_sarsa(self, statistics):
-        for _ in range(self.params['episodes']):
+        print("Running linear SARSA with the parameters {}".format(self.params))
+
+        for _ in range(self.params["episodes"]):
             state = self.env.reset()
             psi = self.function_approximation.calculate_fourier_approximation(state)
 
@@ -80,9 +84,9 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][:-50]))
+                    statistics["smoothed_errors"].append(np.average(statistics["errors"][-50:]))
                     statistics["stopping_points"].append(next_state[1])
-                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][:-50]))
+                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
                     break
 
@@ -90,4 +94,4 @@ class Agent:
                 psi = next_psi
                 action = next_action
 
-                self.params['epsilon'] *= self.params['decay']
+                self.params["epsilon"] *= self.params["decay"]

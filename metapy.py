@@ -43,26 +43,21 @@ def main():
     }
 
     if not args.function:
-        print("Using a table function...")
         prakhar = table_agent.Agent(params, metareasoning_env)
     elif args.function == "fourier":
-        print("Using the Fourier function approximation...")
         prakhar = linear_agent.Agent(params, metareasoning_env)
     else:
         print("Encountered an unrecognized function approximation:", args.function)
         sys.exit()
 
     if args.method == "q-learning":
-        print("Running Q-learning on {}...".format(args.problem))
         prakhar.run_q_learning(statistics)
     elif args.method == "sarsa":
-        print("Running SARSA on {}...".format(args.problem))
         prakhar.run_sarsa(statistics)
     else:
         print("Encountered an unrecognized reinforcement learning method:", args.method)
         sys.exit()
 
-    print("Generating the learning curve...")
     plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14

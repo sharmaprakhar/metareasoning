@@ -7,23 +7,22 @@ import utils
 CONVERGENCE_THRESHOLD = 0.0001
 CONVERGENCE_PERIOD = 50
 
-PROBLEM = "problems/tsp/80-tsp.json"
-ALPHA = 200
-BETA = 0.05
-INCREMENT = 2
+PROBLEM = "problems/jsp/10-10-20-jsp.json"
+ALPHA = 5
+BETA = 0.02
+INCREMENT = 10
 
 PARAMS = {
-    "order": 5,
+    "order": 7,
     "gamma": 1.0,
-    "alpha": 0.0001,
+    "alpha": 0.00001,
     "epsilon": 0.1,
-    "decay": 0.9999,
+    "decay": 0.999,
     "episodes": 5000
 }
 
 
 def test():
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
     statistics = {
         "errors": [],
         "smoothed_errors": [],
@@ -31,8 +30,9 @@ def test():
         "smoothed_stopping_points": []
     }
 
+    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
     prakhar = agent.Agent(PARAMS, metareasoning_env)
-    prakhar.run_q_learning(statistics)
+    prakhar.run_sarsa(statistics)
 
     data = statistics["smoothed_errors"]
     threshold_iterations = 0
@@ -48,7 +48,6 @@ def test():
         else:
             threshold_iterations = 0
 
-    print("Generating the learning curve...")
     fig = plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
@@ -59,13 +58,13 @@ def test():
     axis = plt.gca()
     axis.spines["top"].set_visible(False)
 
-    axis1 = fig.add_subplot(111)
-    axis1.plot(range(len(statistics["smoothed_errors"])), statistics["smoothed_errors"], color='b')
-    axis1.set_ylabel('Error', color='b')
+    axis1 = fig.add_subplot(1, 1, 1)
+    axis1.plot(range(len(statistics["smoothed_errors"])), statistics["smoothed_errors"], color="b")
+    axis1.set_ylabel("Error", color="b")
 
     axis2 = axis1.twinx()
-    axis2.plot(range(len(statistics["smoothed_stopping_points"])), statistics["smoothed_stopping_points"], color='r')
-    axis2.set_ylabel('Stopping Points', color='r')
+    axis2.plot(range(len(statistics["smoothed_stopping_points"])), statistics["smoothed_stopping_points"], color="r")
+    axis2.set_ylabel("Stopping Points", color="r")
 
     plt.tight_layout()
     plt.show()
@@ -89,7 +88,6 @@ def plot():
         if is_episode_done:
             break
 
-    print("Generating the performance curve...")
     fig = plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
@@ -99,18 +97,17 @@ def plot():
     plt.grid(True)
 
     axis = plt.gca()
-    axis.set_xlim([0, 1.5 * utilities.index(max(utilities))])
-    axis.set_ylim([-1, 1.1 * max(utilities)])
+    axis.set_xlim([0, 2 * utilities.index(max(utilities))])
+    axis.set_ylim([utilities[0], 1.05 * max(utilities)])
     axis.spines["top"].set_visible(False)
 
-    plt.plot(range(len(utilities)), utilities, color='r')
+    plt.plot(range(len(utilities)), utilities, color="r")
     plt.tight_layout()
     plt.show()
 
 
 def main():
     test()
-    # plot()
 
 
 if __name__ == "__main__":
