@@ -29,7 +29,7 @@ class policy_estimator():
 
 # env = gym.make('CartPole-v0')
 problem = 'problems/tsp/50-tsp.json'
-anytime_algorithm_env = env.Environment(problem)
+anytime_algorithm_env = env.Environment(problem, 200, 0.02, 5)
 
 s = np.asarray(anytime_algorithm_env.reset())
 
@@ -47,8 +47,8 @@ def discount_rewards(rewards, gamma=0.99):
     r = r[::-1].cumsum()[::-1]
     return r - r.mean()
 
-def reinforce(env, policy_estimator, num_episodes=5000,
-              batch_size=50, gamma=0.99):
+def reinforce(env, policy_estimator, num_episodes=2500,
+               batch_size=10, gamma=0.99):
 
     # Set up lists to hold results
     total_rewards = []
@@ -59,7 +59,7 @@ def reinforce(env, policy_estimator, num_episodes=5000,
     
     # Define optimizer
     optimizer = optim.Adam(policy_estimator.network.parameters(), 
-                           lr=0.01)
+                           lr=0.0001)
     
     # action_space = np.arange(env.action_space.n)
     action_space = np.arange(2)
@@ -72,6 +72,8 @@ def reinforce(env, policy_estimator, num_episodes=5000,
         while complete == False:
             # Get actions and convert to numpy array
             action_probs = policy_estimator.predict(s_0).detach().numpy()
+            # print(action_probs)
+            # print(action_space)
             action = np.random.choice(action_space, p=action_probs)
             s_1, r, complete = env.step(action)
             
@@ -116,7 +118,7 @@ def reinforce(env, policy_estimator, num_episodes=5000,
                     batch_counter = 1
                     
                 # Print running average
-                print("\rEp: {} Average of last 10: {:.2f}".format(
+                print("\rEp: {} Average of last 10 rewards: {:.2f}".format(
                     ep + 1, np.mean(total_rewards[-10:])), end="")
                 
     return total_rewards
@@ -128,7 +130,7 @@ smoothed_rewards = [np.mean(rewards[i-window:i+1]) if i > window
 
 plt.figure(figsize=(12,8))
 plt.plot(rewards)
-# plt.plot(smoothed_rewards)
+plt.plot(smoothed_rewards)
 plt.ylabel('Total Rewards')
 plt.xlabel('Episodes')
 plt.show()
