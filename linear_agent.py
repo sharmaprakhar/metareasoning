@@ -29,7 +29,7 @@ class Agent:
 
     def run_q_learning(self, statistics):
         print("Running linear Q-learning with the parameters {}".format(self.params))
-        
+
         for _ in range(self.params["episodes"]):
             state = self.env.reset()
             psi = self.function_approximation.calculate_fourier_approximation(state)
@@ -49,6 +49,8 @@ class Agent:
                     statistics["smoothed_errors"].append(np.average(statistics["errors"][-50:]))
                     statistics["stopping_points"].append(next_state[1])
                     statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
+
+                    self.params["epsilon"] *= self.params["decay"]
 
                     break
 
@@ -88,10 +90,10 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
+                    self.params["epsilon"] *= self.params["decay"]
+
                     break
 
                 state = next_state
                 psi = next_psi
                 action = next_action
-
-                self.params["epsilon"] *= self.params["decay"]

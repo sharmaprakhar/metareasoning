@@ -4,19 +4,19 @@ import env
 import linear_agent as agent
 import utils
 
-CONVERGENCE_THRESHOLD = 0.0001
+CONVERGENCE_THRESHOLD = 0.001
 CONVERGENCE_PERIOD = 50
 
-PROBLEM = "problems/jsp/10-10-20-jsp.json"
-ALPHA = 5
-BETA = 0.02
-INCREMENT = 10
+PROBLEM = "problems/tsp/50-tsp.json"
+ALPHA = 200
+BETA = 0.3
+INCREMENT = 1
 
 PARAMS = {
+    "alpha": 0.0001,
+    "epsilon": 0.1,
     "order": 7,
     "gamma": 1.0,
-    "alpha": 0.00001,
-    "epsilon": 0.1,
     "decay": 0.999,
     "episodes": 5000
 }
@@ -32,7 +32,7 @@ def test():
 
     metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
     prakhar = agent.Agent(PARAMS, metareasoning_env)
-    prakhar.run_sarsa(statistics)
+    prakhar.run_q_learning(statistics)
 
     data = statistics["smoothed_errors"]
     threshold_iterations = 0

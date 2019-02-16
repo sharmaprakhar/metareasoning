@@ -50,12 +50,12 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
+                    self.params["epsilon"] *= self.params["decay"]
+
                     break
 
                 state = next_state
                 action = next_action
-
-                self.params["epsilon"] *= self.params["decay"]
 
     def run_sarsa(self, statistics):
         print("Running tabular SARSA with the parameters {}".format(self.params))
@@ -84,9 +84,9 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
+                    self.params["epsilon"] *= self.params["decay"]
+
                     break
 
                 state = next_state
                 action = next_action
-
-                self.params["epsilon"] *= self.params["decay"]
