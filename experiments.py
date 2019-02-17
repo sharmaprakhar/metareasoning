@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 import env
 import linear_agent as agent
@@ -13,13 +14,27 @@ BETA = 0.3
 INCREMENT = 1
 
 PARAMS = {
-    "alpha": 0.0001,
+    "alpha": 0.00001,
     "epsilon": 0.1,
-    "order": 7,
+    "order": 5,
     "gamma": 1.0,
     "decay": 0.999,
     "episodes": 5000
 }
+
+
+def get_results(data):
+    threshold_iterations = 0
+
+    for i in range(len(data) - 1):
+        difference = abs(data[i] - data[i - 1])
+
+        if difference <= CONVERGENCE_THRESHOLD:
+            threshold_iterations += 1
+            if threshold_iterations >= CONVERGENCE_PERIOD:
+                return {"episode": i, "error": data[i]}
+        else:
+            threshold_iterations = 0
 
 
 def test():
@@ -32,21 +47,7 @@ def test():
 
     metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
     prakhar = agent.Agent(PARAMS, metareasoning_env)
-    prakhar.run_q_learning(statistics)
-
-    data = statistics["smoothed_errors"]
-    threshold_iterations = 0
-
-    for i in range(len(data) - 1):
-        difference = abs(data[i] - data[i - 1])
-
-        if difference <= CONVERGENCE_THRESHOLD:
-            threshold_iterations += 1
-            if threshold_iterations >= CONVERGENCE_PERIOD:
-                print({"episode": i, "error": data[i]})
-                break
-        else:
-            threshold_iterations = 0
+    prakhar.run_sarsa(statistics)
 
     fig = plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
@@ -59,12 +60,11 @@ def test():
     axis.spines["top"].set_visible(False)
 
     axis1 = fig.add_subplot(1, 1, 1)
+    # axis1.plot(range(50), sorted(statistics["errors"][-50:]), color="b")
     axis1.plot(range(len(statistics["smoothed_errors"])), statistics["smoothed_errors"], color="b")
     axis1.set_ylabel("Error", color="b")
 
-    axis2 = axis1.twinx()
-    axis2.plot(range(len(statistics["smoothed_stopping_points"])), statistics["smoothed_stopping_points"], color="r")
-    axis2.set_ylabel("Stopping Points", color="r")
+    print(np.average(statistics["errors"][-50:]))
 
     plt.tight_layout()
     plt.show()
@@ -88,7 +88,7 @@ def plot():
         if is_episode_done:
             break
 
-    fig = plt.figure(figsize=(7, 3))
+    plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
     plt.rcParams["grid.linestyle"] = "-"
@@ -97,9 +97,9 @@ def plot():
     plt.grid(True)
 
     axis = plt.gca()
+    axis.spines["top"].set_visible(False)
     axis.set_xlim([0, 2 * utilities.index(max(utilities))])
     axis.set_ylim([utilities[0], 1.05 * max(utilities)])
-    axis.spines["top"].set_visible(False)
 
     plt.plot(range(len(utilities)), utilities, color="r")
     plt.tight_layout()

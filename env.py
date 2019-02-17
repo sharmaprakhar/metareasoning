@@ -1,4 +1,5 @@
 import itertools
+import random
 
 import numpy as np
 
@@ -10,7 +11,7 @@ class Environment:
     CONTINUE_ACTION = 1
     ACTIONS = [STOP_ACTION, CONTINUE_ACTION]
 
-    QUALITY_CLASS_COUNT = 100
+    QUALITY_CLASS_COUNT = 200
     TIME_CLASS_COUNT = 500
 
     QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
@@ -74,7 +75,7 @@ class Environment:
         return self.state_id >= len(self.dataset[self.instance_id]) - 1
 
     def reset(self):
-        self.instance_id = 0 if self.is_last_instance() else self.instance_id + 1
+        self.instance_id = random.randint(0, len(self.dataset) - 1)
         self.state_id = 0
         return self.get_current_state()
 

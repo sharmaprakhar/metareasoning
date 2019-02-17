@@ -39,7 +39,8 @@ def main():
     statistics = {
         "errors": [],
         "smoothed_errors": [],
-        "stopping_points": []
+        "stopping_points": [],
+        "smoothed_stopping_points": []
     }
 
     if not args.function:
