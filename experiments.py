@@ -13,10 +13,10 @@ PLOT_WINDOW_SIZE = 200
 PROBLEM_DIRECTORY = "problems/"
 RESULTS_DIRECTORY = "results/"
 
-PROBLEM_FILE = "50-tsp.json"
+PROBLEM_FILE = "90-tsp.json"
 ALPHA = 200
-BETA = 0.3
-INCREMENT = 1
+BETA = 0.05
+INCREMENT = 4
 
 PROBLEM_FILE_PATH = PROBLEM_DIRECTORY + PROBLEM_FILE
 
@@ -106,6 +106,8 @@ def run_linear_q_learning_experiments(params):
 
 
 def run():
+    print("Experiment [{}] with [alpha = {}, beta = {}, increment = {}]".format(PROBLEM_FILE, ALPHA, BETA, INCREMENT))
+
     tabular_sarsa_data = run_tabular_sarsa_experiments({
         "alpha": 0.1,
         "epsilon": 0.1,
