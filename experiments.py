@@ -1,70 +1,156 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as stats
 
 import env
-import linear_agent as agent
+import linear_agent
+import table_agent
 import utils
 
-CONVERGENCE_THRESHOLD = 0.001
-CONVERGENCE_PERIOD = 50
+WINDOW_SIZE = 50
+PLOT_WINDOW_SIZE = 200
 
 PROBLEM = "problems/tsp/50-tsp.json"
 ALPHA = 200
 BETA = 0.3
 INCREMENT = 1
 
-PARAMS = {
-    "alpha": 0.00001,
-    "epsilon": 0.1,
-    "order": 5,
-    "gamma": 1.0,
-    "decay": 0.999,
-    "episodes": 5000
-}
 
-
-def get_results(data):
-    threshold_iterations = 0
-
-    for i in range(len(data) - 1):
-        difference = abs(data[i] - data[i - 1])
-
-        if difference <= CONVERGENCE_THRESHOLD:
-            threshold_iterations += 1
-            if threshold_iterations >= CONVERGENCE_PERIOD:
-                return {"episode": i, "error": data[i]}
-        else:
-            threshold_iterations = 0
-
-
-def test():
+def run_tabular_sarsa_experiments(params):
     statistics = {
         "errors": [],
-        "smoothed_errors": [],
         "stopping_points": [],
-        "smoothed_stopping_points": []
     }
 
     metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
-    prakhar = agent.Agent(PARAMS, metareasoning_env)
+    prakhar = table_agent.Agent(metareasoning_env, params)
     prakhar.run_sarsa(statistics)
 
-    fig = plt.figure(figsize=(7, 3))
+    return {
+        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+    }
+
+
+def run_tabular_q_learning_experiments(params):
+    statistics = {
+        "errors": [],
+        "stopping_points": [],
+    }
+
+    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    prakhar = table_agent.Agent(metareasoning_env, params)
+    prakhar.run_q_learning(statistics)
+
+    return {
+        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+    }
+
+
+def run_linear_sarsa_experiments(params):
+    statistics = {
+        "errors": [],
+        "stopping_points": [],
+    }
+
+    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    prakhar = linear_agent.Agent(metareasoning_env, params)
+    prakhar.run_sarsa(statistics)
+
+    return {
+        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+    }
+
+
+def run_linear_q_learning_experiments(params):
+    statistics = {
+        "errors": [],
+        "stopping_points": [],
+    }
+
+    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    prakhar = linear_agent.Agent(metareasoning_env, params)
+    prakhar.run_q_learning(statistics)
+
+    return {
+        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+    }
+
+
+def run():
+    tabular_sarsa_data = run_tabular_sarsa_experiments({
+        "alpha": 0.1,
+        "epsilon": 0.1,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": 5000
+    })
+    print({
+        "mean": tabular_sarsa_data["mean"],
+        "standard_deviation": tabular_sarsa_data["standard_deviation"]
+    })
+
+    tabular_q_learning_data = run_tabular_q_learning_experiments({
+        "alpha": 0.1,
+        "epsilon": 0.1,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": 5000
+    })
+    print({
+        "mean": tabular_q_learning_data["mean"],
+        "standard_deviation": tabular_q_learning_data["standard_deviation"]
+    })
+
+    linear_sarsa_data = run_linear_sarsa_experiments({
+        "alpha": 0.00001,
+        "epsilon": 0.1,
+        "order": 7,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": 5000
+    })
+    print({
+        "mean": linear_sarsa_data["mean"],
+        "standard_deviation": linear_sarsa_data["standard_deviation"]
+    })
+
+    linear_q_learning_data = run_linear_q_learning_experiments({
+        "alpha": 0.00001,
+        "epsilon": 0.1,
+        "order": 7,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": 5000
+    })
+    print({
+        "mean": linear_q_learning_data["mean"],
+        "standard_deviation": linear_q_learning_data["standard_deviation"]
+    })
+
+    plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
     plt.rcParams["grid.linestyle"] = "-"
     plt.xlabel("Episodes")
+    plt.ylabel("Error")
     plt.grid(True)
 
     axis = plt.gca()
     axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
 
-    axis1 = fig.add_subplot(1, 1, 1)
-    # axis1.plot(range(50), sorted(statistics["errors"][-50:]), color="b")
-    axis1.plot(range(len(statistics["smoothed_errors"])), statistics["smoothed_errors"], color="b")
-    axis1.set_ylabel("Error", color="b")
-
-    print(np.average(statistics["errors"][-50:]))
+    p1 = plt.plot(range(len(tabular_sarsa_data["smoothed_values"])), tabular_sarsa_data["smoothed_values"], color="r")
+    p2 = plt.plot(range(len(linear_sarsa_data["smoothed_values"])), linear_sarsa_data["smoothed_values"], color="b")
+    p3 = plt.plot(range(len(tabular_q_learning_data["smoothed_values"])), tabular_q_learning_data["smoothed_values"], color="g")
+    p4 = plt.plot(range(len(linear_q_learning_data["smoothed_values"])), linear_q_learning_data["smoothed_values"], color="y")
 
     plt.tight_layout()
     plt.show()
@@ -107,7 +193,7 @@ def plot():
 
 
 def main():
-    test()
+    run()
 
 
 if __name__ == "__main__":

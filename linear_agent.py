@@ -8,15 +8,15 @@ from function_approximation import FunctionApproximation
 
 
 class Agent:
-    def __init__(self, params, env):
-        self.params = params
+    def __init__(self, env, params):
         self.env = env
+        self.params = params
         self.function_approximation = FunctionApproximation(params, env)
         self.action_value_function = self.function_approximation.get_initial_action_value_function()
 
-    def transfer(self, params, env, action_value_function):
-        self.params = params
+    def transfer(self, env, params, action_value_function):
         self.env = env
+        self.params = params
         self.function_approximation = FunctionApproximation(params, env, action_value_function)
 
     def get_optimal_action(self, state):
@@ -46,9 +46,7 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][-50:]))
                     statistics["stopping_points"].append(next_state[1])
-                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
                     self.params["epsilon"] *= self.params["decay"]
 
@@ -86,9 +84,7 @@ class Agent:
                     error = abs((utility - optimal_utility) / optimal_utility)
 
                     statistics["errors"].append(error)
-                    statistics["smoothed_errors"].append(np.average(statistics["errors"][-50:]))
                     statistics["stopping_points"].append(next_state[1])
-                    statistics["smoothed_stopping_points"].append(np.average(statistics["stopping_points"][-50:]))
 
                     self.params["epsilon"] *= self.params["decay"]
 

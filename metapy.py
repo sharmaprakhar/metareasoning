@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import env
 import linear_agent
 import table_agent
+import utils
+
+WINDOW_SIZE = 100
 
 ALPHA = 200
 BETA = 0.02
@@ -34,14 +37,12 @@ def main():
         "episodes": args.episodes
     }
 
-    metareasoning_env = env.Environment(args.problem, ALPHA, BETA, INCREMENT)
-
     statistics = {
         "errors": [],
-        "smoothed_errors": [],
-        "stopping_points": [],
-        "smoothed_stopping_points": []
+        "stopping_points": []
     }
+
+    metareasoning_env = env.Environment(args.problem, ALPHA, BETA, INCREMENT)
 
     if not args.function:
         prakhar = table_agent.Agent(params, metareasoning_env)
@@ -71,7 +72,8 @@ def main():
     axis.spines["right"].set_visible(False)
     axis.spines["top"].set_visible(False)
 
-    plt.plot(range(args.episodes), statistics["smoothed_errors"])
+    smoothed_errors = utils.get_smoothed_values(statistics["errors"], WINDOW_SIZE)
+    plt.plot(range(len(smoothed_errors)), smoothed_errors)
     plt.tight_layout()
     plt.show()
 
