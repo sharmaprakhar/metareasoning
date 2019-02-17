@@ -180,7 +180,7 @@ def run():
 
 
 def plot():
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
 
     quality, time = metareasoning_env.reset()
     qualities = [quality]
