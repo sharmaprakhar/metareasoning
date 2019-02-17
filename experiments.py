@@ -152,6 +152,8 @@ def run():
     p3 = plt.plot(range(len(tabular_q_learning_data["smoothed_values"])), tabular_q_learning_data["smoothed_values"], color="g")
     p4 = plt.plot(range(len(linear_q_learning_data["smoothed_values"])), linear_q_learning_data["smoothed_values"], color="y")
 
+    plt.legend((p1[0], p2[0], p3[0], p4[0]), ('SARSA(Table)', 'SARSA(Fourier)', 'Q-learning(Table)', 'Q-learning(Fourier)'), loc=1, ncol=2, fontsize='x-small')
+
     plt.tight_layout()
     plt.show()
 
@@ -193,7 +195,7 @@ def plot():
 
 
 def main():
-    run()
+    plot()
 
 
 if __name__ == "__main__":
