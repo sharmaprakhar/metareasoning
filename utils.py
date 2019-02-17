@@ -3,8 +3,14 @@ import math
 
 import numpy as np
 
-def get_instances(filename):
-    with open(filename) as file:
+
+def save(filename, data):
+    with open(filename, "w") as file:
+        json.dump(data, file)
+
+
+def load(filename):
+    with open(filename, "r") as file:
         return json.load(file)
 
 
@@ -17,7 +23,7 @@ def digitize(item, bins):
 
 
 def get_dataset(problem_file, increment):
-    instances = get_instances(problem_file)
+    instances = load(problem_file)
 
     dataset = []
     for instance in instances.values():

@@ -11,14 +11,14 @@ class Environment:
     CONTINUE_ACTION = 1
     ACTIONS = [STOP_ACTION, CONTINUE_ACTION]
 
-    QUALITY_CLASS_COUNT = 1000
+    QUALITY_CLASS_COUNT = 500
     TIME_CLASS_COUNT = 500
 
     QUALITY_CLASSES = range(QUALITY_CLASS_COUNT)
     TIME_CLASSES = range(TIME_CLASS_COUNT)
 
-    def __init__(self, problem_file, alpha, beta, increment):
-        self.dataset = utils.get_dataset(problem_file, increment)
+    def __init__(self, problem_file_path, alpha, beta, increment):
+        self.dataset = utils.get_dataset(problem_file_path, increment)
 
         self.instance_id = 0
         self.state_id = 0
@@ -89,7 +89,7 @@ class Environment:
 
 def main():
     print("Testing the environment...")
-    env = Environment("problems/test-problem.json", 200, 0.3, 5)
+    env = Environment("problems/tsp/50-tsp.json", 200, 0.3, 1)
 
     print("Running episode 1...")
     print(env.reset())

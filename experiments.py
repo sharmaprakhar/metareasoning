@@ -10,10 +10,15 @@ import utils
 WINDOW_SIZE = 50
 PLOT_WINDOW_SIZE = 200
 
-PROBLEM = "problems/tsp/50-tsp.json"
+PROBLEM_DIRECTORY = "problems/"
+RESULTS_DIRECTORY = "results/"
+
+PROBLEM_FILE = "50-tsp.json"
 ALPHA = 200
 BETA = 0.3
 INCREMENT = 1
+
+PROBLEM_FILE_PATH = PROBLEM_DIRECTORY + PROBLEM_FILE
 
 
 def run_tabular_sarsa_experiments(params):
@@ -22,9 +27,13 @@ def run_tabular_sarsa_experiments(params):
         "stopping_points": [],
     }
 
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    filename = RESULTS_DIRECTORY + "tabular-sarsa-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], PROBLEM_FILE)
+
+    metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
     prakhar = table_agent.Agent(metareasoning_env, params)
     prakhar.run_sarsa(statistics)
+
+    utils.save(filename, statistics)
 
     return {
         "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
@@ -39,9 +48,13 @@ def run_tabular_q_learning_experiments(params):
         "stopping_points": [],
     }
 
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    filename = RESULTS_DIRECTORY + "tabular-q-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], PROBLEM_FILE)
+
+    metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
     prakhar = table_agent.Agent(metareasoning_env, params)
     prakhar.run_q_learning(statistics)
+
+    utils.save(filename, statistics)
 
     return {
         "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
@@ -56,9 +69,13 @@ def run_linear_sarsa_experiments(params):
         "stopping_points": [],
     }
 
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    filename = RESULTS_DIRECTORY + "linear-sarsa-[{}]-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], params['order'], PROBLEM_FILE)
+
+    metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
     prakhar = linear_agent.Agent(metareasoning_env, params)
     prakhar.run_sarsa(statistics)
+
+    utils.save(filename, statistics)
 
     return {
         "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
@@ -73,9 +90,13 @@ def run_linear_q_learning_experiments(params):
         "stopping_points": [],
     }
 
-    metareasoning_env = env.Environment(PROBLEM, ALPHA, BETA, INCREMENT)
+    filename = RESULTS_DIRECTORY + "linear-q-[{}]-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], params['order'], PROBLEM_FILE)
+
+    metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
     prakhar = linear_agent.Agent(metareasoning_env, params)
     prakhar.run_q_learning(statistics)
+
+    utils.save(filename, statistics)
 
     return {
         "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
@@ -152,7 +173,7 @@ def run():
     p3 = plt.plot(range(len(tabular_q_learning_data["smoothed_values"])), tabular_q_learning_data["smoothed_values"], color="g")
     p4 = plt.plot(range(len(linear_q_learning_data["smoothed_values"])), linear_q_learning_data["smoothed_values"], color="y")
 
-    plt.legend((p1[0], p2[0], p3[0], p4[0]), ('SARSA(Table)', 'SARSA(Fourier)', 'Q-learning(Table)', 'Q-learning(Fourier)'), loc=1, ncol=2, fontsize='x-small')
+    plt.legend((p1[0], p2[0], p3[0], p4[0]), ('SARSA(Table)', 'SARSA(Fourier)', 'Q-learning(Table)', 'Q-learning(Fourier)'), loc=1, ncol=2)
 
     plt.tight_layout()
     plt.show()
@@ -195,7 +216,7 @@ def plot():
 
 
 def main():
-    plot()
+    run()
 
 
 if __name__ == "__main__":
