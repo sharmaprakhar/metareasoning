@@ -2,6 +2,7 @@ import json
 import math
 
 import numpy as np
+import scipy.stats as stats
 
 
 def save(filename, data):
@@ -60,3 +61,11 @@ def get_smoothed_values(data, window_size):
         smoothed_values.append(np.average(windowed_data))
 
     return smoothed_values
+
+
+def get_results(errors, window_size, plot_window_size):
+    return {
+        "mean_error": np.average(errors[-window_size:]),
+        "standard_deviation_error": stats.sem(errors[-window_size:]),
+        "smoothed_errors": get_smoothed_values(errors, plot_window_size)
+    }

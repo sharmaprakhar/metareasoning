@@ -37,10 +37,7 @@ def main():
         "episodes": args.episodes
     }
 
-    statistics = {
-        "errors": [],
-        "stopping_points": []
-    }
+    statistics = {"errors": [], "stopping_points": [], "utilities": []}
 
     metareasoning_env = env.Environment(args.problem, ALPHA, BETA, INCREMENT)
 
