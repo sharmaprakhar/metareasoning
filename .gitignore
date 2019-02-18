@@ -6,3 +6,4 @@ plots/
 tags
 __pycache__
 *.pyc
+*.json

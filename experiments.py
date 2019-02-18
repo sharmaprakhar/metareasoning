@@ -8,15 +8,15 @@ import table_agent
 import utils
 
 WINDOW_SIZE = 50
-PLOT_WINDOW_SIZE = 200
+PLOT_WINDOW_SIZE = 300
 
 PROBLEM_DIRECTORY = "problems/"
 RESULTS_DIRECTORY = "results/"
 
-PROBLEM_FILE = "90-tsp.json"
+PROBLEM_FILE = "60-tsp.json"
 ALPHA = 200
-BETA = 0.05
-INCREMENT = 4
+BETA = 0.3
+INCREMENT = 1
 
 PROBLEM_FILE_PATH = PROBLEM_DIRECTORY + PROBLEM_FILE
 
@@ -25,6 +25,7 @@ def run_tabular_sarsa_experiments(params):
     statistics = {
         "errors": [],
         "stopping_points": [],
+        "utilities": []
     }
 
     filename = RESULTS_DIRECTORY + "tabular-sarsa-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], PROBLEM_FILE)
@@ -36,9 +37,9 @@ def run_tabular_sarsa_experiments(params):
     utils.save(filename, statistics)
 
     return {
-        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
-        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
-        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+        "mean_error": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation_error": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_errors": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
     }
 
 
@@ -46,6 +47,7 @@ def run_tabular_q_learning_experiments(params):
     statistics = {
         "errors": [],
         "stopping_points": [],
+        "utilities": []
     }
 
     filename = RESULTS_DIRECTORY + "tabular-q-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], PROBLEM_FILE)
@@ -57,9 +59,9 @@ def run_tabular_q_learning_experiments(params):
     utils.save(filename, statistics)
 
     return {
-        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
-        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
-        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+        "mean_error": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation_error": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_errors": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
     }
 
 
@@ -67,6 +69,7 @@ def run_linear_sarsa_experiments(params):
     statistics = {
         "errors": [],
         "stopping_points": [],
+        "utilities": []
     }
 
     filename = RESULTS_DIRECTORY + "linear-sarsa-[{}]-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], params['order'], PROBLEM_FILE)
@@ -78,9 +81,9 @@ def run_linear_sarsa_experiments(params):
     utils.save(filename, statistics)
 
     return {
-        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
-        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
-        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+        "mean_error": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation_error": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_errors": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
     }
 
 
@@ -88,6 +91,7 @@ def run_linear_q_learning_experiments(params):
     statistics = {
         "errors": [],
         "stopping_points": [],
+        "utilities": []
     }
 
     filename = RESULTS_DIRECTORY + "linear-q-[{}]-[{}]-[{}]-{}".format(params['alpha'], params['epsilon'], params['order'], PROBLEM_FILE)
@@ -99,9 +103,9 @@ def run_linear_q_learning_experiments(params):
     utils.save(filename, statistics)
 
     return {
-        "mean": np.average(statistics["errors"][-WINDOW_SIZE:]),
-        "standard_deviation": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
-        "smoothed_values": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
+        "mean_error": np.average(statistics["errors"][-WINDOW_SIZE:]),
+        "standard_deviation_error": stats.sem(statistics["errors"][-WINDOW_SIZE:]),
+        "smoothed_errors": utils.get_smoothed_values(statistics["errors"], PLOT_WINDOW_SIZE)
     }
 
 
@@ -116,8 +120,8 @@ def run():
         "episodes": 5000
     })
     print({
-        "mean": tabular_sarsa_data["mean"],
-        "standard_deviation": tabular_sarsa_data["standard_deviation"]
+        "mean_error": tabular_sarsa_data["mean_error"],
+        "standard_deviation_error": tabular_sarsa_data["standard_deviation_error"]
     })
 
     tabular_q_learning_data = run_tabular_q_learning_experiments({
@@ -128,8 +132,8 @@ def run():
         "episodes": 5000
     })
     print({
-        "mean": tabular_q_learning_data["mean"],
-        "standard_deviation": tabular_q_learning_data["standard_deviation"]
+        "mean_error": tabular_q_learning_data["mean_error"],
+        "standard_deviation_error": tabular_q_learning_data["standard_deviation_error"]
     })
 
     linear_sarsa_data = run_linear_sarsa_experiments({
@@ -141,8 +145,8 @@ def run():
         "episodes": 5000
     })
     print({
-        "mean": linear_sarsa_data["mean"],
-        "standard_deviation": linear_sarsa_data["standard_deviation"]
+        "mean_error": linear_sarsa_data["mean_error"],
+        "standard_deviation_error": linear_sarsa_data["standard_deviation_error"]
     })
 
     linear_q_learning_data = run_linear_q_learning_experiments({
@@ -154,8 +158,8 @@ def run():
         "episodes": 5000
     })
     print({
-        "mean": linear_q_learning_data["mean"],
-        "standard_deviation": linear_q_learning_data["standard_deviation"]
+        "mean_error": linear_q_learning_data["mean_error"],
+        "standard_deviation_error": linear_q_learning_data["standard_deviation_error"]
     })
 
     plt.figure(figsize=(7, 3))
@@ -170,10 +174,10 @@ def run():
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
 
-    p1 = plt.plot(range(len(tabular_sarsa_data["smoothed_values"])), tabular_sarsa_data["smoothed_values"], color="r")
-    p2 = plt.plot(range(len(linear_sarsa_data["smoothed_values"])), linear_sarsa_data["smoothed_values"], color="b")
-    p3 = plt.plot(range(len(tabular_q_learning_data["smoothed_values"])), tabular_q_learning_data["smoothed_values"], color="g")
-    p4 = plt.plot(range(len(linear_q_learning_data["smoothed_values"])), linear_q_learning_data["smoothed_values"], color="y")
+    p1 = plt.plot(range(len(tabular_sarsa_data["smoothed_errors"])), tabular_sarsa_data["smoothed_errors"], color="r")
+    p2 = plt.plot(range(len(linear_sarsa_data["smoothed_errors"])), linear_sarsa_data["smoothed_errors"], color="b")
+    p3 = plt.plot(range(len(tabular_q_learning_data["smoothed_errors"])), tabular_q_learning_data["smoothed_errors"], color="g")
+    p4 = plt.plot(range(len(linear_q_learning_data["smoothed_errors"])), linear_q_learning_data["smoothed_errors"], color="y")
 
     plt.legend((p1[0], p2[0], p3[0], p4[0]), ('SARSA(Table)', 'SARSA(Fourier)', 'Q-learning(Table)', 'Q-learning(Fourier)'), loc=1, ncol=2)
 
@@ -182,6 +186,42 @@ def run():
 
 
 def plot():
+    figure = plt.figure(figsize=(6, 5))
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 16
+    plt.rcParams["grid.linestyle"] = "-"
+    plt.xlabel("Episodes")
+    plt.ylabel("Utility")
+    plt.grid(True)
+
+    axis = plt.gca()
+    axis.spines["top"].set_visible(False)
+    axis.spines["right"].set_visible(False)
+
+    tabular_sarsa_data = utils.load(RESULTS_DIRECTORY + "tabular-sarsa-[0.1]-[0.1]-60-tsp.json")
+    linear_sarsa_data = utils.load(RESULTS_DIRECTORY + "linear-sarsa-[1e-05]-[0.1]-[7]-60-tsp.json")
+    tabular_q_learning_data = utils.load(RESULTS_DIRECTORY + "tabular-q-[0.1]-[0.1]-60-tsp.json")
+    linear_q_learning_data = utils.load(RESULTS_DIRECTORY + "linear-q-[1e-05]-[0.1]-[7]-60-tsp.json")
+
+    tabular_sarsa_smoothed_values = utils.get_smoothed_values(tabular_sarsa_data["utilities"], PLOT_WINDOW_SIZE)
+    linear_sarsa_smoothed_values = utils.get_smoothed_values(linear_sarsa_data["utilities"], PLOT_WINDOW_SIZE)
+    tabular_q_learning_smoothed_values = utils.get_smoothed_values(tabular_q_learning_data["utilities"], PLOT_WINDOW_SIZE)
+    linear_q_learning_smoothed_values = utils.get_smoothed_values(linear_q_learning_data["utilities"], PLOT_WINDOW_SIZE)
+
+    p1 = plt.plot(range(len(tabular_sarsa_smoothed_values)), tabular_sarsa_smoothed_values, color="r")
+    p2 = plt.plot(range(len(linear_sarsa_smoothed_values)), linear_sarsa_smoothed_values, color="b")
+    p3 = plt.plot(range(len(tabular_q_learning_smoothed_values)), tabular_q_learning_smoothed_values, color="g")
+    p4 = plt.plot(range(len(linear_q_learning_smoothed_values)), linear_q_learning_smoothed_values, color="y")
+
+    plt.legend((p1[0], p2[0], p3[0], p4[0]), ('SARSA(Table)', 'SARSA(Fourier)', 'Q-learning(Table)', 'Q-learning(Fourier)'), loc=4, fontsize="small")
+
+    plt.tight_layout()
+
+    # plt.show()
+    figure.savefig("jsp-learning-curve.pdf", bbox_inches='tight')
+
+
+def test():
     metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
 
     quality, time = metareasoning_env.reset()
@@ -199,7 +239,7 @@ def plot():
         if is_episode_done:
             break
 
-    plt.figure(figsize=(7, 3))
+    figure = plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
     plt.rcParams["grid.linestyle"] = "-"
@@ -218,7 +258,7 @@ def plot():
 
 
 def main():
-    run()
+    plot()
 
 
 if __name__ == "__main__":

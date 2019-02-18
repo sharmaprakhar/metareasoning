@@ -47,6 +47,7 @@ class Agent:
 
                     statistics["errors"].append(error)
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["utilities"].append(utility)
 
                     self.params["epsilon"] *= self.params["decay"]
 
@@ -79,6 +80,7 @@ class Agent:
 
                     statistics["errors"].append(error)
                     statistics["stopping_points"].append(next_state[1])
+                    statistics["utilities"].append(utility)
 
                     self.params["epsilon"] *= self.params["decay"]
 
