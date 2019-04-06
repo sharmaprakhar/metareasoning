@@ -5,10 +5,10 @@ import numpy as np
 
 
 class FunctionApproximation:
-    def __init__(self, param, env, action_value_function=None):
+    def __init__(self, param, env, weights=None, action_value_function=None):
         self.param = param
         self.env = env
-        self.weights = self.get_initial_weights()
+        self.weights = weights if weights else self.get_initial_weights()
         self.action_value_function = action_value_function if action_value_function else self.get_initial_action_value_function()
 
     def get_initial_weights(self):

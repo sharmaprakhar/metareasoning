@@ -6,14 +6,10 @@ import numpy as np
 
 
 class Agent:
-    def __init__(self, env, params):
+    def __init__(self, env, params, action_value_function=None):
         self.env = env
         self.params = params
-        self.action_value_function = {state: [random.random(), random.random()] for state in env.get_states()}
-
-    def transfer(self, env, params):
-        self.env = env
-        self.params = params
+        self.action_value_function = action_value_function if action_value_function else {state: [random.random(), random.random()] for state in env.get_states()}
 
     def get_optimal_action(self, state):
         return np.argmax(self.action_value_function[state])

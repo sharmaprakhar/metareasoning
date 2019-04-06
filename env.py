@@ -57,7 +57,7 @@ class Environment:
 
     def get_normalized_state(self, raw_state):
         raw_quality, raw_time = raw_state
-        bounds = np.linspace(0, 1, self.QUALITY_CLASS_COUNT)
+        bounds = np.linspace(0.7, 0.86, self.QUALITY_CLASS_COUNT)
         return utils.digitize(raw_quality, bounds), raw_time
 
     def get_previous_state(self):

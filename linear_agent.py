@@ -8,16 +8,16 @@ from function_approximation import FunctionApproximation
 
 
 class Agent:
-    def __init__(self, env, params):
+    def __init__(self, env, params, weights=None, action_value_function=None):
         self.env = env
         self.params = params
-        self.function_approximation = FunctionApproximation(params, env)
-        self.action_value_function = self.function_approximation.get_initial_action_value_function()
 
-    def transfer(self, env, params, action_value_function):
-        self.env = env
-        self.params = params
-        self.function_approximation = FunctionApproximation(params, env, action_value_function)
+        if weights and action_value_function:
+            self.function_approximation = FunctionApproximation(params, env, weights, action_value_function)
+            self.action_value_function = action_value_function
+        else:
+            self.function_approximation = FunctionApproximation(params, env)
+            self.action_value_function = self.function_approximation.get_initial_action_value_function()
 
     def get_optimal_action(self, state):
         return np.argmax(self.action_value_function[state])
