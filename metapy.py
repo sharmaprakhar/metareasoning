@@ -19,7 +19,7 @@ INCREMENT = 5
 
 def main():
     parser = argparse.ArgumentParser(description="Run a reinforcement learning agent with a function approximation.")
-    parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent")
+    parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent. Use 'r' for REINFORCE")
     parser.add_argument("-problem", type=str, required=True, help="The problem file")
     parser.add_argument("-function", type=str, required=False, help="The function approximation")
     parser.add_argument("-order", type=int, required=False, help="The Fourier basis order")
