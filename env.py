@@ -89,7 +89,7 @@ class Environment:
 
 def main():
     print("Testing the environment...")
-    env = Environment("problems/tsp/50-tsp.json", 200, 0.3, 1)
+    env = Environment("problems/50-tsp.json", 200, 0.3, 1)
 
     print("Running episode 1...")
     print(env.reset())

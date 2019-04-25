@@ -86,3 +86,18 @@ def discount_rewards(rewards, gamma):
     reward = np.array([gamma**time * reward for time, reward in enumerate(rewards)])
     reward = reward[::-1].cumsum()[::-1]
     return reward - reward.mean()
+
+if __name__=="deep_learning_agent":
+	print("running reinforce...")
+	rewards = reinforce(anytime_algorithm_env, pe)
+    # rewards = reinforce(env, pe)
+    window = 10
+    smoothed_rewards = [np.mean(rewards[i-window:i+1]) if i > window 
+                        else np.mean(rewards[:i+1]) for i in range(len(rewards))]
+    
+    plt.figure(figsize=(12,8))
+    plt.plot(rewards)
+    plt.plot(smoothed_rewards)
+    plt.ylabel('Total Rewards')
+    plt.xlabel('Episodes')
+    plt.show()    

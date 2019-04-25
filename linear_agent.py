@@ -8,7 +8,7 @@ from function_approximation import FunctionApproximation
 
 
 class Agent:
-    def __init__(self, env, params, weights=None, action_value_function=None):
+    def __init__(self, params, env,     weights=None, action_value_function=None):
         self.env = env
         self.params = params
 
