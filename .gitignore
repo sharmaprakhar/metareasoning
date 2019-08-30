@@ -5,4 +5,3 @@ launch.json
 tags
 __pycache__
 *.pyc
-*.json
