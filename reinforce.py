@@ -17,87 +17,102 @@ class PolicyEstimator():
     def predict(self, state):
         return self.network(torch.FloatTensor(state))
 
-def discount_rewards(rewards, gamma=0.99):
-    reward = np.array([gamma**i * rewards[i] for i in range(len(rewards))])
-    reward = reward[::-1].cumsum()[::-1]
-    return reward - reward.mean()
 
-def reinforce(env, policy_estimator, num_episodes=2000, batch_size=10, gamma=0.99):
-    total_rewards = []
-    batch_rewards = []
-    batch_actions = []
-    batch_states = []
-    batch_counter = 1
+class Agent():
+    def __init__(self, params, env, policy_estimator):
+        self.params = params
+        self.env = env
+        self.policy_estimator = policy_estimator
 
-    optimizer = optim.Adam(policy_estimator.network.parameters(), lr=0.001)
+    def get_action(self, state):
+        action_probabilities = self.policy_estimator.predict(state).detach().numpy()
+        return np.random.choice(self.env.ACTIONS, p=action_probabilities)
 
-    action_space = np.arange(2)
-    for episode in range(num_episodes):
-        state = env.reset()
+    def get_loss(self, batch_states, batch_actions, batch_rewards):
+        state_tensor = torch.FloatTensor(batch_states)
+        action_tensor = torch.LongTensor(batch_actions)
+        reward_tensor = torch.FloatTensor(batch_rewards)
 
-        states = []
-        rewards = []
-        actions = []
+        log_probabilities = torch.log(self.policy_estimator.predict(state_tensor))
+        selected_log_probabilities = reward_tensor * log_probabilities[np.arange(len(action_tensor)), action_tensor]
 
-        is_episode_done = False
+        return -selected_log_probabilities.mean()
 
-        while not is_episode_done:
-            action_probs = policy_estimator.predict(state).detach().numpy()
-            action = np.random.choice(action_space, p=action_probs)
-            next_state, reward, is_episode_done = env.step(action)
-            
-            states.append(state)
-            rewards.append(reward)
-            actions.append(action)
-            state = next_state
+    def discount_rewards(self, rewards):
+        reward = np.array([self.params["gamma"]**i * rewards[i] for i in range(len(rewards))])
+        reward = reward[::-1].cumsum()[::-1]
+        return reward - reward.mean()
 
-            if is_episode_done:
-                batch_rewards.extend(discount_rewards(rewards, gamma))
-                batch_states.extend(states)
-                batch_actions.extend(actions)
-                batch_counter += 1
-                total_rewards.append(sum(rewards))
+    def run_reinforce(self, statistics):
+        batch_states = []
+        batch_actions = []
+        batch_rewards = []
+        batch_counter = 1
 
-                if batch_counter == batch_size:
-                    optimizer.zero_grad()
-                    state_tensor = torch.FloatTensor(batch_states)
-                    reward_tensor = torch.FloatTensor(batch_rewards)
-                    action_tensor = torch.LongTensor(batch_actions)
+        optimizer = optim.Adam(self.policy_estimator.network.parameters(), lr=self.params["learning_rate"])
 
-                    logprob = torch.log(policy_estimator.predict(state_tensor))
-                    selected_logprobs = reward_tensor * logprob[np.arange(len(action_tensor)), action_tensor]
-                    loss = -selected_logprobs.mean()
+        for _ in range(self.params["episodes"]):
+            state = self.env.reset()
+            action = self.get_action(state)
 
-                    loss.backward()
+            states = []
+            actions = []
+            rewards = []
 
-                    optimizer.step()
+            while True:
+                print(state)
 
-                    batch_rewards = []
-                    batch_actions = []
-                    batch_states = []
-                    batch_counter = 1
+                next_state, reward, is_episode_done = self.env.step(action)
 
-                print("\rEp: {} Average of last 10 rewards: {:.2f}".format(episode + 1, np.mean(total_rewards[-10:])))
+                states.append(state)
+                actions.append(action)
+                rewards.append(reward)
 
-    return total_rewards
+                next_action = self.get_action(state)
+
+                if is_episode_done:
+                    batch_states.extend(states)
+                    batch_actions.extend(actions)
+                    batch_rewards.extend(self.discount_rewards(rewards))
+                    batch_counter += 1
+
+                    if batch_counter == self.params["batch_size"]:
+                        optimizer.zero_grad()
+
+                        loss = self.get_loss(batch_states, batch_actions, batch_rewards)
+                        loss.backward()
+
+                        optimizer.step()
+
+                        batch_states = []
+                        batch_actions = []
+                        batch_rewards = []
+                        batch_counter = 1
+
+                    statistics["stopping_points"].append(next_state[1])
+                    statistics["utilities"].append(self.env.get_utility())
+
+                    break
+
+                state = next_state
+                action = next_action
 
 
 def main():
-    print("Running REINFORCE...")
+    print("Testing...")
 
-    metareasoning_env = env.Environment('problems/test.json', 200, 0.02, 3)
+    params = {
+        "episodes": 2000,
+        "batch_size": 10,
+        "gamma": 1,
+        "learning_rate": 0.01
+    }
+    metareasoning_env = env.Environment('problems/test.json', 200, 0.3, 1)
     policy_estimator = PolicyEstimator()
-    rewards = reinforce(metareasoning_env, policy_estimator)
+    agent = Agent(params, metareasoning_env, policy_estimator)
 
-    window = 10
-    smoothed_rewards = [np.mean(rewards[i-window:i+1]) if i > window else np.mean(rewards[:i+1]) for i in range(len(rewards))]
-
-    plt.figure(figsize=(12, 8))
-    plt.plot(rewards)
-    plt.plot(smoothed_rewards)
-    plt.ylabel('Total Rewards')
-    plt.xlabel('Episodes')
-    plt.show()
+    statistics = {"stopping_points": [], "utilities": []}
+    agent.run_reinforce(statistics)
 
 
 if __name__ == "__main__":
