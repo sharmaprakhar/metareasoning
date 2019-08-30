@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 
-class FunctionApproximation:
+class FunctionApproximator:
     def __init__(self, param, env, weights=None, action_value_function=None):
         self.param = param
         self.env = env

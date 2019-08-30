@@ -4,20 +4,20 @@ import random
 
 import numpy as np
 
-from function_approximation import FunctionApproximation
+from function_approximator import FunctionApproximator
 
 
 class Agent:
-    def __init__(self, params, env,     weights=None, action_value_function=None):
+    def __init__(self, params, env, weights=None, action_value_function=None):
         self.env = env
         self.params = params
 
         if weights and action_value_function:
-            self.function_approximation = FunctionApproximation(params, env, weights, action_value_function)
+            self.function_approximator = FunctionApproximator(params, env, weights, action_value_function)
             self.action_value_function = action_value_function
         else:
-            self.function_approximation = FunctionApproximation(params, env)
-            self.action_value_function = self.function_approximation.get_initial_action_value_function()
+            self.function_approximator = FunctionApproximator(params, env)
+            self.action_value_function = self.function_approximator.get_initial_action_value_function()
 
     def get_optimal_action(self, state):
         return np.argmax(self.action_value_function[state])
@@ -28,14 +28,14 @@ class Agent:
         return random.choice(self.env.ACTIONS)
 
     def run_q_learning(self, statistics):
-        print("Running linear Q-learning with the parameters {}".format(self.params))
+        print("Running Fourier Q-learning with the parameters {}".format(self.params))
 
         for _ in range(self.params["episodes"]):
             state = self.env.reset()
-            psi = self.function_approximation.calculate_fourier_approximation(state)
+            psi = self.function_approximator.calculate_fourier_approximation(state)
 
             while True:
-                self.action_value_function = self.function_approximation.update_action_value_function(state, psi)
+                self.action_value_function = self.function_approximator.update_action_value_function(state, psi)
                 action = self.get_action(state)
 
                 next_state, reward, is_episode_done = self.env.step(action)
@@ -54,30 +54,30 @@ class Agent:
                     break
 
                 next_action = self.get_optimal_action(next_state)
-                next_psi = self.function_approximation.calculate_fourier_approximation(next_state)
-                self.function_approximation.update_weights(action, next_action, psi, next_psi, reward)
+                next_psi = self.function_approximator.calculate_fourier_approximation(next_state)
+                self.function_approximator.update_weights(action, next_action, psi, next_psi, reward)
 
                 state = next_state
                 psi = next_psi
 
     def run_sarsa(self, statistics):
-        print("Running linear SARSA with the parameters {}".format(self.params))
+        print("Running Fourier SARSA with the parameters {}".format(self.params))
 
         for _ in range(self.params["episodes"]):
             state = self.env.reset()
-            psi = self.function_approximation.calculate_fourier_approximation(state)
+            psi = self.function_approximator.calculate_fourier_approximation(state)
 
-            self.action_value_function = self.function_approximation.update_action_value_function(state, psi)
+            self.action_value_function = self.function_approximator.update_action_value_function(state, psi)
             action = self.get_action(state)
 
             while True:
                 next_state, reward, is_episode_done = self.env.step(action)
-                next_psi = self.function_approximation.calculate_fourier_approximation(next_state)
+                next_psi = self.function_approximator.calculate_fourier_approximation(next_state)
 
-                self.action_value_function = self.function_approximation.update_action_value_function(next_state, next_psi)
+                self.action_value_function = self.function_approximator.update_action_value_function(next_state, next_psi)
                 next_action = self.get_action(next_state)
 
-                self.function_approximation.update_weights(action, next_action, psi, next_psi, reward)
+                self.function_approximator.update_weights(action, next_action, psi, next_psi, reward)
 
                 if is_episode_done:
                     utility = self.env.get_utility()

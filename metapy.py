@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt
 
 import env
-import linear_agent
+import fourier_agent
 import table_agent
 import utils
 
@@ -19,7 +19,7 @@ INCREMENT = 5
 
 def main():
     parser = argparse.ArgumentParser(description="Run a reinforcement learning agent with a function approximation.")
-    parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent. Use 'r' for REINFORCE")
+    parser.add_argument("-method", type=str, required=True, help="The reinforcement learning agent")
     parser.add_argument("-problem", type=str, required=True, help="The problem file")
     parser.add_argument("-function", type=str, required=False, help="The function approximation")
     parser.add_argument("-order", type=int, required=False, help="The Fourier basis order")
@@ -46,7 +46,7 @@ def main():
     if not args.function:
         prakhar = table_agent.Agent(params, metareasoning_env)
     elif args.function == "fourier":
-        prakhar = linear_agent.Agent(params, metareasoning_env)
+        prakhar = fourier_agent.Agent(params, metareasoning_env)
     else:
         print("Encountered an unrecognized function approximation:", args.function)
         sys.exit()
@@ -55,8 +55,8 @@ def main():
         prakhar.run_q_learning(statistics)
     elif args.method == "sarsa":
         prakhar.run_sarsa(statistics)
-    elif args.method=="r":
-        run_reinforce()
+    elif args.method == "reinforce":
+        prakhar.run_reinforce(statistics)
     else:
         print("Encountered an unrecognized reinforcement learning method:", args.method)
         sys.exit()

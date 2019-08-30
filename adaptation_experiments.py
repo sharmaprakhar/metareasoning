@@ -39,7 +39,7 @@ def run_tabular_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
         metareasoning_env = env.Environment(problem_file_path, ALPHA, BETA, increment)
         prakhar = table_agent.Agent(metareasoning_env, params, prakhar.action_value_function)
         prakhar.run_sarsa(statistics)
-    
+
     utils.save(filename, statistics)
 
     return utils.get_results(statistics["errors"], WINDOW_SIZE, PLOT_WINDOW_SIZE)
