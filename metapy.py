@@ -8,8 +8,6 @@ import fourier_agent
 import table_agent
 import utils
 
-from reinforce import *
-
 WINDOW_SIZE = 100
 
 ALPHA = 200
@@ -55,8 +53,6 @@ def main():
         prakhar.run_q_learning(statistics)
     elif args.method == "sarsa":
         prakhar.run_sarsa(statistics)
-    elif args.method == "reinforce":
-        prakhar.run_reinforce(statistics)
     else:
         print("Encountered an unrecognized reinforcement learning method:", args.method)
         sys.exit()
