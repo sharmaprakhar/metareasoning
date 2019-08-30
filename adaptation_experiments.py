@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 import env
-import linear_agent
+import fourier_agent
 import table_agent
 import utils
 
@@ -12,6 +13,7 @@ PROBLEM_DIRECTORY = "problems/"
 RESULTS_DIRECTORY = "statistics/"
 
 PROBLEM_FILES = [("80-tsp.json", 1), ("90-tsp.json", 1)]
+
 ALPHA = 200
 BETA = 0.3
 
@@ -36,6 +38,7 @@ def run_tabular_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
         params["episodes"] = transfer_episodes
         params["epsilon"] = transfer_epsilon
 
+        print("Shifting to {} with [increment = {}]".format(problem_file_path, increment))
         metareasoning_env = env.Environment(problem_file_path, ALPHA, BETA, increment)
         prakhar = table_agent.Agent(metareasoning_env, params, prakhar.action_value_function)
         prakhar.run_sarsa(statistics)
@@ -61,6 +64,7 @@ def run_tabular_q_learning_experiments(transfer_episodes, transfer_epsilon, para
         params["episodes"] = transfer_episodes
         params["epsilon"] = transfer_epsilon
 
+        print("Shifting to {} with [increment = {}]".format(problem_file_path, increment))
         metareasoning_env = env.Environment(problem_file_path, ALPHA, BETA, increment)
         prakhar = table_agent.Agent(metareasoning_env, params, prakhar.action_value_function)
         prakhar.run_q_learning(statistics)
@@ -70,14 +74,14 @@ def run_tabular_q_learning_experiments(transfer_episodes, transfer_epsilon, para
     return utils.get_results(statistics["errors"], WINDOW_SIZE, PLOT_WINDOW_SIZE)
 
 
-def run_linear_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
+def run_fourier_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
     statistics = {"errors": [], "stopping_points": [], "utilities": []}
 
-    filename = RESULTS_DIRECTORY + "linear-sarsa-transfer-[{}]-[{}]-[{}].json".format(params["alpha"], params["epsilon"], params["order"])
+    filename = RESULTS_DIRECTORY + "fourier-sarsa-transfer-[{}]-[{}]-[{}].json".format(params["alpha"], params["epsilon"], params["order"])
 
     print("Training on {} with [increment = {}]".format(PROBLEM_DIRECTORY + PROBLEM_FILES[0][0], PROBLEM_FILES[0][1]))
     metareasoning_env = env.Environment(PROBLEM_DIRECTORY + PROBLEM_FILES[0][0], ALPHA, BETA, PROBLEM_FILES[0][1])
-    prakhar = linear_agent.Agent(metareasoning_env, params)
+    prakhar = fourier_agent.Agent(metareasoning_env, params)
     prakhar.run_sarsa(statistics)
 
     for problem_file in PROBLEM_FILES[1:]:
@@ -89,7 +93,7 @@ def run_linear_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
 
         print("Shifting to {} with [increment = {}]".format(problem_file_path, increment))
         metareasoning_env = env.Environment(problem_file_path, ALPHA, BETA, increment)
-        prakhar = linear_agent.Agent(metareasoning_env, params, prakhar.function_approximation.weights, prakhar.function_approximation.action_value_function)
+        prakhar = fourier_agent.Agent(metareasoning_env, params, prakhar.function_approximator.weights, prakhar.function_approximator.action_value_function)
         prakhar.run_sarsa(statistics)
 
     utils.save(filename, statistics)
@@ -97,14 +101,14 @@ def run_linear_sarsa_experiments(transfer_episodes, transfer_epsilon, params):
     return utils.get_results(statistics["errors"], WINDOW_SIZE, PLOT_WINDOW_SIZE)
 
 
-def run_linear_q_learning_experiments(transfer_episodes, transfer_epsilon, params):
+def run_fourier_q_learning_experiments(transfer_episodes, transfer_epsilon, params):
     statistics = {"errors": [], "stopping_points": [], "utilities": []}
 
-    filename = RESULTS_DIRECTORY + "linear-q-transfer-[{}]-[{}]-[{}].json".format(params["alpha"], params["epsilon"], params["order"])
+    filename = RESULTS_DIRECTORY + "fourier-q-transfer-[{}]-[{}]-[{}].json".format(params["alpha"], params["epsilon"], params["order"])
 
     print("Training on {} with [increment = {}]".format(PROBLEM_DIRECTORY + PROBLEM_FILES[0][0], PROBLEM_FILES[0][1]))
     metareasoning_env = env.Environment(PROBLEM_DIRECTORY + PROBLEM_FILES[0][0], ALPHA, BETA, PROBLEM_FILES[0][1])
-    prakhar = linear_agent.Agent(metareasoning_env, params)
+    prakhar = fourier_agent.Agent(metareasoning_env, params)
     prakhar.run_q_learning(statistics)
 
     for problem_file in PROBLEM_FILES[1:]:
@@ -116,7 +120,7 @@ def run_linear_q_learning_experiments(transfer_episodes, transfer_epsilon, param
 
         print("Shifting to {} with [increment = {}]".format(problem_file_path, increment))
         metareasoning_env = env.Environment(problem_file_path, ALPHA, BETA, increment)
-        prakhar = linear_agent.Agent(metareasoning_env, params, prakhar.function_approximation.weights, prakhar.function_approximation.action_value_function)
+        prakhar = fourier_agent.Agent(metareasoning_env, params, prakhar.function_approximator.weights, prakhar.function_approximator.action_value_function)
         prakhar.run_q_learning(statistics)
 
     utils.save(filename, statistics)
@@ -127,25 +131,25 @@ def run_linear_q_learning_experiments(transfer_episodes, transfer_epsilon, param
 def run():
     print("Adaptation experiment with [alpha = {}, beta = {}]".format(ALPHA, BETA))
 
-    # tabular_sarsa_results = run_tabular_sarsa_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
-    #     "alpha": 0.1,
-    #     "epsilon": 0.1,
-    #     "gamma": 1.0,
-    #     "decay": 0.999,
-    #     "episodes": TRAINING_EPISODES
-    # })
-    # print("Error: {} +/- {}".format(tabular_sarsa_results["mean_error"], tabular_sarsa_results["standard_deviation_error"]))
-    
-    # tabular_q_learning_results = run_tabular_q_learning_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
-    #     "alpha": 0.1,
-    #     "epsilon": 0.1,
-    #     "gamma": 1.0,
-    #     "decay": 0.999,
-    #     "episodes": TRAINING_EPISODES
-    # })
-    # print("Error: {} +/- {}".format(tabular_q_learning_results["mean_error"], tabular_q_learning_results["standard_deviation_error"]))
+    tabular_sarsa_results = run_tabular_sarsa_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
+        "alpha": 0.1,
+        "epsilon": 0.1,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": TRAINING_EPISODES
+    })
+    print("Error: {} +/- {}".format(tabular_sarsa_results["mean_error"], tabular_sarsa_results["standard_deviation_error"]))
 
-    linear_sarsa_results = run_linear_sarsa_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
+    tabular_q_learning_results = run_tabular_q_learning_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
+        "alpha": 0.1,
+        "epsilon": 0.1,
+        "gamma": 1.0,
+        "decay": 0.999,
+        "episodes": TRAINING_EPISODES
+    })
+    print("Error: {} +/- {}".format(tabular_q_learning_results["mean_error"], tabular_q_learning_results["standard_deviation_error"]))
+
+    fourier_sarsa_results = run_fourier_sarsa_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
         "alpha": 0.00001,
         "epsilon": 0.1,
         "order": 10,
@@ -153,9 +157,9 @@ def run():
         "decay": 0.999,
         "episodes": TRAINING_EPISODES
     })
-    print("Error: {} +/- {}".format(linear_sarsa_results["mean_error"], linear_sarsa_results["standard_deviation_error"]))
+    print("Error: {} +/- {}".format(fourier_sarsa_results["mean_error"], fourier_sarsa_results["standard_deviation_error"]))
 
-    linear_q_learning_results = run_linear_q_learning_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
+    fourier_q_learning_results = run_fourier_q_learning_experiments(TRANSFER_EPISODES, TRANSFER_EPSILON, {
         "alpha": 0.00001,
         "epsilon": 0.1,
         "order": 10,
@@ -163,7 +167,7 @@ def run():
         "decay": 0.999,
         "episodes": TRAINING_EPISODES
     })
-    print("Error: {} +/- {}".format(linear_q_learning_results["mean_error"], linear_q_learning_results["standard_deviation_error"]))
+    print("Error: {} +/- {}".format(fourier_q_learning_results["mean_error"], fourier_q_learning_results["standard_deviation_error"]))
 
 
 def plot():
@@ -174,6 +178,7 @@ def plot():
     plt.grid(True)
     plt.ylabel('Time (ms)')
     plt.xlabel('Degree')
+
     # plt.xticks(range(8), ('2', '3', '4', '5', '6', '7', '8', '9'))
     plt.xticks(range(4), ('2', '3', '4', '5'))
 
@@ -181,8 +186,6 @@ def plot():
     axis.spines['right'].set_visible(False)
     axis.spines['top'].set_visible(False)
 
-
-    import numpy as np
     a = np.multiply([0.033, 0.125, 0.183, 0.366], 1000)
     b = np.multiply([0.028, 0.061, 0.085, 0.134], 1000)
     # a = np.multiply([0.39, 0.113, 0.253, 0.839, 1.295, 2.553, 2.862, 3.189], 1000)
@@ -194,26 +197,23 @@ def plot():
     plt.legend((p1[0], p2[0]), ('Centralized', 'Distributed'), loc=2, fontsize="small")
 
     plt.tight_layout(True)
-    plt.savefig("adaptation-chart.pdf", bbox_inches="tight")
-    # plt.show()
+    plt.show()
 
 
 def test():
-    import os
-
-    FILENAMES = [
-        "linear-q-transfer-[1e-05]-[0.1]-[10]-40-50.json",
-        "linear-q-transfer-[1e-05]-[0.1]-[10]-50-60.json",
-        "linear-q-transfer-[1e-05]-[0.1]-[10]-60-70.json",
-        "linear-q-transfer-[1e-05]-[0.1]-[10]-70-80.json",
-        "linear-q-transfer-[1e-05]-[0.1]-[10]-80-90.json",
-        "linear-sarsa-transfer-[1e-05]-[0.1]-[10]-40-50.json",
-        "linear-sarsa-transfer-[1e-05]-[0.1]-[10]-50-60.json",
-        "linear-sarsa-transfer-[1e-05]-[0.1]-[10]-60-70.json",
-        "linear-sarsa-transfer-[1e-05]-[0.1]-[10]-70-80.json",
-        "linear-sarsa-transfer-[1e-05]-[0.1]-[10]-80-90.json",
+    filenames = [
+        "fourier-q-transfer-[1e-05]-[0.1]-[10]-40-50.json",
+        "fourier-q-transfer-[1e-05]-[0.1]-[10]-50-60.json",
+        "fourier-q-transfer-[1e-05]-[0.1]-[10]-60-70.json",
+        "fourier-q-transfer-[1e-05]-[0.1]-[10]-70-80.json",
+        "fourier-q-transfer-[1e-05]-[0.1]-[10]-80-90.json",
+        "fourier-sarsa-transfer-[1e-05]-[0.1]-[10]-40-50.json",
+        "fourier-sarsa-transfer-[1e-05]-[0.1]-[10]-50-60.json",
+        "fourier-sarsa-transfer-[1e-05]-[0.1]-[10]-60-70.json",
+        "fourier-sarsa-transfer-[1e-05]-[0.1]-[10]-70-80.json",
+        "fourier-sarsa-transfer-[1e-05]-[0.1]-[10]-80-90.json",
     ]
-    for filename in FILENAMES:
+    for filename in filenames:
         if filename.endswith(".json"):
             statistics = utils.load(RESULTS_DIRECTORY + filename)
             smoothed_errors = utils.get_smoothed_values(statistics["errors"][5000:], 100)
@@ -221,7 +221,7 @@ def test():
 
 
 def main():
-    plot()
+    run()
 
 
 if __name__ == "__main__":
