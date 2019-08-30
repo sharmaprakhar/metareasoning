@@ -1,7 +1,6 @@
 .idea/
 .DS_Store
 launch.json
-plots/
 .vscode
 tags
 __pycache__

@@ -9,8 +9,8 @@ from function_approximator import FunctionApproximator
 
 class Agent:
     def __init__(self, params, env, weights=None, action_value_function=None):
-        self.env = env
         self.params = params
+        self.env = env
 
         if weights and action_value_function:
             self.function_approximator = FunctionApproximator(params, env, weights, action_value_function)

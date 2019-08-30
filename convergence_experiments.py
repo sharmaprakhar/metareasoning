@@ -10,8 +10,11 @@ PLOT_WINDOW_SIZE = 350
 
 PROBLEM_DIRECTORY = "problems/"
 RESULTS_DIRECTORY = "statistics/"
+PLOTS_DIRECTORY = "plots/"
 
-PROBLEM_FILE = "test.json"
+NAME = "test"
+PROBLEM_FILE = NAME + ".json"
+
 ALPHA = 200
 BETA = 0.3
 INCREMENT = 50
@@ -25,7 +28,7 @@ def run_tabular_sarsa_experiments(params):
     filename = RESULTS_DIRECTORY + "tabular-sarsa-[{}]-[{}]-{}".format(params["alpha"], params["epsilon"], PROBLEM_FILE)
 
     metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
-    prakhar = table_agent.Agent(metareasoning_env, params)
+    prakhar = table_agent.Agent(params, metareasoning_env)
     prakhar.run_sarsa(statistics)
 
     utils.save(filename, statistics)
@@ -39,7 +42,7 @@ def run_tabular_q_learning_experiments(params):
     filename = RESULTS_DIRECTORY + "tabular-q-[{}]-[{}]-{}".format(params["alpha"], params["epsilon"], PROBLEM_FILE)
 
     metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
-    prakhar = table_agent.Agent(metareasoning_env, params)
+    prakhar = table_agent.Agent(params, metareasoning_env)
     prakhar.run_q_learning(statistics)
 
     utils.save(filename, statistics)
@@ -53,7 +56,7 @@ def run_fourier_sarsa_experiments(params):
     filename = RESULTS_DIRECTORY + "fourier-sarsa-[{}]-[{}]-[{}]-{}".format(params["alpha"], params["epsilon"], params["order"], PROBLEM_FILE)
 
     metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
-    prakhar = fourier_agent.Agent(metareasoning_env, params)
+    prakhar = fourier_agent.Agent(params, metareasoning_env)
     prakhar.run_sarsa(statistics)
 
     utils.save(filename, statistics)
@@ -67,7 +70,7 @@ def run_fourier_q_learning_experiments(params):
     filename = RESULTS_DIRECTORY + "fourier-q-[{}]-[{}]-[{}]-{}".format(params["alpha"], params["epsilon"], params["order"], PROBLEM_FILE)
 
     metareasoning_env = env.Environment(PROBLEM_FILE_PATH, ALPHA, BETA, INCREMENT)
-    prakhar = fourier_agent.Agent(metareasoning_env, params)
+    prakhar = fourier_agent.Agent(params, metareasoning_env)
     prakhar.run_q_learning(statistics)
 
     utils.save(filename, statistics)
@@ -152,11 +155,11 @@ def plot():
     axis.spines["top"].set_visible(False)
     axis.spines["right"].set_visible(False)
 
-    filename = "qap-learning-curve.pdf"
-    tabular_sarsa_statistics = utils.load(RESULTS_DIRECTORY + "tabular-sarsa-[0.1]-[0.1]-150-qap.json")
-    tabular_q_learning_statistics = utils.load(RESULTS_DIRECTORY + "tabular-q-[0.1]-[0.1]-150-qap.json")
-    fourier_sarsa_statistics = utils.load(RESULTS_DIRECTORY + "fourier-sarsa-[1e-05]-[0.1]-[7]-150-qap.json")
-    fourier_q_learning_statistics = utils.load(RESULTS_DIRECTORY + "fourier-q-[1e-05]-[0.1]-[7]-150-qap.json")
+    filename = PLOTS_DIRECTORY + "{}-learning-curve.pdf".format(NAME)
+    tabular_sarsa_statistics = utils.load(RESULTS_DIRECTORY + "tabular-sarsa-[0.1]-[0.1]-{}.json".format(NAME))
+    tabular_q_learning_statistics = utils.load(RESULTS_DIRECTORY + "tabular-q-[0.1]-[0.1]-{}.json".format(NAME))
+    fourier_sarsa_statistics = utils.load(RESULTS_DIRECTORY + "fourier-sarsa-[1e-05]-[0.1]-[7]-{}.json".format(NAME))
+    fourier_q_learning_statistics = utils.load(RESULTS_DIRECTORY + "fourier-q-[1e-05]-[0.1]-[7]-{}.json".format(NAME))
 
     tabular_sarsa_utitilities = utils.get_smoothed_values(tabular_sarsa_statistics["utilities"], PLOT_WINDOW_SIZE)
     fourier_sarsa_utilities = utils.get_smoothed_values(fourier_sarsa_statistics["utilities"], PLOT_WINDOW_SIZE)
@@ -187,14 +190,12 @@ def test():
         (quality, time), _, is_episode_done = metareasoning_env.step(metareasoning_env.CONTINUE_ACTION)
 
         qualities.append(quality)
-        print(quality)
-        print(time)
         utilities.append(utils.get_time_dependent_utility(quality, time, ALPHA, BETA))
 
         if is_episode_done:
             break
 
-    figure = plt.figure(figsize=(7, 3))
+    plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rcParams["font.size"] = 14
     plt.rcParams["grid.linestyle"] = "-"
@@ -213,7 +214,7 @@ def test():
 
 
 def main():
-    run()
+    test()
 
 
 if __name__ == "__main__":
