@@ -12,12 +12,12 @@ PROBLEM_DIRECTORY = "problems/"
 RESULTS_DIRECTORY = "statistics/"
 PLOTS_DIRECTORY = "plots/"
 
-NAME = "test"
+NAME = "mine-s"
 PROBLEM_FILE = NAME + ".json"
 
-ALPHA = 200
-BETA = 0.3
-INCREMENT = 50
+ALPHA = 100
+BETA = 0.01
+INCREMENT = 1
 
 PROBLEM_FILE_PATH = PROBLEM_DIRECTORY + PROBLEM_FILE
 
@@ -99,25 +99,25 @@ def run():
     })
     print("Error: {} +/- {}".format(tabular_q_learning_results["mean_error"], tabular_q_learning_results["standard_deviation_error"]))
 
-    fourier_sarsa_results = run_fourier_sarsa_experiments({
-        "alpha": 0.00001,
-        "epsilon": 0.1,
-        "order": 7,
-        "gamma": 1.0,
-        "decay": 0.999,
-        "episodes": 5000
-    })
-    print("Error: {} +/- {}".format(fourier_sarsa_results["mean_error"], fourier_sarsa_results["standard_deviation_error"]))
+    # fourier_sarsa_results = run_fourier_sarsa_experiments({
+    #     "alpha": 0.00001,
+    #     "epsilon": 0.1,
+    #     "order": 7,
+    #     "gamma": 1.0,
+    #     "decay": 0.999,
+    #     "episodes": 5000
+    # })
+    # print("Error: {} +/- {}".format(fourier_sarsa_results["mean_error"], fourier_sarsa_results["standard_deviation_error"]))
 
-    fourier_q_learning_results = run_fourier_q_learning_experiments({
-        "alpha": 0.00001,
-        "epsilon": 0.1,
-        "order": 7,
-        "gamma": 1.0,
-        "decay": 0.999,
-        "episodes": 5000
-    })
-    print("Error: {} +/- {}".format(fourier_q_learning_results["mean_error"], fourier_q_learning_results["standard_deviation_error"]))
+    # fourier_q_learning_results = run_fourier_q_learning_experiments({
+    #     "alpha": 0.00001,
+    #     "epsilon": 0.1,
+    #     "order": 7,
+    #     "gamma": 1.0,
+    #     "decay": 0.999,
+    #     "episodes": 5000
+    # })
+    # print("Error: {} +/- {}".format(fourier_q_learning_results["mean_error"], fourier_q_learning_results["standard_deviation_error"]))
 
     plt.figure(figsize=(7, 3))
     plt.rcParams["font.family"] = "Times New Roman"
@@ -132,11 +132,12 @@ def run():
     axis.spines["right"].set_visible(False)
 
     p1 = plt.plot(range(len(tabular_sarsa_results["smoothed_errors"])), tabular_sarsa_results["smoothed_errors"], color="r")
-    p2 = plt.plot(range(len(fourier_sarsa_results["smoothed_errors"])), fourier_sarsa_results["smoothed_errors"], color="b")
+    # p2 = plt.plot(range(len(fourier_sarsa_results["smoothed_errors"])), fourier_sarsa_results["smoothed_errors"], color="b")
     p3 = plt.plot(range(len(tabular_q_learning_results["smoothed_errors"])), tabular_q_learning_results["smoothed_errors"], color="g")
-    p4 = plt.plot(range(len(fourier_q_learning_results["smoothed_errors"])), fourier_q_learning_results["smoothed_errors"], color="y")
+    # p4 = plt.plot(range(len(fourier_q_learning_results["smoothed_errors"])), fourier_q_learning_results["smoothed_errors"], color="y")
 
-    plt.legend((p1[0], p2[0], p3[0], p4[0]), ("SARSA(Table)", "SARSA(Fourier)", "Q-learning(Table)", "Q-learning(Fourier)"), loc=1, ncol=2)
+    # plt.legend((p1[0], p2[0], p3[0], p4[0]), ("SARSA(Table)", "SARSA(Fourier)", "Q-learning(Table)", "Q-learning(Fourier)"), loc=1, ncol=2)
+    plt.legend((p1[0], p3[0], ), ("SARSA(Table)", "Q-learning(Table)"), loc=1, ncol=2)
 
     plt.tight_layout()
     plt.show()
@@ -214,7 +215,7 @@ def test():
 
 
 def main():
-    test()
+    run()
 
 
 if __name__ == "__main__":

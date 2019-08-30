@@ -18,7 +18,11 @@ class Environment:
     TIME_CLASSES = range(TIME_CLASS_COUNT)
 
     def __init__(self, problem_file_path, alpha, beta, increment):
-        self.dataset = utils.get_dataset(problem_file_path, increment)
+        # transformer = lambda x: ((x + 217.65911865234375) / 217.65911865234375) # Office
+        transformer = lambda x: ((x + 258.6470031738281) / 258.6470031738281) # Mine-S
+        # transformer = lambda x: ((x + 399.6733703613281) / 399.6733703613281) # Mine-L
+
+        self.dataset = utils.get_dataset(problem_file_path, increment, transformer)
 
         self.instance_id = 0
         self.state_id = 0
