@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 import env
 import fourier_agent
+import reinforce_agent
 import table_agent
 import utils
 
@@ -45,6 +46,8 @@ def main():
         prakhar = table_agent.Agent(params, metareasoning_env)
     elif args.function == "fourier":
         prakhar = fourier_agent.Agent(params, metareasoning_env)
+    elif args.function == "reinforce":
+        prakhar = reinforce_agent.Agent(params, metareasoning_env)
     else:
         print("Encountered an unrecognized function approximation:", args.function)
         sys.exit()

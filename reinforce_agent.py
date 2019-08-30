@@ -6,39 +6,34 @@ from torch import nn, optim
 import env
 
 
-class PolicyEstimator():
-    def __init__(self):
+class Agent():
+    def __init__(self, params, env):
+        self.params = params
+        self.env = env
         self.network = nn.Sequential(
             nn.Linear(2, 32),
             nn.ReLU(),
             nn.Linear(32, 2),
             nn.Softmax(dim=-1))
 
-    def predict(self, state):
-        return self.network(torch.FloatTensor(state))
-
-
-class Agent():
-    def __init__(self, params, env, policy_estimator):
-        self.params = params
-        self.env = env
-        self.policy_estimator = policy_estimator
-
     def get_action(self, state):
-        action_probabilities = self.policy_estimator.predict(state).detach().numpy()
+        action_probabilities = self.get_prediction(state).detach().numpy()
         return np.random.choice(self.env.ACTIONS, p=action_probabilities)
+
+    def get_prediction(self, state):
+        return self.network(torch.FloatTensor(state))
 
     def get_loss(self, batch_states, batch_actions, batch_rewards):
         state_tensor = torch.FloatTensor(batch_states)
         action_tensor = torch.LongTensor(batch_actions)
         reward_tensor = torch.FloatTensor(batch_rewards)
 
-        log_probabilities = torch.log(self.policy_estimator.predict(state_tensor))
+        log_probabilities = torch.log(self.get_prediction(state_tensor))
         selected_log_probabilities = reward_tensor * log_probabilities[np.arange(len(action_tensor)), action_tensor]
 
         return -selected_log_probabilities.mean()
 
-    def discount_rewards(self, rewards):
+    def get_discounted_rewards(self, rewards):
         reward = np.array([self.params["gamma"]**i * rewards[i] for i in range(len(rewards))])
         reward = reward[::-1].cumsum()[::-1]
         return reward - reward.mean()
@@ -49,7 +44,7 @@ class Agent():
         batch_rewards = []
         batch_counter = 1
 
-        optimizer = optim.Adam(self.policy_estimator.network.parameters(), lr=self.params["learning_rate"])
+        optimizer = optim.Adam(self.network.parameters(), lr=self.params["learning_rate"])
 
         for _ in range(self.params["episodes"]):
             state = self.env.reset()
@@ -60,8 +55,6 @@ class Agent():
             rewards = []
 
             while True:
-                print(state)
-
                 next_state, reward, is_episode_done = self.env.step(action)
 
                 states.append(state)
@@ -73,7 +66,7 @@ class Agent():
                 if is_episode_done:
                     batch_states.extend(states)
                     batch_actions.extend(actions)
-                    batch_rewards.extend(self.discount_rewards(rewards))
+                    batch_rewards.extend(self.get_discounted_rewards(rewards))
                     batch_counter += 1
 
                     if batch_counter == self.params["batch_size"]:
@@ -99,8 +92,6 @@ class Agent():
 
 
 def main():
-    print("Testing...")
-
     params = {
         "episodes": 2000,
         "batch_size": 10,
@@ -108,8 +99,7 @@ def main():
         "learning_rate": 0.01
     }
     metareasoning_env = env.Environment('problems/test.json', 200, 0.3, 1)
-    policy_estimator = PolicyEstimator()
-    agent = Agent(params, metareasoning_env, policy_estimator)
+    agent = Agent(params, metareasoning_env)
 
     statistics = {"stopping_points": [], "utilities": []}
     agent.run_reinforce(statistics)
