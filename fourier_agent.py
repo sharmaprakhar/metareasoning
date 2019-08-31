@@ -59,7 +59,7 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["utilities"].append(utility)
 
-                    if episode % self.params["checkpoint"] == 0:
+                    if "checkpoints" in self.params and episode % self.params["checkpoint"] == 0:
                         utils.save_policy(self.get_policy(), "%s-checkpoint-policy.json" % episode)
 
                     self.params["epsilon"] *= self.params["decay"]
@@ -101,7 +101,7 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["utilities"].append(utility)
 
-                    if episode % self.params["checkpoint"] == 0:
+                    if "checkpoints" in self.params and episode % self.params["checkpoint"] == 0:
                         utils.save_policy(self.get_policy(), "%s-checkpoint-policy.json", episode)
 
                     self.params["epsilon"] *= self.params["decay"]
