@@ -15,6 +15,11 @@ def load(filename):
         return json.load(file)
 
 
+def save_policy(policy, filename):
+    with open(filename, 'w') as file:
+        json.dump(policy, file, sort_keys=True, indent=4)
+
+
 def digitize(item, bins):
     for i, _ in enumerate(bins):
         if i + 1 < len(bins):

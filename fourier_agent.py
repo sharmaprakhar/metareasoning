@@ -4,6 +4,7 @@ import random
 
 import numpy as np
 
+import utils
 from function_approximator import FunctionApproximator
 
 
@@ -27,10 +28,19 @@ class Agent:
             return self.get_optimal_action(state)
         return random.choice(self.env.ACTIONS)
 
+    def get_policy(self):
+        policy = {int(quality_class): [] for quality_class in self.env.QUALITY_CLASSES}
+
+        for quality_class in policy.keys():
+            for time_class in self.env.TIME_CLASSES:
+                policy[quality_class].append(self.env.ACTION_MAP[self.get_optimal_action((quality_class, time_class))])
+
+        return policy
+
     def run_q_learning(self, statistics):
         print("Running Fourier Q-learning with the parameters {}".format(self.params))
 
-        for _ in range(self.params["episodes"]):
+        for episode in range(self.params["episodes"]):
             state = self.env.reset()
             psi = self.function_approximator.calculate_fourier_approximation(state)
 
@@ -49,6 +59,9 @@ class Agent:
                     statistics["stopping_points"].append(next_state[1])
                     statistics["utilities"].append(utility)
 
+                    if episode % self.params["checkpoint"] == 0:
+                        utils.save_policy(self.get_policy(), "%s-checkpoint-policy.json" % episode)
+
                     self.params["epsilon"] *= self.params["decay"]
 
                     break
@@ -63,7 +76,7 @@ class Agent:
     def run_sarsa(self, statistics):
         print("Running Fourier SARSA with the parameters {}".format(self.params))
 
-        for _ in range(self.params["episodes"]):
+        for episode in range(self.params["episodes"]):
             state = self.env.reset()
             psi = self.function_approximator.calculate_fourier_approximation(state)
 
@@ -87,6 +100,9 @@ class Agent:
                     statistics["errors"].append(error)
                     statistics["stopping_points"].append(next_state[1])
                     statistics["utilities"].append(utility)
+
+                    if episode % self.params["checkpoint"] == 0:
+                        utils.save_policy(self.get_policy(), "%s-checkpoint-policy.json", episode)
 
                     self.params["epsilon"] *= self.params["decay"]
 
