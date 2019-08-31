@@ -31,9 +31,9 @@ class Agent:
     def get_policy(self):
         policy = {int(quality_class): [] for quality_class in self.env.QUALITY_CLASSES}
 
-        for quality_class in policy.keys():
+        for key in policy.keys():
             for time_class in self.env.TIME_CLASSES:
-                policy[quality_class].append(self.env.ACTION_MAP[self.get_optimal_action((quality_class, time_class))])
+                policy[key].append(self.env.ACTION_MAP[self.get_optimal_action((key, time_class))])
 
         return policy
 
